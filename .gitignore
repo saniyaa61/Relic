@@ -1,1 +1,10 @@
-relic-archive.json
+# Build outputs
+*.apk
+*.aab
+*.ipa
+/build/
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
