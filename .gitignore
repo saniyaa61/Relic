@@ -1,3 +1,6 @@
+# Personal data: never commit
+relic-archive.json
+
 # Build outputs
 *.apk
 *.aab
