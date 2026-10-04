@@ -48,6 +48,7 @@ Update this section when a decision is made.
 
 ## Working with the owner
 
+- The owner has **no Android phone** and a **3.8 GB RAM** laptop, so the local Android emulator isn't usable. Day to day, check screens in the Windows build (phone-sized window) and `cmd/snapshot` PNGs. The Android check is the GitHub Actions run (`.github/workflows/build.yml`), which builds the APK, runs it on a cloud emulator and uploads a screenshot.
 - The owner edits in **VS Code**, not Android Studio. Don't give instructions that need the Android Studio app; use command-line tools (`sdkmanager`, `avdmanager`, `emulator`, `adb`, `gogio`) and VS Code.
 - All work is saved to a private GitHub repo (`origin` → github.com/saniyaa61/Relic). **Commit and push after each piece of finished work**, with `go vet ./...` and `go test ./...` passing first.
 - When a step needs something installed, tell the owner what to install and how, step by step, before it's needed.
@@ -57,4 +58,9 @@ Update this section when a decision is made.
 
 ## Commands
 
-_Fill in after Phase 0, e.g._ `go test ./...` · building the Android APK · running on the emulator · building for iOS.
+- Checks: `go vet ./...` and `go test ./...`
+- Run on Windows: `go run ./cmd/relic`
+- Screen to PNG: `go run ./cmd/snapshot -o build/spike.png -scale 2`
+- Android APK locally (needs `ANDROID_HOME`, the NDK, and JDK 17's `bin` on PATH for `keytool`): `gogio -target android -arch arm64,amd64 -minsdk 24 -appid com.saniyaa61.relic -name Relic -o build/relic.apk ./cmd/relic`
+- Android on an emulator: push to GitHub; the **Build** workflow uploads `relic-apk` and `emulator-screenshots` as run artifacts.
+- iOS: needs a Mac (Phase 4).

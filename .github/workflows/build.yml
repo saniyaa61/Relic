@@ -1,0 +1,92 @@
+# Checks, Android build and an emulator screenshot on every push.
+# Download the results from the run's "Artifacts" section on GitHub.
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  APP_ID: com.saniyaa61.relic
+
+jobs:
+  test:
+    name: Vet and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install Gio's Linux libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev \
+            libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev \
+            libxcursor-dev libvulkan-dev
+      - run: go vet ./...
+      - run: go test ./...
+
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install gogio
+        run: go install gioui.org/cmd/gogio@v0.10.0
+      - name: Build APK
+        # The runner image ships the Android SDK and NDK.
+        run: |
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
+          gogio -target android -arch arm64,amd64 -minsdk 24 \
+            -appid "$APP_ID" -name Relic -o relic.apk ./cmd/relic
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relic-apk
+          path: relic.apk
+
+  emulator:
+    name: Run on Android emulator
+    needs: android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: relic-apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install, launch and screenshot
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            mkdir -p screenshots
+            adb install -r relic.apk
+            adb shell monkey -p ${{ env.APP_ID }} -c android.intent.category.LAUNCHER 1
+            sleep 15
+            adb exec-out screencap -p > screenshots/relic.png
+            adb logcat -d > screenshots/logcat.txt
+            # Fails the run if the app has crashed.
+            adb shell pidof ${{ env.APP_ID }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-screenshots
+          path: screenshots/

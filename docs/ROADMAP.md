@@ -6,7 +6,7 @@ Native Go app for Android and iOS, built offline-first. Each phase ends with a *
 
 - [ ] Export your data from the prototype (Settings → Export) and keep `relic-archive.json` safe. It's your only backup and the import test data for Phase 4.
 - [ ] Install Go, Git, Claude Code.
-- [ ] Android: Android Studio (SDK + NDK) and an emulator or a phone with USB debugging.
+- [ ] Android: SDK + NDK command-line tools and JDK 17. With no phone, or too little RAM for an emulator, the GitHub Actions workflow runs the app on a cloud emulator.
 - [ ] iOS (later phases): a Mac with Xcode. iOS builds are not possible without one.
 
 ## Phase 0 — Decisions and spike (short)
@@ -27,7 +27,7 @@ Decide by building, not debating:
    reference/   relic.html (the prototype — read-only)
    ```
 
-**Done when:** toolkit and storage are chosen and written into CLAUDE.md "Decisions"; the spike runs on the Android emulator.
+**Done when:** toolkit and storage are chosen and written into CLAUDE.md "Decisions"; the spike runs on the Android emulator (locally or in the GitHub Actions run).
 
 ## Phase 1 — Core library
 
@@ -54,7 +54,7 @@ Include tests for the cases that broke in the prototype:
 
 **Done when:** importing the real archive and reading it back reproduces the same counts, time totals and Top 5 as the prototype shows.
 
-## Phase 3 — Screens (Android emulator first)
+## Phase 3 — Screens (Windows build day to day, Android emulator via GitHub Actions)
 
 Build in this order, checking each against the prototype side by side:
 
