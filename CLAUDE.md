@@ -48,6 +48,9 @@ Update this section when a decision is made.
 
 ## Working with the owner
 
+- The owner edits in **VS Code**, not Android Studio. Don't give instructions that need the Android Studio app; use command-line tools (`sdkmanager`, `avdmanager`, `emulator`, `adb`, `gogio`) and VS Code.
+- All work is saved to a private GitHub repo (`origin` → github.com/saniyaa61/Relic). **Commit and push after each piece of finished work**, with `go vet ./...` and `go test ./...` passing first.
+- When a step needs something installed, tell the owner what to install and how, step by step, before it's needed.
 - The owner is the product designer and tests on real data. Describe changes in plain language, not code.
 - Ask before changing anything visual that the spec doesn't define.
 - Report honestly: say what was tested and how, and what wasn't.
