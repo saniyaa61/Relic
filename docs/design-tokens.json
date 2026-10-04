@@ -1,0 +1,212 @@
+{
+  "_note": "Extracted from reference/relic.html. Each theme has light and dark variants. 'custom' is user-defined at runtime from two colours (base, accent).",
+  "fonts": {
+    "display": "Playfair Display (400, 500, 600; italic 400, 500)",
+    "body_serif": "Lora (400, 500; italic 400)",
+    "ui": "DM Sans (300, 400, 500)"
+  },
+  "themes": {
+    "linen": {
+      "light": {
+        "bg": "#F7F3EC",
+        "surface": "#FDFAF5",
+        "card": "#FFFFFF",
+        "text": "#2C2016",
+        "muted": "#8B7355",
+        "accent": "#7A5C3A",
+        "accent2": "#C4956A",
+        "border": "#E2D9C8",
+        "tag": "#EDE4D3",
+        "btn-text": "#FFF8F0",
+        "timeline": "#F0EAE0"
+      },
+      "dark": {
+        "bg": "#18140D",
+        "surface": "#221C12",
+        "card": "#2C2418",
+        "text": "#F0EAE0",
+        "muted": "#9A8468",
+        "accent": "#D4A870",
+        "accent2": "#E8C090",
+        "border": "#3A3020",
+        "tag": "#2A2215",
+        "btn-text": "#1A1008",
+        "timeline": "#1E1A10"
+      }
+    },
+    "midnight": {
+      "light": {
+        "bg": "#F2EEF8",
+        "surface": "#F8F5FD",
+        "card": "#FFFFFF",
+        "text": "#1A1028",
+        "muted": "#7060A0",
+        "accent": "#5A3E9A",
+        "accent2": "#9B74D4",
+        "border": "#DDD5F0",
+        "tag": "#EBE6F8",
+        "btn-text": "#FFFFFF",
+        "timeline": "#EDE8F8"
+      },
+      "dark": {
+        "bg": "#07050F",
+        "surface": "#0F0A1C",
+        "card": "#160F2A",
+        "text": "#EDE8F8",
+        "muted": "#9078C8",
+        "accent": "#B090E8",
+        "accent2": "#CDB0F5",
+        "border": "#2A1E48",
+        "tag": "#130B22",
+        "btn-text": "#07050F",
+        "timeline": "#110A20"
+      }
+    },
+    "blush": {
+      "light": {
+        "bg": "#FDF0EF",
+        "surface": "#FEF6F5",
+        "card": "#FFFFFF",
+        "text": "#2C1A18",
+        "muted": "#A0706A",
+        "accent": "#C4756A",
+        "accent2": "#E8A89F",
+        "border": "#F0D5D0",
+        "tag": "#F5E2DF",
+        "btn-text": "#FFFFFF",
+        "timeline": "#FAEAE8"
+      },
+      "dark": {
+        "bg": "#160A09",
+        "surface": "#201210",
+        "card": "#2C1816",
+        "text": "#F5EAE8",
+        "muted": "#C09088",
+        "accent": "#D49088",
+        "accent2": "#EAB8B0",
+        "border": "#3C2220",
+        "tag": "#221210",
+        "btn-text": "#160A09",
+        "timeline": "#1E1210"
+      }
+    },
+    "forest": {
+      "light": {
+        "bg": "#EFF4EB",
+        "surface": "#F6F9F3",
+        "card": "#FFFFFF",
+        "text": "#162116",
+        "muted": "#5C7A5A",
+        "accent": "#3D6B3A",
+        "accent2": "#7AAD76",
+        "border": "#D0E0CB",
+        "tag": "#DCE9D8",
+        "btn-text": "#FFFFFF",
+        "timeline": "#E8F0E4"
+      },
+      "dark": {
+        "bg": "#060E06",
+        "surface": "#0C160C",
+        "card": "#121E12",
+        "text": "#E8F0E5",
+        "muted": "#6A9A66",
+        "accent": "#7AAD76",
+        "accent2": "#A0CC9C",
+        "border": "#1E321E",
+        "tag": "#0A140A",
+        "btn-text": "#060E06",
+        "timeline": "#0E180E"
+      }
+    },
+    "rose": {
+      "light": {
+        "bg": "#FEF0F5",
+        "surface": "#FFF5F9",
+        "card": "#FFFFFF",
+        "text": "#2A1020",
+        "muted": "#A06080",
+        "accent": "#C05880",
+        "accent2": "#E090B0",
+        "border": "#F0D0E0",
+        "tag": "#F8E0EC",
+        "btn-text": "#FFFFFF",
+        "timeline": "#FAE8F2"
+      },
+      "dark": {
+        "bg": "#110618",
+        "surface": "#1C0C22",
+        "card": "#28142E",
+        "text": "#F5E8F0",
+        "muted": "#C080A8",
+        "accent": "#D890B8",
+        "accent2": "#EAB8D4",
+        "border": "#3C1840",
+        "tag": "#1A0A20",
+        "btn-text": "#110618",
+        "timeline": "#1A0C20"
+      }
+    },
+    "slate": {
+      "light": {
+        "bg": "#EEF2F7",
+        "surface": "#F5F8FC",
+        "card": "#FFFFFF",
+        "text": "#141C28",
+        "muted": "#607090",
+        "accent": "#3A5A8A",
+        "accent2": "#7090C0",
+        "border": "#CCD8E8",
+        "tag": "#DDE5F2",
+        "btn-text": "#FFFFFF",
+        "timeline": "#E5EAF5"
+      },
+      "dark": {
+        "bg": "#060C14",
+        "surface": "#0C1420",
+        "card": "#121C2E",
+        "text": "#E8EEF8",
+        "muted": "#7090C0",
+        "accent": "#90B0E0",
+        "accent2": "#B0C8F0",
+        "border": "#1E2E44",
+        "tag": "#0A1018",
+        "btn-text": "#060C14",
+        "timeline": "#0E1622"
+      }
+    }
+  },
+  "custom_palette": {
+    "_note": "User picks two colours: base (backgrounds) and accent. lerp(a,b,t) is linear RGB interpolation from a toward b by t.",
+    "light": {
+      "bg": "lerp(base,#FFFFFF,0.923)",
+      "surface": "lerp(base,#FFFFFF,0.959)",
+      "card": "#FFFFFF",
+      "text": "lerp(base,#000000,0.700)",
+      "muted": "lerp(base,accent,0.40)",
+      "accent": "accent",
+      "accent2": "base",
+      "border": "lerp(base,#FFFFFF,0.758)",
+      "tag": "lerp(base,#FFFFFF,0.841)",
+      "btn-text": "isDark(accent) ? #FFFFFF : #1A1A1A",
+      "timeline": "lerp(base,#FFFFFF,0.883)"
+    },
+    "dark": {
+      "bg": "lerp(base,#000000,0.894)",
+      "surface": "lerp(base,#000000,0.814)",
+      "card": "lerp(base,#000000,0.731)",
+      "text": "lerp(base,#FFFFFF,0.879)",
+      "muted": "lerp(base,accent,0.70)",
+      "accent": "accent",
+      "accent2": "base",
+      "border": "lerp(base,#000000,0.573)",
+      "tag": "lerp(base,#000000,0.825)",
+      "btn-text": "same value as dark bg",
+      "timeline": "lerp(base,#000000,0.802)"
+    },
+    "defaults": {
+      "base": "#7A5C3A",
+      "accent": "#C4956A"
+    },
+    "isDark": "(r*299 + g*587 + b*114)/1000 < 128, with r,g,b in 0-255"
+  }
+}
