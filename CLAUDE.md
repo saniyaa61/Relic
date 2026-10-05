@@ -16,6 +16,7 @@ Relic ("your stories, preserved") is a personal archive for films, dramas, books
 - Local storage: **SQLite via github.com/ncruces/go-sqlite3** (SQLite translated to pure Go, no cgo), in `store/`. Uses Go's own file I/O, so it runs inside Android's syscall filter; builds for Windows, Android and iOS with no C toolchain. Schema changes are numbered migrations tracked in `PRAGMA user_version`. (modernc.org/sqlite was rejected: it crashed on Android x86_64.)
 - Architecture: pure `core/` package for every rule in SPEC §4. UI and storage depend on core, never the other way round.
 - Offline-first: the app works fully without a network. Sync comes in Phase 5.
+- Core model (Phase 1): ids are random 128-bit hex. Entries reference categories by id, so renaming a category touches nothing else. A session's minutes are optional (`nil` = not logged, so books estimate 1.5 min/page; an explicit 0 counts as 0); the importer must map the prototype's `mins: 0` to "not logged". Totals (episodes, pages) of 0 mean "not given" and never count as reached. Editing an entry doesn't rewrite the start session's "logged as finished" flag.
 
 Update this section when a decision is made.
 
