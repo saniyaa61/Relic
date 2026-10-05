@@ -1,3 +1,4 @@
 // Package store persists the core model behind an interface the UI uses.
-// The storage engine is chosen in Phase 0 (see CLAUDE.md "Decisions").
+// It uses SQLite through modernc.org/sqlite, a pure-Go build of SQLite, so
+// the app compiles for Android and iOS without a C toolchain.
 package store

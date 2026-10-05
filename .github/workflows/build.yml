@@ -82,11 +82,61 @@ jobs:
             adb shell monkey -p ${{ env.APP_ID }} -c android.intent.category.LAUNCHER 1
             sleep 15
             adb exec-out screencap -p > screenshots/relic.png
+            # Restart the app: the saved launch count must survive.
+            adb shell am force-stop ${{ env.APP_ID }}
+            adb shell monkey -p ${{ env.APP_ID }} -c android.intent.category.LAUNCHER 1
+            sleep 10
             adb logcat -d > screenshots/logcat.txt
             # Fails the run if the app has crashed.
             adb shell pidof ${{ env.APP_ID }}
+            # Fails the run unless the database was written and read back.
+            grep "relic: store ok, launch 1" screenshots/logcat.txt
+            grep "relic: store ok, launch 2" screenshots/logcat.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: emulator-screenshots
+          path: screenshots/
+
+  ios:
+    name: iOS simulator
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test store on macOS
+        run: go test ./store/...
+      - name: Install gogio
+        run: go install gioui.org/cmd/gogio@v0.10.0
+      - name: Build for the iOS simulator
+        run: |
+          gogio -target ios -arch arm64 -minsdk 15 \
+            -appid "$APP_ID" -name Relic -o Relic.app ./cmd/relic
+      - name: Install, launch twice and screenshot
+        run: |
+          mkdir -p screenshots
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          print(next(x["udid"] for r, xs in d.items() if "iOS" in r for x in xs if "iPhone" in x["name"]))')
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID"
+          xcrun simctl install "$UDID" Relic.app
+          xcrun simctl launch --console-pty "$UDID" "$APP_ID" > screenshots/run1.txt 2>&1 &
+          sleep 20
+          xcrun simctl io "$UDID" screenshot screenshots/relic-ios.png
+          xcrun simctl terminate "$UDID" "$APP_ID" || true
+          sleep 2
+          xcrun simctl launch --console-pty "$UDID" "$APP_ID" > screenshots/run2.txt 2>&1 &
+          sleep 15
+          xcrun simctl terminate "$UDID" "$APP_ID" || true
+          cat screenshots/run1.txt screenshots/run2.txt
+          grep "relic: store ok, launch 1" screenshots/run1.txt
+          grep "relic: store ok, launch 2" screenshots/run2.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-screenshots
           path: screenshots/

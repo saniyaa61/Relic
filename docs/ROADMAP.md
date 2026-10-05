@@ -4,7 +4,7 @@ Native Go app for Android and iOS, built offline-first. Each phase ends with a *
 
 ## Before you start
 
-- [ ] Export your data from the prototype (Settings → Export) and keep `relic-archive.json` safe. It's your only backup and the import test data for Phase 4.
+- [x] Export your data from the prototype (Settings → Export) and keep `relic-archive.json` safe. It's your only backup and the import test data for Phase 4.
 - [ ] Install Go, Git, Claude Code.
 - [ ] Android: SDK + NDK command-line tools and JDK 17. With no phone, or too little RAM for an emulator, the GitHub Actions workflow runs the app on a cloud emulator.
 - [ ] iOS (later phases): a Mac with Xcode. iOS builds are not possible without one.

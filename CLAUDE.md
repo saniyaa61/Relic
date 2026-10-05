@@ -12,8 +12,8 @@ Relic ("your stories, preserved") is a personal archive for films, dramas, books
 ## Decisions
 
 - Language: **Go**, for the app and later the backend.
-- UI toolkit: _pending Phase 0 spike_ (recommended: Gio; alternative: Fyne).
-- Local storage: _pending Phase 0 spike_ (must build for Android and iOS).
+- UI toolkit: **Gio** (gioui.org v0.10). The Phase 0 spike matched the prototype's chip and poster card with custom drawing and bundled fonts, and runs on Android.
+- Local storage: **SQLite via modernc.org/sqlite** (pure Go, no cgo), in `store/`. Builds for Windows, Android and iOS with no C toolchain; schema changes are numbered migrations tracked in `PRAGMA user_version`.
 - Architecture: pure `core/` package for every rule in SPEC §4. UI and storage depend on core, never the other way round.
 - Offline-first: the app works fully without a network. Sync comes in Phase 5.
 
