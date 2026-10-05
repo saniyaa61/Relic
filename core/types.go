@@ -128,7 +128,7 @@ func FieldsFor(t EntryType, f Fields) []FieldValue {
 		return []FieldValue{{"creator", f.Creator}, {"platform", f.Platform}, {"duration", num(f.Duration)},
 			{"watchedDate", date(f.WatchedDate)}, {"url", f.URL}}
 	case Music:
-		return []FieldValue{{"artist", f.Artist}, {"genre", f.Genre}, {"tracks", num(f.Tracks)},
+		return []FieldValue{{"artist", f.Artist}, {"genre", f.Genre}, {"tracks", num(f.Tracks)}, {"duration", num(f.Duration)},
 			{"watchedDate", date(f.WatchedDate)}, {"platform", f.Platform}}
 	}
 	return []FieldValue{{"creator", f.Creator}, {"platform", f.Platform}, {"duration", f.DurationText},

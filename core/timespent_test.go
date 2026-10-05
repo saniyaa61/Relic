@@ -34,8 +34,12 @@ func TestTimeEvents(t *testing.T) {
 		// Full rewatch doubles series time; partial adds nothing.
 		{"full rewatch doubles series time", Series, EntryInput{Status: Finished, StartEpisodes: 10, Fields: Fields{EpisodeDuration: 45, TotalEpisodes: 10}},
 			func(e *Entry) { e.LogRewatch(RewatchInput{Date: day, Full: &yes}, time.UTC) }, 900},
-		{"partial rewatch adds nothing", Series, EntryInput{Status: Finished, StartEpisodes: 10, Fields: Fields{EpisodeDuration: 45, TotalEpisodes: 10}},
+		{"partial rewatch counts episodes rewatched", Series, EntryInput{Status: Finished, StartEpisodes: 10, Fields: Fields{EpisodeDuration: 45, TotalEpisodes: 10}},
+			func(e *Entry) { e.LogRewatch(RewatchInput{Date: day, Full: &no, Episodes: 4}, time.UTC) }, 450 + 180},
+		{"partial rewatch with no episodes adds nothing", Series, EntryInput{Status: Finished, StartEpisodes: 10, Fields: Fields{EpisodeDuration: 45, TotalEpisodes: 10}},
 			func(e *Entry) { e.LogRewatch(RewatchInput{Date: day, Full: &no}, time.UTC) }, 450},
+		{"full rewatch ignores episodes field", Podcast, EntryInput{Status: Finished, StartEpisodes: 2, Fields: Fields{EpisodeDuration: 30, TotalEpisodes: 2}},
+			func(e *Entry) { e.LogRewatch(RewatchInput{Date: day, Episodes: 9}, time.UTC) }, 120},
 		{"podcast", Podcast, EntryInput{StartEpisodes: 2, Fields: Fields{EpisodeDuration: 30}}, nil, 60},
 		// Book with pages but no minutes → estimated time; logged minutes override.
 		{"book pages estimate 1.5 min/page", Book, EntryInput{StartPages: 0},
@@ -49,7 +53,11 @@ func TestTimeEvents(t *testing.T) {
 			func(e *Entry) { e.LogSession(SessionInput{FromPage: ip(50), ToPage: ip(10)}, t0) }, 0},
 		{"other counts session minutes only", Other, EntryInput{Fields: Fields{DurationText: "2 hours"}},
 			func(e *Entry) { e.LogSession(SessionInput{Minutes: ip(25)}, t0) }, 25},
-		{"music counts nothing", Music, EntryInput{Fields: Fields{Tracks: 12}}, nil, 0},
+		{"music counts its length", Music, EntryInput{Fields: Fields{Tracks: 11, Duration: 44}}, nil, 44},
+		{"music without length estimates 3.5 min/track", Music, EntryInput{Fields: Fields{Tracks: 11}}, nil, 38.5},
+		{"music relisten adds length again", Music, EntryInput{Fields: Fields{Duration: 44}},
+			func(e *Entry) { e.LogRewatch(RewatchInput{Date: day}, time.UTC) }, 88},
+		{"music with nothing counts nothing", Music, EntryInput{}, nil, 0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -84,17 +92,18 @@ func TestTotalsAgree(t *testing.T) {
 	mustEntry(t, l, films, EntryInput{Title: "c", Fields: Fields{Duration: 90}}, t0)
 	stale := mustEntry(t, l, films, EntryInput{Title: "d", Folder: "Gone", Fields: Fields{Duration: 10}}, t0)
 	mustEntry(t, l, books, EntryInput{Title: "e", StartPages: 100}, t0)
-	mustEntry(t, l, music, EntryInput{Title: "f"}, t0)
+	mustEntry(t, l, music, EntryInput{Title: "f", Fields: Fields{Duration: 40}}, t0)
+	mustEntry(t, l, music, EntryInput{Title: "g"}, t0) // no time at all
 	_ = stale
 
 	x := NewTimeIndex(l.Entries)
 	all := x.Sum(l.Entries)
-	if all != 150+120+90+10+150 {
+	if all != 150+120+90+10+150+40 {
 		t.Fatalf("all-time = %v", all)
 	}
 	cats := l.ConsumedByCategory(x)
-	if len(cats) != 2 {
-		t.Fatalf("got %d categories with time, want 2 (music has none)", len(cats))
+	if len(cats) != 3 {
+		t.Fatalf("got %d categories with time, want 3", len(cats))
 	}
 	var catSum float64
 	for _, c := range cats {

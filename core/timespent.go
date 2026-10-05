@@ -15,8 +15,7 @@ type TimeEvent struct {
 const BookPageMinutes = 1.5
 
 // TimeEvents lists the time the entry has taken, per SPEC §4.5. Every total
-// and chart in the app is a sum over these. Music has no time rule yet
-// (SPEC §11 #1) and returns none.
+// and chart in the app is a sum over these.
 func (e *Entry) TimeEvents() []TimeEvent {
 	var ev []TimeEvent
 	add := func(at time.Time, m float64) {
@@ -34,6 +33,8 @@ func (e *Entry) TimeEvents() []TimeEvent {
 		for _, r := range e.Rewatches {
 			if r.Full {
 				add(r.At, float64(f.TotalEpisodes)*per)
+			} else {
+				add(r.At, float64(r.Episodes)*per)
 			}
 		}
 	case Book:
@@ -51,8 +52,26 @@ func (e *Entry) TimeEvents() []TimeEvent {
 		for _, r := range e.Rewatches {
 			add(r.At, float64(f.Duration))
 		}
+	case Music:
+		m := musicMinutes(f)
+		add(e.CreatedAt, m)
+		for _, r := range e.Rewatches {
+			add(r.At, m)
+		}
 	}
 	return ev
+}
+
+// TrackMinutes is the estimated length of one track when an album's length
+// isn't given.
+const TrackMinutes = 3.5
+
+// musicMinutes is the album length, or tracks × 3.5 min when it's blank.
+func musicMinutes(f Fields) float64 {
+	if f.Duration > 0 {
+		return float64(f.Duration)
+	}
+	return float64(f.Tracks) * TrackMinutes
 }
 
 // bookSessionMinutes is the logged time, or 1.5 minutes per page read.

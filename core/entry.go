@@ -282,6 +282,7 @@ type RewatchInput struct {
 	Note      string
 	Rating    float64 // 0 = no new rating
 	Full      *bool   // series/podcast; nil = true ("Yes, all of it")
+	Episodes  int     // partial rewatch: "Episodes rewatched"
 	StartDate Date    // books
 	EndDate   Date    // books
 }
@@ -293,10 +294,16 @@ func (in RewatchInput) rewatch(id string, loc *time.Location) (Rewatch, error) {
 	if !ValidRating(in.Rating) {
 		return Rewatch{}, ErrBadRating
 	}
+	if in.Episodes < 0 {
+		return Rewatch{}, ErrNegative
+	}
 	r := Rewatch{ID: id, At: in.Date.Noon(loc).UTC(), Note: in.Note, Rating: in.Rating,
 		Full: true, StartDate: in.StartDate, EndDate: in.EndDate}
 	if in.Full != nil {
 		r.Full = *in.Full
+	}
+	if !r.Full {
+		r.Episodes = in.Episodes
 	}
 	return r, nil
 }

@@ -61,7 +61,7 @@ type Fields struct {
 	Genre     string
 	URL       string
 
-	Duration        int    // minutes (film, short)
+	Duration        int    // minutes (film, short; music "Length")
 	DurationText    string // free text (other; counts no time, see SPEC §11 #2)
 	EpisodeDuration int    // minutes per episode (series, podcast)
 	TotalEpisodes   int    // series, podcast
@@ -114,6 +114,7 @@ type Rewatch struct {
 	Note      string
 	Rating    float64 // 0 = none; never changes the entry's rating
 	Full      bool    // series/podcast: "Yes, all of it" vs "Partial rewatch"
+	Episodes  int     // series/podcast partial rewatch: episodes rewatched
 	StartDate Date    // books, optional
 	EndDate   Date    // books, optional
 }

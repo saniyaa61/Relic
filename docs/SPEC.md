@@ -72,6 +72,7 @@ Rewatch
   id, at, note
   rating          optional 0–5 (stored on the rewatch only; does not change the entry rating)
   full            bool, default true (series/podcast: "Yes, all of it" vs "Partial rewatch")
+  episodes        int  (partial rewatch only: "Episodes rewatched", asked when "Partial rewatch" is picked)
   startDate, endDate  optional (books)
 
 Favourites
@@ -92,7 +93,7 @@ Derived, never stored independently in the new app: `watchedEpisodes` (= sum of 
 | `book` | Book | author, startDate, totalPages, pagesRead (initial), publisher/year | pages |
 | `podcast` | Podcast | host, platform, totalEpisodes, watchedEpisodes (initial), language, watchedDate | episodes |
 | `short` | Shorts / YouTube | creator, platform, duration (mins), watchedDate, url | no |
-| `music` | Music / Album | artist, genre, tracks, watchedDate, platform | no |
+| `music` | Music / Album | artist, genre, tracks, length (mins), watchedDate, platform | no |
 | `other` | Other | creator, platform, duration (free text), watchedDate | no |
 
 Preset feeling tags: Emotional, Haunting, Rewatch-worthy, Quiet, Profound, Funny, Disturbing, Comforting, Life-changing, Beautiful, Slow-burn, Bittersweet, Gothic, Romantic, Devastating. Users can also add custom tags.
@@ -136,11 +137,11 @@ Every entry produces a list of **time events** `(at, minutes)`. All totals — a
 
 | Type | Events |
 |---|---|
-| series, podcast | each session: `episodes × episodeDuration`; each rewatch with `full = true`: `totalEpisodes × episodeDuration` (partial rewatches add nothing) |
+| series, podcast | each session: `episodes × episodeDuration`; each rewatch with `full = true`: `totalEpisodes × episodeDuration`; each partial rewatch: `episodes rewatched × episodeDuration` |
 | book | each session: `minutes` if logged, otherwise `(toPage − fromPage) × 1.5` |
 | other | each session: `minutes` (if any) |
 | film, short | one event at `createdAt` of `duration`; plus `duration` per rewatch |
-| music | none (gap — see §11) |
+| music | one event at `createdAt` of the album length; plus the length per relisten. If length is blank: `tracks × 3.5` min |
 
 Compute each entry's events **once per render** and reuse them (the prototype was slow when it re-derived them per chart bucket).
 
@@ -335,8 +336,8 @@ Accounts (Google & Apple sign-in), cloud storage and sync across devices, store 
 
 | # | Item | Notes |
 |---|---|---|
-| 1 | **Music counts zero time** | No time rule exists for music. Suggest: tracks × average track length, or minutes per session. Decide. |
-| 2 | **"Other" duration is free text and unused** | Only session minutes count. Consider a numeric duration. |
+| 1 | ~~Music counts zero time~~ | **Decided:** album length (mins) field, counted like a film; blank length estimates tracks × 3.5 min. |
+| 2 | **"Other" duration is free text and unused** | Only session minutes count. **Decided:** keep it free text for now. |
 | 3 | **Timezone** | Prototype used UTC days; new app must use local days (§4.11). |
 | 4 | **Posters stored full-size inline** | Prototype risked filling browser storage. Resize and store as files. |
 | 5 | **Prototype import didn't restore theme** | Fixed by §8. |
