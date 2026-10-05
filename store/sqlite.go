@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	_ "modernc.org/sqlite" // pure-Go SQLite: builds for Android and iOS without cgo
+	_ "github.com/ncruces/go-sqlite3/driver" // SQLite translated to pure Go: no cgo, uses Go's own file I/O
 )
 
 // migrations[i] moves the schema from version i to i+1. Append only; never
@@ -26,7 +26,7 @@ type DB struct {
 func Open(path string) (*DB, error) {
 	dsn := "file:" + path +
 		"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)"
-	s, err := sql.Open("sqlite", dsn)
+	s, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		return nil, err
 	}

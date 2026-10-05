@@ -100,7 +100,8 @@ jobs:
 
   ios:
     name: iOS simulator
-    runs-on: macos-latest
+    # gogio builds simulator apps for Intel only, so use an Intel Mac.
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -112,7 +113,7 @@ jobs:
         run: go install gioui.org/cmd/gogio@v0.10.0
       - name: Build for the iOS simulator
         run: |
-          gogio -target ios -arch arm64 -minsdk 15 \
+          gogio -target ios -arch amd64 -minsdk 15 \
             -appid "$APP_ID" -name Relic -o Relic.app ./cmd/relic
       - name: Install, launch twice and screenshot
         run: |
