@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 1 (app shell) was merged.
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Step 1 (app shell) merged (PR #2). The owner is trying it on Windows; their two answers below (tab label, symbols) are still open. Step 2 (Library) is next. |
+| 3 Screens | **In progress.** Step 1 (app shell) done. Step 2 (Library) in progress. |
 
 ## What exists
 
@@ -40,6 +40,8 @@ Decided 2026-10-06 (first cloud session):
 - **Podcasts get "Ep. length (mins)"**, same as series. The core already counts podcast time from `EpisodeDuration`; the field goes on the podcast form in step 3. (SPEC §3)
 - **Rewatch ratings never change the entry rating**; they are kept as separate history. (SPEC §2, §11 #8)
 - **The app remembers the last light/dark mode, including after import.** The importer leaves the mode empty and `importer.Result.KeepMode` copies the app's current mode in; `cmd/import` does this, and the Settings import (step 9) must too. (SPEC §2, §8)
+- **Middle tab says "New"** (SPEC §5), not the prototype's "Add".
+- **Symbols from Noto Sans Symbols 2 approved** (★ ♥ ✓ ✕ ✦ as bundled).
 
 The two new form fields (Episodes rewatched, Length (mins)) are not in the prototype. The owner approved them from these sketches, so build them like this, styled like neighbouring fields:
 
@@ -55,10 +57,8 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **(Asked 2026-10-06, awaiting answer)** Middle tab label: "Add" (prototype, built) or "New" (the word SPEC §5 uses).
-2. **(Asked 2026-10-06, awaiting answer)** Is the bundled Noto Sans Symbols 2 look fine for ★ ♥ ✓ ✕ ✦?
-3. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
-4. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
+1. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+2. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
 
 ## The owner's real data
 

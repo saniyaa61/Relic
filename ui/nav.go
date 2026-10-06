@@ -9,14 +9,16 @@ import (
 	"gioui.org/widget"
 )
 
-// navItems are the bottom bar's destinations, labelled as in the prototype.
+// navItems are the bottom bar's destinations, labelled as in the prototype
+// except the middle tab: "New" (SPEC §5) rather than the prototype's "Add"
+// (owner's choice, 2026-10-06).
 var navItems = [tabCount]struct {
 	icon  *Icon
 	label string
 }{
 	TabHome:      {IconHome, "Home"},
 	TabLibrary:   {IconLibrary, "Library"},
-	TabNew:       {IconAdd, "Add"},
+	TabNew:       {IconAdd, "New"},
 	TabFavorites: {IconFavorites, "Favorites"},
 	TabDigest:    {IconDigest, "Digest"},
 }
