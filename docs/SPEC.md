@@ -32,7 +32,7 @@ Profile
   name            string    (optional)
   firstUsedAt     time      set once, on first launch
   theme           string    linen | midnight | blush | forest | rose | slate | custom
-  mode            string    light | dark
+  mode            string    light | dark (remembered across launches and imports)
   customBase      color     (only when theme = custom)
   customAccent    color     (only when theme = custom)
 
@@ -70,7 +70,7 @@ Session
 
 Rewatch
   id, at, note
-  rating          optional 0–5 (stored on the rewatch only; does not change the entry rating)
+  rating          optional 0–5 (stored on the rewatch only; never changes the entry rating — kept as separate history)
   full            bool, default true (series/podcast: "Yes, all of it" vs "Partial rewatch")
   episodes        int  (partial rewatch only: "Episodes rewatched", asked when "Partial rewatch" is picked)
   startDate, endDate  optional (books)
@@ -91,7 +91,7 @@ Derived, never stored independently in the new app: `watchedEpisodes` (= sum of 
 | `film` | Film | director, language, cast, duration (mins), watchedDate | no |
 | `series` | Series / Drama | totalEpisodes, watchedEpisodes (initial), episodeDuration (mins), platform, cast | episodes |
 | `book` | Book | author, startDate, totalPages, pagesRead (initial), publisher/year | pages |
-| `podcast` | Podcast | host, platform, totalEpisodes, watchedEpisodes (initial), language, watchedDate | episodes |
+| `podcast` | Podcast | host, platform, totalEpisodes, watchedEpisodes (initial), episodeDuration ("Ep. length (mins)", as series), language, watchedDate | episodes |
 | `short` | Shorts / YouTube | creator, platform, duration (mins), watchedDate, url | no |
 | `music` | Music / Album | artist, genre, tracks, length (mins), watchedDate, platform | no |
 | `other` | Other | creator, platform, duration (free text), watchedDate | no |
@@ -293,7 +293,7 @@ Preview in a dialog with **Save image** and **Share** (native share sheet). A ca
 ## 8. Settings & archive
 
 - **Export** produces a single JSON archive of everything (profile, categories, entries, favourites) including posters. Name: `relic-archive.json`.
-- **Import** replaces all data after confirmation and restores the theme too (the prototype forgot the theme — §11).
+- **Import** replaces all data after confirmation and restores the theme too (the prototype forgot the theme — §11). It keeps the app's current light/dark mode: the app remembers the last mode, including after an import.
 - Clear all data requires confirmation.
 
 ---
@@ -343,4 +343,4 @@ Accounts (Google & Apple sign-in), cloud storage and sync across devices, store 
 | 5 | **Prototype import didn't restore theme** | Fixed by §8. |
 | 6 | **Mood attribution** | Feelings count in the month the entry was created; edited tags have no history. Acceptable for v1. |
 | 7 | **Consumed page with very large libraries** | Folder previews are the slow part; render them lazily. |
-| 8 | **Rewatch rating** | Stored on the rewatch only; decide whether it should ever update the entry rating. |
+| 8 | ~~Rewatch rating~~ | **Decided:** stored on the rewatch only and never changes the entry rating; rewatch ratings are separate history. |

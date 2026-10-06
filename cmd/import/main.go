@@ -48,6 +48,12 @@ func run(in, dbPath string) error {
 		return err
 	}
 	defer db.Close()
+	// Keep the database's light/dark mode, as the app does on import.
+	current, err := db.Load()
+	if err != nil {
+		return err
+	}
+	res.KeepMode(current.Profile)
 	if err := db.ReplaceAll(res.Library); err != nil {
 		return err
 	}

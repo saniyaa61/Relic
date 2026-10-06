@@ -118,8 +118,13 @@ func TestEntryRepairs(t *testing.T) {
 		]}`)
 	lib := res.Library
 
-	if p := lib.Profile; p.Name != "Haya" || p.Theme != "custom" || p.Mode != "light" || p.CustomAccent != "#6f75be" {
+	if p := lib.Profile; p.Name != "Haya" || p.Theme != "custom" || p.Mode != "" || p.CustomAccent != "#6f75be" {
 		t.Errorf("profile = %+v", p)
+	}
+	// The archive has no light/dark mode; KeepMode carries the app's over.
+	res.KeepMode(core.Profile{Mode: "dark"})
+	if lib.Profile.Mode != "dark" {
+		t.Errorf("mode after KeepMode = %q, want dark", lib.Profile.Mode)
 	}
 	if !lib.Profile.FirstUsedAt.Equal(time.Date(2026, 3, 1, 10, 0, 0, 0, time.UTC)) {
 		t.Errorf("first used = %v, want earliest createdAt", lib.Profile.FirstUsedAt)
