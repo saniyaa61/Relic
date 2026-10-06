@@ -69,6 +69,9 @@ func openStore() (*store.DB, error) {
 	return db, nil
 }
 
+// startTour is set in tour builds (tour.go) to step through every screen.
+var startTour func(a *ui.App, db *store.DB, posters string)
+
 func run(w *app.Window) error {
 	db, err := openStore()
 	if err != nil {
@@ -114,6 +117,9 @@ func run(w *app.Window) error {
 		return wc, err
 	}
 	a.Invalidate = w.Invalidate
+	if startTour != nil {
+		startTour(a, db, posters)
+	}
 	a.OnWindowColors = func(status, navigation color.NRGBA) {
 		w.Option(app.StatusColor(status), app.NavigationColor(navigation))
 	}

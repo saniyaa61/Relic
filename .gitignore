@@ -16,3 +16,4 @@ relic-archive.json
 .env
 .env.*
 !.env.example
+cmd/relic/tour-archive.json

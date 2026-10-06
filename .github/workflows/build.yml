@@ -1,4 +1,5 @@
-# Checks, Android build and an emulator screenshot on every push.
+# Checks, Android build and emulator screenshots (the first launch, then
+# every screen via the tour build) on every push.
 # Download the results from the run's "Artifacts" section on GitHub.
 name: Build
 
@@ -50,19 +51,34 @@ jobs:
           export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
           gogio -target android -arch arm64,amd64 -minsdk 24 \
             -appid "$APP_ID" -name Relic -o relic.apk ./cmd/relic
+      - name: Build the tour APK (steps through every screen, for the emulator)
+        run: |
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
+          cp importer/testdata/scrubbed-archive.json cmd/relic/tour-archive.json
+          gogio -target android -arch amd64 -minsdk 24 -tags tour \
+            -appid "$APP_ID" -name Relic -o relic-tour.apk ./cmd/relic
       - uses: actions/upload-artifact@v4
         with:
           name: relic-apk
           path: relic.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relic-tour-apk
+          path: relic-tour.apk
 
   emulator:
     name: Run on Android emulator
     needs: android
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: relic-apk
+      - uses: actions/download-artifact@v4
+        with:
+          name: relic-tour-apk
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -96,6 +112,8 @@ jobs:
             # Fails the run unless the database was written and read back.
             grep "relic: store ok, launch 1" screenshots/logcat.txt
             grep "relic: store ok, launch 2" screenshots/logcat.txt
+            # Every screen, in Linen light and Midnight dark, with test data.
+            bash tools/emulator-tour.sh relic-tour.apk ${{ env.APP_ID }} screenshots/tour
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -63,7 +63,7 @@ Update this section when a decision is made.
 
 - The owner has **no Android phone** and a **3.8 GB RAM** laptop, so the local Android emulator isn't usable. Day to day, check screens in the Windows build (phone-sized window) and `cmd/snapshot` PNGs. The Android check is the GitHub Actions run (`.github/workflows/build.yml`), which builds the APK, runs it on a cloud emulator and uploads a screenshot.
 - The owner edits in **VS Code**, not Android Studio. Don't give instructions that need the Android Studio app; use command-line tools (`sdkmanager`, `avdmanager`, `emulator`, `adb`, `gogio`) and VS Code.
-- All work is saved to a private GitHub repo (`origin` → github.com/saniyaa61/Relic). **Commit and push after each piece of finished work**, with `go vet ./...` and `go test ./...` passing first. **Push straight to `main`; no pull requests** unless the owner asks for one (owner's decision, 2026-10-06).
+- All work is saved to a GitHub repo (public since 2026-10-06) (`origin` → github.com/saniyaa61/Relic). **Commit and push after each piece of finished work**, with `go vet ./...` and `go test ./...` passing first. **Push straight to `main`; no pull requests** unless the owner asks for one (owner's decision, 2026-10-06).
 - **After every finished step or phase, give the owner a Windows check:** what to pull (`git checkout main`, `git pull`), what to run (`go run ./cmd/relic`), and a short list of exactly what to try, with what should happen. Wait for their result before moving far ahead on anything it could change.
 - When a step needs something installed, tell the owner what to install and how, step by step, before it's needed.
 - The owner is the product designer and tests on real data. Describe changes in plain language, not code.
@@ -90,5 +90,5 @@ Update this section when a decision is made.
 - Compare an import with the prototype's own formulas: `go test ./importer -run Prototype -v` (scrubbed copy); add `RELIC_ARCHIVE=C:/Users/saniy/Downloads/relic-archive.json` to also check the real archive.
 - Refresh the scrubbed test copy after a new export: `go run ./cmd/scrub -in ../relic-archive.json -out importer/testdata/scrubbed-archive.json`. Never commit the real archive.
 - Android APK locally (needs `ANDROID_HOME`, the NDK, and JDK 17's `bin` on PATH for `keytool`): `gogio -target android -arch arm64,amd64 -minsdk 24 -appid com.saniyaa61.relic -name Relic -o build/relic.apk ./cmd/relic`
-- Android on an emulator: push to GitHub; the **Build** workflow uploads `relic-apk` and `emulator-screenshots` as run artifacts.
+- Android on an emulator: push to GitHub; the **Build** workflow uploads `relic-apk` and `emulator-screenshots` (first launch, plus `tour/` with every screen in Linen light and Midnight dark from the tour build) as run artifacts. The repo is public (free Actions minutes).
 - iOS: needs a Mac (Phase 4).

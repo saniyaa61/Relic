@@ -81,7 +81,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **CI minutes.** The owner confirmed GitHub Actions minutes are used up (private repo; macOS minutes count 10×). Options put to the owner: wait for the monthly reset; run the workflow only when started by hand and leave the iOS job out until Phase 4; or make the repo public (free minutes). Waiting for the answer; the Phase 3 "Done when" check on Android needs CI.
+None right now.
 
 ## The owner's real data
 
@@ -95,7 +95,8 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 - Jobs: vet+test (Linux, installs Gio's X11/Wayland libs), Android APK, Android emulator run (screenshot + checks the log for `relic: store ok, launch 1/2`), iOS simulator run on an Intel Mac (same check).
 - Emulator and simulator launches used fixed pauses and failed now and then on slow cloud machines (most recently the iOS step on 2026-10-06: the simulator took ~3 min to boot). They now wait up to 3 minutes for the app's "store ok" log line instead. If a launch step still fails, read its log before calling it a flake.
-- **Since step 4 (2026-10-06) every run fails within ~3 s with no logs: the Actions minutes are used up** (owner confirmed). Code checks pass locally (`go vet`, `go test`, Windows build, Android/iOS compile of the pure packages).
+- The owner made the repo **public** on 2026-10-06 (private Actions minutes had run out; public repos get free minutes).
+- **Tour build:** the Android job also builds `relic-tour.apk` (`-tags tour`, `cmd/relic/tour.go`, embeds the scrubbed archive copied to `cmd/relic/tour-archive.json`). On the emulator it steps through every screen (`ui.App.Tour`) in Linen light, then a few in Midnight dark, logging `relic: tour n/total screen theme mode`; `tools/emulator-tour.sh` screenshots each into the `emulator-screenshots` artifact (`tour/`) and fails on errors or a crash. `go test ./ui -run TestTour` runs every snapshot screen through the same path. Code checks pass locally (`go vet`, `go test`, Windows build, Android/iOS compile of the pure packages).
 - Download results from the run's Artifacts section: `relic-apk`, `emulator-screenshots`, `ios-screenshots`.
 
 ## How the owner checks each step (Windows)
