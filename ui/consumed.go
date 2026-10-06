@@ -185,7 +185,7 @@ func timeHead(gtx layout.Context, th *Theme, title, time string) layout.Dimensio
 				return Text{Font: font.Font{Typeface: Display, Weight: font.Medium}, Size: 16, Color: th.Text}.Layout(gtx, th, title)
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 12, Color: th.Accent}.Layout(gtx, th, time)
+				return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 12, FakeBold: true, Color: th.Accent}.Layout(gtx, th, time)
 			}))
 	})
 }
@@ -201,7 +201,7 @@ func miniHead(gtx layout.Context, th *Theme, name, time string, see *widget.Clic
 			}),
 			layout.Rigid(layout.Spacer{Width: 8}.Layout),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 11, Color: th.Accent}.Layout(gtx, th, time)
+				return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 11, FakeBold: true, Color: th.Accent}.Layout(gtx, th, time)
 			}),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 				return layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -273,7 +273,7 @@ func heroBody(gtx layout.Context, th *Theme, total, month float64, weekly []floa
 					}
 					return layout.Inset{Left: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return card(gtx, th.Tag, th.Tag, 20, layout.Inset{Top: 2, Bottom: 2, Left: 9, Right: 9}, 0, func(gtx layout.Context) layout.Dimensions {
-							return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 11.5, Color: th.Accent}.Layout(gtx, th, "+"+core.FormatDuration(month)+" this month")
+							return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 11.5, FakeBold: true, Color: th.Accent}.Layout(gtx, th, "+"+core.FormatDuration(month)+" this month")
 						})
 					})
 				}))

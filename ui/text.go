@@ -31,8 +31,12 @@ type Text struct {
 	Tracking float32
 	Upper    bool
 	// MaxLines truncates with "…" when exceeded; 0 means no limit.
-	// Ignored for tracked text.
+	// Ignored for tracked and bold text.
 	MaxLines int
+	// FakeBold thickens the glyphs the way browsers do when CSS asks for
+	// a weight (600) the loaded font lacks: the prototype's bold times
+	// and labels are DM Sans / Lora Medium drawn this way. One line only.
+	FakeBold bool
 }
 
 // Layout draws s and returns its size.
@@ -47,7 +51,7 @@ func (t Text) Layout(gtx layout.Context, th *Theme, s string) layout.Dimensions 
 
 	rec = op.Record(gtx.Ops)
 	var dims layout.Dimensions
-	if t.Tracking != 0 {
+	if t.Tracking != 0 || t.FakeBold {
 		dims = t.layoutTracked(gtx, th, s, material)
 	} else {
 		dims = widget.Label{MaxLines: t.MaxLines}.Layout(gtx, th.Shaper, t.Font, t.Size, s, material)
@@ -71,7 +75,8 @@ func (t Text) Layout(gtx layout.Context, th *Theme, s string) layout.Dimensions 
 	}
 }
 
-// layoutTracked draws one line of s with letter-spacing. Gio has no
+// layoutTracked draws one line of s with letter-spacing (and fake bold).
+// Gio has no
 // letter-spacing, so we shape the line once and push each character right,
 // keeping the font's own kerning. Like CSS, space follows every character,
 // including the last.
@@ -102,10 +107,22 @@ func (t Text) layoutTracked(gtx layout.Context, th *Theme, s string, material op
 
 	// Shape positions glyphs relative to the first one.
 	st := op.Affine(f32.AffineId().Offset(f32.Pt(0, float32(ascent)))).Push(gtx.Ops)
-	outline := clip.Outline{Path: th.Shaper.Shape(glyphs)}.Op().Push(gtx.Ops)
+	path := th.Shaper.Shape(glyphs)
+	outline := clip.Outline{Path: path}.Op().Push(gtx.Ops)
 	material.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 	outline.Pop()
+	if t.FakeBold {
+		// Chrome (Skia) strokes the outline by size × a ratio that goes
+		// from 1/24 at 9px to 1/32 at 36px; advances don't change.
+		px := float32(t.Size)
+		k := min(max((px-9)/27, 0), 1)
+		ratio := 1.0/24 + k*(1.0/32-1.0/24)
+		stroke := clip.Stroke{Path: path, Width: gtx.Metric.PxPerSp * px * ratio}.Op().Push(gtx.Ops)
+		material.Add(gtx.Ops)
+		paint.PaintOp{}.Add(gtx.Ops)
+		stroke.Pop()
+	}
 	st.Pop()
 	return layout.Dimensions{Size: image.Pt(width, ascent+descent), Baseline: descent}
 }
@@ -152,4 +169,38 @@ func colorOp(gtx layout.Context, c color.NRGBA) op.CallOp {
 	rec := op.Record(gtx.Ops)
 	paint.ColorOp{Color: c}.Add(gtx.Ops)
 	return rec.Stop()
+}
+
+// outlinedText draws one line of s filled with fill and outlined with a
+// stroke of width px centred on the glyph edges, as SVG text with both
+// fill and stroke draws.
+func outlinedText(gtx layout.Context, th *Theme, f font.Font, size unit.Sp, s string, fill, stroke color.NRGBA, width float32) layout.Dimensions {
+	th.Shaper.LayoutString(text.Parameters{
+		Font:     f,
+		PxPerEm:  fixed.I(gtx.Sp(size)),
+		MaxLines: 1,
+		MaxWidth: math.MaxInt32,
+		Locale:   gtx.Locale,
+	}, s)
+	var glyphs []text.Glyph
+	for g, ok := th.Shaper.NextGlyph(); ok; g, ok = th.Shaper.NextGlyph() {
+		glyphs = append(glyphs, g)
+	}
+	if len(glyphs) == 0 {
+		return layout.Dimensions{}
+	}
+	first, last := glyphs[0], glyphs[len(glyphs)-1]
+	w := (last.X + last.Advance - first.X).Ceil()
+	ascent, descent := first.Ascent.Ceil(), first.Descent.Ceil()
+	defer op.Affine(f32.AffineId().Offset(f32.Pt(0, float32(ascent)))).Push(gtx.Ops).Pop()
+	path := th.Shaper.Shape(glyphs)
+	area := clip.Outline{Path: path}.Op().Push(gtx.Ops)
+	paint.ColorOp{Color: fill}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
+	area.Pop()
+	area = clip.Stroke{Path: path, Width: width}.Op().Push(gtx.Ops)
+	paint.ColorOp{Color: stroke}.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
+	area.Pop()
+	return layout.Dimensions{Size: image.Pt(w, ascent+descent), Baseline: descent}
 }

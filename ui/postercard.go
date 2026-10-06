@@ -227,7 +227,7 @@ func (c *finishedCard) Layout(gtx layout.Context, a *App, e *core.Entry, showTim
 					return layout.Dimensions{}
 				}
 				return layout.Inset{Top: 2}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return Text{Font: font.Font{Typeface: Sans, Weight: font.SemiBold}, Size: 9.5, Color: th.Accent}.Layout(gtx, th,
+					return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 9.5, FakeBold: true, Color: th.Accent}.Layout(gtx, th,
 						core.FormatDurationOrZero(a.timeIndex().Total(e.ID)))
 				})
 			}),
@@ -326,9 +326,10 @@ func liftOnPress(gtx layout.Context, th *Theme, c *widget.Clickable, radius unit
 }
 
 // The prototype's .prog-ring asks for 28px, but the general `.oc-ph svg`
-// rule wins and draws it at 26px and 70% opacity. We match what's on screen,
-// except the label: that same rule also outlines the text in the muted
-// colour, which makes it muddy, so ours stays crisp white.
+// rule wins and draws it at 26px and 70% opacity. That rule also outlines
+// the white label in the muted colour, thick enough to cover the white,
+// so it reads as bold brown. The owner likes that, so we draw it solid
+// muted with the same 1.3-unit outline.
 const ringSize unit.Dp = 26
 
 // progressRing draws the white ring with the percentage in the middle.
@@ -345,7 +346,8 @@ func progressRing(gtx layout.Context, th *Theme, pct int) layout.Dimensions {
 	rec := op.Record(gtx.Ops)
 	lgtx := gtx
 	lgtx.Constraints = layout.Constraints{Max: image.Pt(size, size)}
-	d := Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: unit.Sp(7 * float32(ringSize) / 28), Color: white}.Layout(lgtx, th, fmt.Sprintf("%d%%", pct))
+	d := outlinedText(lgtx, th, font.Font{Typeface: Sans, Weight: font.Medium}, unit.Sp(7*float32(ringSize)/28), fmt.Sprintf("%d%%", pct),
+		th.Muted, th.Muted, 1.3*px)
 	call := rec.Stop()
 	st := op.Offset(image.Pt((size-d.Size.X)/2, (size-d.Size.Y)/2)).Push(gtx.Ops)
 	call.Add(gtx.Ops)

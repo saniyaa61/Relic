@@ -164,7 +164,7 @@ func feelingsCard(gtx layout.Context, th *Theme, d core.MoodData) layout.Dimensi
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints = layout.Constraints{Min: image.Pt(gtx.Dp(24), 0), Max: image.Pt(gtx.Dp(24), gtx.Constraints.Max.Y)}
 					return layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 12, Color: th.Accent}.Layout(gtx, th, strconv.Itoa(t.Total))
+						return Text{Font: font.Font{Typeface: Sans, Weight: font.Medium}, Size: 12, FakeBold: true, Color: th.Accent}.Layout(gtx, th, strconv.Itoa(t.Total))
 					})
 				}))
 		})

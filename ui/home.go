@@ -261,7 +261,7 @@ func (h *homePage) memoryCard(gtx layout.Context, a *App, e *core.Entry) layout.
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions { return IconClock.Layout(gtx, 13, 2, th.Accent) }),
 								layout.Rigid(layout.Spacer{Width: 6}.Layout),
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-									return Text{Font: font.Font{Typeface: Serif, Weight: font.Medium}, Size: 10, Tracking: 0.08, Upper: true, Color: th.Accent}.Layout(gtx, th, "One year ago today")
+									return Text{Font: font.Font{Typeface: Serif, Weight: font.Medium}, Size: 10, FakeBold: true, Tracking: 0.08, Upper: true, Color: th.Accent}.Layout(gtx, th, "One year ago today")
 								}))
 						})
 					}),

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -33,9 +34,14 @@ func FormatDurationOrZero(mins float64) string {
 }
 
 func oneDecimal(v float64, one, many string) string {
-	// Halves round up, as the prototype's toFixed does (6.25 → "6.3"),
-	// not to even.
-	s := strconv.FormatFloat(math.Floor(v*10+0.5)/10, 'f', 1, 64)
+	// Like the prototype's toFixed: round the exact value, but an exact
+	// half (6.25) goes up ("6.3"), where Go would round it to even.
+	s := strconv.FormatFloat(v, 'f', 1, 64)
+	// 60 places show a float64 of this size exactly.
+	_, frac, _ := strings.Cut(new(big.Float).SetFloat64(v).Text('f', 60), ".")
+	if frac[1] == '5' && strings.Trim(frac[2:], "0") == "" {
+		s = strconv.FormatFloat(v+0.05, 'f', 1, 64)
+	}
 	s = strings.TrimSuffix(s, ".0")
 	if s == "1" {
 		return s + " " + one
