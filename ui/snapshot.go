@@ -18,7 +18,8 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
 	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
 	"digest-prev", "digest-week", "digest-year", "digest-year-peak", "digest-year-flat", "moods", "digest-empty",
-	"yearcard", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
+	"onboarding", "settings", "settings-custom", "settings-custom-own", "settings-custom-plain", "settings-dark", "settings-colour",
+	"settings-import", "settings-clear", "yearcard", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
@@ -87,11 +88,33 @@ func (a *App) ShowForSnapshot(screen string) error {
 			}
 		}
 		showYearCard(a, yc.Year, yearcard.Render(yc, cardColors(a.Theme), posters))
+	case "settings", "settings-custom", "settings-custom-own", "settings-custom-plain", "settings-dark",
+		"settings-colour", "settings-import", "settings-clear":
+		p := &settingsPage{}
+		a.Push(p)
+		prof := a.Lib.Profile
+		switch screen {
+		case "settings-custom", "settings-custom-own", "settings-custom-plain", "settings-colour":
+			a.SetTheme("custom", prof.Mode, defaultCustomBase, defaultCustomAccent)
+			customTile = map[string]customTileStyle{"settings-custom-own": tileOwn, "settings-custom-plain": tilePlain}[screen]
+			if screen == "settings-colour" {
+				openColourDialog(a, "Accent color", defaultCustomAccent, func(string) {})
+			}
+		case "settings-dark":
+			a.SetTheme("linen", "dark", "", "")
+		case "settings-import":
+			a.ShowDialog(ConfirmDialog("Import this archive?", "Your current data will be replaced.", "Cancel", "Import", func(*App) {}))
+		case "settings-clear":
+			confirmClearAll(a)
+		}
+	case "onboarding":
+		a.Lib.Categories, a.Lib.Entries, a.Lib.Profile.Name = nil, nil, ""
+		a.StartOnboarding()
 	case "moods":
 		a.Go(TabDigest)
 		a.Push(&moodsPage{})
 	case "subpage", "search":
-		p := &themePreview{}
+		p := newPosterPage(pageAllEntries)
 		a.Push(p)
 		if screen == "search" {
 			p.search.Toggle(a)

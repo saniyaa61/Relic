@@ -66,7 +66,7 @@ Build in this order, checking each against the prototype side by side:
 6. Digest (week / month / year), Mood Trends. (Built.)
 7. Consumed and its folder pages. (Built.)
 8. Year in Review image + share sheet. (Built: image, preview, Save image. Share moves to Phase 4, owner's choice.)
-9. Settings, export / import, onboarding.
+9. Settings, export / import, onboarding. (Built.)
 
 **Done when:** every screen in SPEC §5 works on Android with imported real data, in at least Linen light and one dark theme.
 

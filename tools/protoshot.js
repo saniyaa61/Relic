@@ -2,7 +2,7 @@
 // for side-by-side checks against cmd/snapshot. Uses the bundled fonts
 // (Google Fonts may be unreachable) and the pre-installed Chromium.
 //
-//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest|consumed|yearcard]
+//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest|consumed|yearcard|settings]
 //
 // HEIGHT=1900 for a taller window (long forms). NOW=2026-09-29T09:00:00Z fixes the clock. MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
@@ -90,6 +90,12 @@ const shots = {
     ['yearcard', async () => (await renderYearCardCanvas(2026)).canvas.toDataURL('image/png')],
     ['yearcard-preview', async () => { nav('digest'); setDigestPeriod('year'); await openYearCard(); }],
     ['yearcard-dark', async () => { document.body.className = document.body.className.replace('-light', '-dark'); return (await renderYearCardCanvas(2026)).canvas.toDataURL('image/png'); }],
+  ],
+  settings: [
+    ['settings', () => openSettingsSheet()],
+    ['settings-custom', () => { setTheme('custom'); renderSettingsPage(); }],
+    ['settings-dark', () => { setTheme('linen'); setMode('dark'); renderSettingsPage(); }],
+    ['onboarding', () => { setMode('light'); showOnboarding(); }],
   ],
   library: [
     ['lib-root', () => nav('library')],

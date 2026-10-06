@@ -3,8 +3,6 @@ package main
 
 import (
 	"errors"
-	"flag"
-	"fmt"
 	"image/color"
 	"io"
 	"log"
@@ -18,21 +16,11 @@ import (
 	"gioui.org/op"
 	"gioui.org/x/explorer"
 
-	"github.com/saniyaa61/relic/importer"
 	"github.com/saniyaa61/relic/store"
 	"github.com/saniyaa61/relic/ui"
 )
 
-// importPath is a temporary, desktop-only way to load the prototype
-// archive until Settings has Import (Phase 3 step 9):
-//
-//	go run ./cmd/relic -import C:/Users/saniy/Downloads/relic-archive.json
-//
-// It replaces everything in the app's database, keeping the light/dark mode.
-var importPath = flag.String("import", "", "replace the app's data with this prototype archive (relic-archive.json)")
-
 func main() {
-	flag.Parse()
 	go func() {
 		w := new(app.Window)
 		w.Option(app.Title("Relic"), app.Size(400, 800))
@@ -92,11 +80,6 @@ func run(w *app.Window) error {
 		return err
 	}
 	posters := filepath.Join(dir, "posters")
-	if *importPath != "" {
-		if err := importArchive(db, *importPath, posters); err != nil {
-			return fmt.Errorf("import %s: %w", *importPath, err)
-		}
-	}
 	lib, err := db.Load()
 	if err != nil {
 		return err
@@ -114,11 +97,12 @@ func run(w *app.Window) error {
 	}
 	a := ui.NewApp(th, lib, db)
 	a.PosterDir = posters
+	a.StartOnboarding()
 	expl := explorer.NewExplorer(w)
-	a.ChooseImage = func() (io.ReadCloser, error) {
-		rc, err := expl.ChooseFile(".jpg", ".jpeg", ".png", ".webp", ".gif")
+	a.ChooseFile = func(extensions ...string) (io.ReadCloser, error) {
+		rc, err := expl.ChooseFile(extensions...)
 		if errors.Is(err, explorer.ErrUserDecline) {
-			return nil, ui.ErrNoPicture
+			return nil, ui.ErrNoFile
 		}
 		return rc, err
 	}
@@ -147,39 +131,4 @@ func run(w *app.Window) error {
 			e.Frame(gtx.Ops)
 		}
 	}
-}
-
-// importArchive replaces the database's contents with a prototype archive,
-// keeping the current light/dark mode (owner's decision) and writing the
-// posters beside the database.
-func importArchive(db *store.DB, path, posters string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	res, err := importer.Read(f, time.Now())
-	if err != nil {
-		return err
-	}
-	current, err := db.Load()
-	if err != nil {
-		return err
-	}
-	res.KeepMode(current.Profile)
-	if err := store.WritePosters(posters, res.Posters); err != nil {
-		return err
-	}
-	if err := db.ReplaceAll(res.Library); err != nil {
-		return err
-	}
-	if err := store.RemoveUnusedPosters(posters, res.Library); err != nil {
-		return err
-	}
-	r := res.Report
-	log.Printf("relic: imported %d categories, %d entries, %d posters from %s", r.Categories, r.Entries, r.Posters, path)
-	for _, w := range r.Warnings {
-		log.Printf("relic: import note: %s", w)
-	}
-	return nil
 }

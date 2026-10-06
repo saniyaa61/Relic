@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 8 (Year in Review image).
+Last updated: 2026-10-06, after Phase 3 step 9 (Settings, archive, onboarding).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 8 (Year in Review image).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Steps 1–8 done (Year card: Save image now, Share in Phase 4). Next: step 9 (Settings, export / import, onboarding). |
+| 3 Screens | **All 9 steps built.** Waiting on the owner's Windows check of step 9 and two Custom-theme choices; then the Phase 3 "Done when" check on Android (needs CI running again, see CI notes). |
 
 ## What exists
 
@@ -33,7 +33,7 @@ Last updated: 2026-10-06, after Phase 3 step 8 (Year in Review image).
 - `ui/` step 7: `consumed.go` (Consumed, from Home's chip: the "All time, all worlds" hero with the total, "+X this month", the perspective line, the last-8-weeks sparkline and the category share bar; each category with its time, each folder with its time, "See all" and a row of up to 4 cards showing time; search across the library; the folder page "Category · Time spent" with all its entries and its own search). `core.Library.ConsumedFolder` lists a folder group; folders now group by the category's own spelling (case-insensitive). Durations round like the prototype's toFixed (exact halves up: 6.25 hrs → "6.3 hrs"; 61.65 → "61.6").
 - Durations drop a trailing ".0" ("51 hrs", not the prototype's "51.0 hrs"): the owner chose to keep this.
 - Step 8: `yearcard/` draws the 1080 × 1350 Year in Review PNG in plain Go (x/image: opentype text with the bundled fonts and the symbols fallback, vector shapes), laid out exactly as the prototype's `renderYearCardCanvas`; `core.Library.YearCard` gathers its data. `ui/yearcard.go`: "Share your year" → "Making your card…" → preview dialog (`Dialog.Wide`, `KeepOpen`) with Close / Save image; Save uses `App.CreateFile` (gioui.org/x/explorer's save dialog on Windows, Android and iOS); a cancelled save does nothing. `go test ./yearcard` with `YEARCARD_OUT=build/card.png` writes the card from the test archive; `tools/protoshot.js … yearcard` saves the prototype's canvas for comparison.
-- `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
+- Step 9: `archive/` writes and reads `relic-archive.json` (versioned, the whole library with posters inside; Read also takes a prototype export through the importer). `ui/settings.go`: Settings from the Home gear (theme tiles, Custom colours, light/dark, name edit, archive started, Export / Import archive, Clear all data asked twice); `App.replaceLibrary` / `clearAll` / `restart`. `ui/customtheme.go`: the Custom tile (three looks behind `customTile`) and the colour dialog (swatches + hex). `ui/onboarding.go`: first-launch welcome (`App.StartOnboarding`, called from `cmd/relic`). `App.ChooseFile(exts...)` replaces `ChooseImage`. The temporary `-import` flag and `preview.go` are gone: real data now goes in through Settings → Import archive. `Text.FakeItalic` slants DM Sans like the browser's synthetic italic ("Clear all data").
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
 
@@ -79,7 +79,8 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-None right now.
+1. **Custom theme tile.** The prototype's tile is a rainbow gradient with 🎨. Built three looks (sheet `s9-3-custom-tile.png`, switched by `customTile` in `customtheme.go`): **A rainbow + 🎨 (current, like the prototype)**, B the user's own custom colours like the other tiles, C plain with 🎨.
+2. **Custom colour picker.** The prototype used the browser's colour picker, which doesn't exist here. Built: tap a colour square → a dialog with 18 swatches (the themes' own colours and a few more) and a hex code field. Alternative if the owner wants finer control: hue and shade sliders.
 
 ## The owner's real data
 
@@ -93,6 +94,7 @@ None right now.
 
 - Jobs: vet+test (Linux, installs Gio's X11/Wayland libs), Android APK, Android emulator run (screenshot + checks the log for `relic: store ok, launch 1/2`), iOS simulator run on an Intel Mac (same check).
 - Emulator and simulator launches used fixed pauses and failed now and then on slow cloud machines (most recently the iOS step on 2026-10-06: the simulator took ~3 min to boot). They now wait up to 3 minutes for the app's "store ok" log line instead. If a launch step still fails, read its log before calling it a flake.
+- **Since step 4 (2026-10-06) every run fails within ~3 s on all jobs with no logs**: GitHub isn't starting the jobs (most likely the private repo's free Actions minutes ran out; macOS minutes count 10×). Asked the owner to read the note on the run page. Code checks pass locally (`go vet`, `go test`, Windows build, Android/iOS compile of the pure packages).
 - Download results from the run's Artifacts section: `relic-apk`, `emulator-screenshots`, `ios-screenshots`.
 
 ## How the owner checks each step (Windows)
@@ -109,6 +111,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 9: Settings (SPEC §5 "Settings", §8 archive), export / import, onboarding (prototype `renderSettings`, `renderOnboarding`). Replace `themePreview` in `preview.go` (Home gear) and remove the temporary `cmd/relic -import` flag once import is in Settings. Export writes `relic-archive.json` with posters (use `App.CreateFile`); import reads one (`App.ChooseImage`'s picker pattern with `.json`). 🎨 in Settings uses `ui.Emoji` (same as the streak flame).
+2. Phase 3 is built. Next: the owner's Windows check of Settings / import / onboarding with real data, the two Custom-theme answers, then the "Done when" check (every SPEC §5 screen on Android with real data, Linen light and one dark theme) via CI's emulator screenshots, which needs Actions running again. Then Phase 4 (iOS; the Year card's Share).
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

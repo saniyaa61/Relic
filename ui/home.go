@@ -70,7 +70,7 @@ func (h *homePage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 	th := a.Theme
 	lib := a.Lib
 	if h.settings.Click.Clicked(gtx) {
-		a.Push(&themePreview{})
+		a.Push(&settingsPage{})
 	}
 	if h.add.Clicked(gtx) {
 		a.Go(TabNew)
@@ -173,14 +173,14 @@ func (h *homePage) greeting(gtx layout.Context, a *App, sub string, streak bool,
 				greet := core.Greeting(now, a.Loc)
 				name := strings.TrimSpace(a.Lib.Profile.Name)
 				return richLine(gtx, th, 26, 1.2, []textRun{
-					{greet, font.Font{Typeface: Display, Weight: font.Medium}, th.Text},
+					{greet, font.Font{Typeface: Display, Weight: font.Medium}, th.Text, false},
 					{func() string {
 						if name == "" {
 							return ""
 						}
 						return ", "
-					}(), font.Font{Typeface: Display, Weight: font.Medium}, th.Text},
-					{name, font.Font{Typeface: Display, Weight: font.Medium, Style: font.Italic}, th.Accent},
+					}(), font.Font{Typeface: Display, Weight: font.Medium}, th.Text, false},
+					{name, font.Font{Typeface: Display, Weight: font.Medium, Style: font.Italic}, th.Accent, false},
 				})
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -469,9 +469,10 @@ func (p *posterPage) cardRows(a *App, es []*core.Entry) []layout.Widget {
 
 // textRun is one styled piece of a richLine.
 type textRun struct {
-	s     string
-	font  font.Font
-	color colorNRGBA
+	s        string
+	font     font.Font
+	color    colorNRGBA
+	fakeBold bool
 }
 
 // richLine lays out runs one after another on a baseline, wrapping whole
@@ -488,7 +489,7 @@ func richLine(gtx layout.Context, th *Theme, size, lineHeight float32, runs []te
 			continue
 		}
 		rec := op.Record(gtx.Ops)
-		d := Text{Font: r.font, Size: unitSp(size), LineHeight: lineHeight, Color: r.color}.Layout(cgtx, th, r.s)
+		d := Text{Font: r.font, Size: unitSp(size), LineHeight: lineHeight, FakeBold: r.fakeBold, Color: r.color}.Layout(cgtx, th, r.s)
 		call := rec.Stop()
 		if x > 0 && x+d.Size.X > maxW {
 			x, y = 0, y+lineH

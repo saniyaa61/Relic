@@ -58,10 +58,11 @@ type App struct {
 	// snapshots and tests.
 	Now func() time.Time
 	Loc *time.Location
-	// ChooseImage, if set, asks the system for a picture file (the
-	// platform's file picker; it blocks until the user chooses or
-	// cancels). Invalidate asks for a new frame from another goroutine.
-	ChooseImage func() (io.ReadCloser, error)
+	// ChooseFile, if set, asks the system for a file with one of the
+	// extensions (the platform's file picker; it blocks until the user
+	// chooses or cancels, which returns ErrNoFile). Invalidate asks for a
+	// new frame from another goroutine.
+	ChooseFile func(extensions ...string) (io.ReadCloser, error)
 	// CreateFile, if set, asks where to save a new file called name (the
 	// platform's save dialog; it blocks). Cancelling returns ErrNoFile.
 	CreateFile func(name string) (io.WriteCloser, error)
@@ -95,14 +96,19 @@ type App struct {
 func NewApp(th *Theme, lib *core.Library, db *store.DB) *App {
 	a := &App{Theme: th, Lib: lib, DB: db, Now: time.Now, Loc: time.Local}
 	th.Palette = PaletteFor(lib.Profile)
-	a.roots = [tabCount]Screen{
+	a.roots = newRoots()
+	return a
+}
+
+// newRoots is every tab's page, fresh.
+func newRoots() [tabCount]Screen {
+	return [tabCount]Screen{
 		TabHome:      &homePage{},
 		TabLibrary:   &libraryRoot{},
 		TabNew:       newEntryPage(),
 		TabFavorites: &favoritesPage{},
 		TabDigest:    newDigestPage(),
 	}
-	return a
 }
 
 // Tab returns the current tab.
@@ -262,23 +268,20 @@ func (a *App) runAsync() {
 	}
 }
 
-// ErrNoPicture is what ChooseImage returns when the user cancels.
-var ErrNoPicture = errors.New("no picture chosen")
-
-// ErrNoFile is what CreateFile returns when the user cancels.
+// ErrNoFile is what ChooseFile and CreateFile return when the user cancels.
 var ErrNoFile = errors.New("no file chosen")
 
 // pickPoster lets the user choose a picture, resizes it to a stored
 // poster file and calls done with its file name.
 func (a *App) pickPoster(done func(name string)) {
-	if a.ChooseImage == nil || a.PosterDir == "" {
+	if a.ChooseFile == nil || a.PosterDir == "" {
 		a.ToastError("Choosing a picture isn't available here yet.")
 		return
 	}
 	dir := a.PosterDir
 	a.background(func() func(*App) {
-		rc, err := a.ChooseImage()
-		if errors.Is(err, ErrNoPicture) {
+		rc, err := a.ChooseFile(".jpg", ".jpeg", ".png", ".webp", ".gif")
+		if errors.Is(err, ErrNoFile) {
 			return nil
 		}
 		fail := func(err error) func(*App) {

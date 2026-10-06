@@ -155,10 +155,15 @@ type InputStyle struct {
 	Multiline  bool
 	MinHeight  unit.Dp
 	LineHeight float32
+	// Center centres the text and placeholder (single line only).
+	Center bool
 }
 
 func (in *Input) Layout(gtx layout.Context, th *Theme, s InputStyle) layout.Dimensions {
 	in.Editor.SingleLine = !s.Multiline
+	if s.Center {
+		in.Editor.Alignment = textMiddle
+	}
 	f := s.Font
 	if f.Typeface == "" {
 		f.Typeface = Sans
@@ -184,7 +189,14 @@ func (in *Input) Layout(gtx layout.Context, th *Theme, s InputStyle) layout.Dime
 			if s.Multiline {
 				Paragraph{Font: f, Size: s.Size, LineHeight: s.LineHeight, Color: withAlpha(th.Muted, s.PlaceholderAlpha)}.Layout(pgtx, th, s.Placeholder)
 			} else {
-				Text{Font: f, Size: s.Size, MaxLines: 1, Color: withAlpha(th.Muted, s.PlaceholderAlpha)}.Layout(pgtx, th, s.Placeholder)
+				d := Text{Font: f, Size: s.Size, MaxLines: 1, Color: withAlpha(th.Muted, s.PlaceholderAlpha)}.Layout(pgtx, th, s.Placeholder)
+				if s.Center {
+					ph := rec.Stop()
+					rec = op.Record(gtx.Ops)
+					st := op.Offset(image.Pt((gtx.Constraints.Max.X-d.Size.X)/2, 0)).Push(gtx.Ops)
+					ph.Add(gtx.Ops)
+					st.Pop()
+				}
 			}
 			ph := rec.Stop()
 			defer ph.Add(gtx.Ops)

@@ -37,6 +37,9 @@ type Text struct {
 	// a weight (600) the loaded font lacks: the prototype's bold times
 	// and labels are DM Sans / Lora Medium drawn this way. One line only.
 	FakeBold bool
+	// FakeItalic slants upright glyphs the way browsers do for italic
+	// text in a font without an italic (DM Sans here). One line only.
+	FakeItalic bool
 }
 
 // Layout draws s and returns its size.
@@ -51,7 +54,7 @@ func (t Text) Layout(gtx layout.Context, th *Theme, s string) layout.Dimensions 
 
 	rec = op.Record(gtx.Ops)
 	var dims layout.Dimensions
-	if t.Tracking != 0 || t.FakeBold {
+	if t.Tracking != 0 || t.FakeBold || t.FakeItalic {
 		dims = t.layoutTracked(gtx, th, s, material)
 	} else {
 		dims = widget.Label{MaxLines: t.MaxLines}.Layout(gtx, th.Shaper, t.Font, t.Size, s, material)
@@ -106,7 +109,13 @@ func (t Text) layoutTracked(gtx layout.Context, th *Theme, s string, material op
 	ascent, descent := first.Ascent.Ceil(), first.Descent.Ceil()
 
 	// Shape positions glyphs relative to the first one.
-	st := op.Affine(f32.AffineId().Offset(f32.Pt(0, float32(ascent)))).Push(gtx.Ops)
+	tr := f32.AffineId()
+	if t.FakeItalic {
+		// Skia's fake italic: x shifts by a quarter of the height above
+		// the baseline.
+		tr = tr.Shear(f32.Point{}, -float32(math.Atan(0.25)), 0)
+	}
+	st := op.Affine(tr.Offset(f32.Pt(0, float32(ascent)))).Push(gtx.Ops)
 	path := th.Shaper.Shape(glyphs)
 	outline := clip.Outline{Path: path}.Op().Push(gtx.Ops)
 	material.Add(gtx.Ops)

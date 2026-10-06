@@ -60,7 +60,7 @@ func TestBackOrder(t *testing.T) {
 
 	// A sub-page with its search open: the first back closes the search
 	// and stays on the page (SPEC §4.9), the second leaves the page.
-	p := &themePreview{}
+	p := newPosterPage(pageAllEntries)
 	a.Push(p)
 	p.search.Toggle(a)
 	p.search.input.Editor.SetText("dune")
@@ -80,7 +80,7 @@ func TestBackOrder(t *testing.T) {
 	}
 
 	// A dialog closes before anything else.
-	a.Push(&themePreview{})
+	a.Push(newPosterPage(pageAllEntries))
 	a.ShowDialog(ConfirmDialog("Delete this entry?", "", "", "", func(*App) {}))
 	a.Back()
 	if len(a.stack) != 1 {
@@ -99,7 +99,7 @@ func TestBackOrder(t *testing.T) {
 
 func TestGoClearsSubPages(t *testing.T) {
 	a, _ := testApp(t, nil)
-	a.Push(&themePreview{})
+	a.Push(newPosterPage(pageAllEntries))
 	a.Go(TabLibrary)
 	if len(a.stack) != 0 || a.Tab() != TabLibrary {
 		t.Fatalf("Go(Library): %d sub-pages, tab %v", len(a.stack), a.Tab())
@@ -214,7 +214,7 @@ func TestWindowColorsFollowTheme(t *testing.T) {
 	a.OnWindowColors = func(s, n color.NRGBA) { status = append(status, hex(s)); nav = append(nav, hex(n)) }
 	frame(a)
 	frame(a) // unchanged: no second call
-	a.Push(&themePreview{})
+	a.Push(newPosterPage(pageAllEntries))
 	frame(a)
 	a.SetTheme("linen", "dark", "", "")
 	frame(a)
@@ -303,7 +303,7 @@ func TestSystemBackKey(t *testing.T) {
 		t.Error("after returning Home, back should go to the system again")
 	}
 	// Escape does the same on desktop.
-	a.Push(&themePreview{})
+	a.Push(newPosterPage(pageAllEntries))
 	run()
 	r.Queue(key.Event{Name: key.NameEscape})
 	run()

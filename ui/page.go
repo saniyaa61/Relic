@@ -85,20 +85,6 @@ func wideButton(gtx layout.Context, th *Theme, c *widget.Clickable, ic *Icon, la
 	})
 }
 
-// pill is the prototype's .stab: a rounded outline chip that fills with
-// the accent colour when selected.
-func pill(gtx layout.Context, th *Theme, c *widget.Clickable, label string, on bool) layout.Dimensions {
-	bg, fg, border := th.Bg, th.Muted, th.Border
-	if on {
-		bg, fg, border = th.Accent, th.BtnText, th.Accent
-	}
-	return pressable(gtx, c, func(gtx layout.Context) layout.Dimensions {
-		return card(gtx, bg, border, 20, layout.Inset{Top: 5, Bottom: 5, Left: 13, Right: 13}, 0, func(gtx layout.Context) layout.Dimensions {
-			return Text{Font: font.Font{Typeface: Sans}, Size: 12, Color: fg}.Layout(gtx, th, label)
-		})
-	})
-}
-
 // flow lays children out left to right, wrapping onto new rows, with gap
 // dp between them both ways (CSS flex-wrap with gap).
 func flow(gtx layout.Context, gap int, children []layout.Widget) layout.Dimensions {
