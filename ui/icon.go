@@ -372,3 +372,25 @@ func (ic *Icon) Layout(gtx layout.Context, size unit.Dp, strokeW float32, c colo
 	paint.FillShape(gtx.Ops, c, clip.Stroke{Path: p.End(), Width: strokeW * s}.Op())
 	return layout.Dimensions{Size: image.Pt(px, px)}
 }
+
+// Fill paints the icon's shapes solid (a filled heart, say), at size dp.
+func (ic *Icon) Fill(gtx layout.Context, size unit.Dp, c color.NRGBA) layout.Dimensions {
+	px := gtx.Dp(size)
+	s := float32(px) / 24
+	var p clip.Path
+	p.Begin(gtx.Ops)
+	for _, sg := range ic.segs {
+		switch sg.op {
+		case 'M':
+			p.MoveTo(sg.pts[0].Mul(s))
+		case 'L':
+			p.LineTo(sg.pts[0].Mul(s))
+		case 'C':
+			p.CubeTo(sg.pts[0].Mul(s), sg.pts[1].Mul(s), sg.pts[2].Mul(s))
+		case 'Z':
+			p.Close()
+		}
+	}
+	paint.FillShape(gtx.Ops, c, clip.Outline{Path: p.End()}.Op())
+	return layout.Dimensions{Size: image.Pt(px, px)}
+}

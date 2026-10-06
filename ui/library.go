@@ -607,19 +607,3 @@ func nameError(a *App, err error, taken string) {
 	}
 	a.ToastError(err.Error())
 }
-
-// ---------- Entry placeholder (the real page is step 3) ----------
-
-type entryPlaceholder struct {
-	entry *core.Entry
-	back  IconButton
-	list  widget.List
-}
-
-func (p *entryPlaceholder) Layout(gtx layout.Context, a *App) layout.Dimensions {
-	return scrollPage(gtx, &p.list, []layout.Widget{
-		func(gtx layout.Context) layout.Dimensions { return subBar(gtx, a, &p.back, nil) },
-	}, []layout.Widget{func(gtx layout.Context) layout.Dimensions {
-		return pageHead(gtx, a.Theme, "Entry", p.entry.Title, "The entry page — your words, your journey — arrives in step 3.")
-	}})
-}

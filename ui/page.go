@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"strconv"
 
+	"github.com/saniyaa61/relic/store"
+
 	"gioui.org/font"
 	"gioui.org/io/key"
 	"gioui.org/layout"
@@ -150,3 +152,52 @@ const keyHintNumeric = key.HintNumeric
 
 // gtxSize is the full available width at height h.
 func gtxSize(gtx layout.Context, h int) image.Point { return image.Pt(gtx.Constraints.Max.X, h) }
+
+type storeWriter = store.Writer
+
+// flowCentered is flow with each line's items centred vertically on it.
+func flowCentered(gtx layout.Context, gap int, children []layout.Widget) layout.Dimensions {
+	maxW := gtx.Constraints.Max.X
+	cgtx := gtx
+	cgtx.Constraints.Min = image.Point{}
+	type item struct {
+		call op.CallOp
+		size image.Point
+	}
+	var lines [][]item
+	var line []item
+	x := 0
+	for _, ch := range children {
+		rec := op.Record(gtx.Ops)
+		d := ch(cgtx)
+		it := item{rec.Stop(), d.Size}
+		if x > 0 && x+d.Size.X > maxW {
+			lines, line, x = append(lines, line), nil, 0
+		}
+		line = append(line, it)
+		x += d.Size.X + gap
+	}
+	if len(line) > 0 {
+		lines = append(lines, line)
+	}
+	y, w := 0, 0
+	for li, l := range lines {
+		h := 0
+		for _, it := range l {
+			h = max(h, it.size.Y)
+		}
+		x := 0
+		for _, it := range l {
+			st := op.Offset(image.Pt(x, y+(h-it.size.Y)/2)).Push(gtx.Ops)
+			it.call.Add(gtx.Ops)
+			st.Pop()
+			x += it.size.X + gap
+		}
+		w = max(w, x-gap)
+		y += h
+		if li < len(lines)-1 {
+			y += gap
+		}
+	}
+	return layout.Dimensions{Size: image.Pt(w, y)}
+}

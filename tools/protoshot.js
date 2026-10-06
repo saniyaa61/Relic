@@ -43,6 +43,17 @@ const shots = {
     ['form-podcast', () => { formState.section = sections[3].name; renderNew(); }],
     ['form-edit', () => { showDetail(entries[0].id); openEditEntry(entries[0].id); }],
   ],
+  detail: [
+    ['detail', () => showDetail(entries[0].id)],
+    ['detail-noposter', () => { const e = entries.find(x => !x.poster) || entries[0]; showDetail(e.id); }],
+    ['detail-book', () => showDetail((entries.find(x => x.type === 'book') || entries[0]).id)],
+    ['detail-film', () => showDetail((entries.find(x => x.type === 'film') || entries[0]).id)],
+    ['log-session', () => { showDetail(entries[0].id); openLogSheet(entries[0].id, 'session'); }],
+    ['log-book', () => { closeLogSheet(); const e = entries.find(x => x.type === 'book'); showDetail(e.id); openLogSheet(e.id, 'session'); }],
+    ['log-rewatch', () => { closeLogSheet(); const e = entries.find(x => x.type === 'series' && x.status === 'finished'); showDetail(e.id); openLogSheet(e.id, 'rewatch'); }],
+    ['log-edit', () => { closeLogSheet(); showDetail(entries[0].id); openLogSheet(entries[0].id, 'session', 0); }],
+    ['reached-end', () => { closeLogSheet(); const e = entries[0]; openConfirmModal({ title: 'Looks like you reached the end!', sub: `You've caught up with every bit of ${e.title}. Mark it as finished?`, confirm: 'Mark as finished', cancel: 'Not yet', onConfirm: () => {} }); }],
+  ],
   library: [
     ['lib-root', () => nav('library')],
     ['lib-new-category', () => goAddCategory()],

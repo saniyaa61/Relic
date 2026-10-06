@@ -13,7 +13,9 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"lib-menu", "lib-new-category", "lib-picker", "lib-rename", "lib-delete", "lib-search",
 	"lib-category", "lib-category-films", "lib-category-empty", "lib-new-folder", "lib-delete-folder",
 	"lib-folder", "lib-folder-search", "lib-folder-empty",
-	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar"}
+	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
+	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
+	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
 
 // ShowForSnapshot puts the app into one of SnapshotScreens with every
 // animation finished, for rendering to a PNG.
@@ -56,6 +58,9 @@ func (a *App) ShowForSnapshot(screen string) error {
 	case "toast-error":
 		a.ToastError("You already have that category")
 	default:
+		if strings.HasPrefix(screen, "detail") || strings.HasPrefix(screen, "log-") || strings.HasPrefix(screen, "reached-end") {
+			return a.detailForSnapshot(screen)
+		}
 		if strings.HasPrefix(screen, "form-") {
 			return a.formForSnapshot(screen)
 		}
@@ -148,6 +153,54 @@ func (a *App) formForSnapshot(screen string) error {
 		openCalendar(a, "Date watched", core.Date{Year: 2026, Month: 6, Day: 16}, func(core.Date) {})
 	default:
 		return fmt.Errorf("unknown screen %q", screen)
+	}
+	return nil
+}
+
+// detailForSnapshot shows entry pages and the logging sheet, using the
+// archive's entries in the prototype screenshots' order.
+func (a *App) detailForSnapshot(screen string) error {
+	es := a.Lib.Entries
+	if len(es) < 3 {
+		return fmt.Errorf("%s needs a library (use -archive)", screen)
+	}
+	find := func(keep func(*core.Entry) bool) *core.Entry {
+		for _, e := range es {
+			if keep(e) {
+				return e
+			}
+		}
+		return es[0]
+	}
+	e := es[0]
+	switch screen {
+	case "detail-noposter":
+		e = find(func(e *core.Entry) bool { return e.Poster == "" })
+		if e.Poster != "" {
+			e.Poster = ""
+		}
+	case "detail-book", "log-book":
+		e = find(func(e *core.Entry) bool { return e.Type == core.Book })
+	case "detail-film":
+		e = find(func(e *core.Entry) bool { return e.Type == core.Film })
+	case "log-rewatch", "log-rewatch-partial":
+		e = find(func(e *core.Entry) bool { return e.Type == core.Series && e.Status == core.Finished })
+	}
+	if screen == "detail-hero-prototype" {
+		detailHero = heroPrototype
+	}
+	a.Push(newEntryDetail(e.ID))
+	switch screen {
+	case "log-session", "log-book":
+		openLogSheet(a, e.ID, false, "")
+	case "log-rewatch", "log-rewatch-partial":
+		l := openLogSheet(a, e.ID, true, "")
+		l.full = screen != "log-rewatch-partial"
+	case "log-edit":
+		openLogSheet(a, e.ID, false, e.Sessions[0].ID)
+	case "reached-end", "reached-end-accent":
+		markFinishedRed = screen == "reached-end"
+		reachedEndDialog(a, e.ID)
 	}
 	return nil
 }

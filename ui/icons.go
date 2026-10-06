@@ -60,3 +60,30 @@ func typeIcon(t core.EntryType) *Icon {
 	}
 	return typeIcons[core.Other]
 }
+
+// Entry page icons (prototype renderDetail).
+var (
+	IconEdit    = IconSVG(`<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>`)
+	IconAlert   = IconSVG(`<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`)
+	IconRewatch = IconSVG(`<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>`)
+	IconPerson  = IconSVG(`<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/>`)
+	IconGlobe   = IconSVG(`<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>`)
+	IconTV      = IconSVG(`<rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/>`)
+	IconNote    = IconSVG(`<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>`)
+	IconDot     = IconSVG(`<circle cx="12" cy="12" r="10"/>`)
+
+	// heroIcons stand in for a missing poster (prototype pIcon: film for
+	// anything that isn't a series or book).
+	heroIcons = map[core.EntryType]*Icon{
+		core.Series: rowIcons[core.Series],
+		core.Book:   IconBook,
+	}
+
+	// metaIcons go with the field chips under the title.
+	metaIcons = map[string]*Icon{
+		"director": IconPerson, "language": IconGlobe, "author": IconBook,
+		"watchedDate": IconCalendar, "startDate": IconCalendar, "platform": IconTV,
+		"host": IconPerson, "creator": IconPerson, "artist": IconPerson,
+		"totalEpisodes": IconDot, "totalPages": IconDot, "tracks": IconDot,
+	}
+)

@@ -76,10 +76,13 @@ type App struct {
 	shownAt time.Time // when the current page appeared, for its fade-in
 	nav     navBar
 	dialog  *Dialog
+	sheet   *Sheet
 	toast   toast
 
 	lastStatus, lastNav color.NRGBA
 	posters             posterCache
+
+	timeIdx *core.TimeIndex // built once per frame, see timeIndex
 
 	asyncMu sync.Mutex
 	async   []func(*App)
@@ -147,6 +150,10 @@ func (a *App) Back() bool {
 		a.dialog.close(a)
 		return true
 	}
+	if a.sheet != nil && !a.sheet.closing() {
+		a.CloseSheet()
+		return true
+	}
 	if b, ok := a.top().(BackHandler); ok && b.WantsBack() {
 		b.Back(a)
 		return true
@@ -164,7 +171,7 @@ func (a *App) Back() bool {
 
 // canGoBack reports whether Back would do anything, without doing it.
 func (a *App) canGoBack() bool {
-	if a.dialog != nil || len(a.stack) > 0 || a.tab != TabHome {
+	if a.dialog != nil || a.sheet != nil || len(a.stack) > 0 || a.tab != TabHome {
 		return true
 	}
 	b, ok := a.top().(BackHandler)
@@ -292,6 +299,16 @@ func (a *App) pickPoster(done func(name string)) {
 	})
 }
 
+// timeIndex is every entry's time events, computed once per frame and
+// shared by everything that shows time (CLAUDE.md: compute time events
+// once per render).
+func (a *App) timeIndex() *core.TimeIndex {
+	if a.timeIdx == nil {
+		a.timeIdx = core.NewTimeIndex(a.Lib.Entries)
+	}
+	return a.timeIdx
+}
+
 // navShown reports whether the bottom bar shows: on the tab pages, and on
 // sub-pages that keep it (the Library's category and folder pages, as in
 // the prototype).
@@ -323,6 +340,7 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 		a.shownAt = a.Now()
 	}
 	a.runAsync()
+	a.timeIdx = nil
 	a.handleBack(gtx)
 	th := a.Theme
 	paint.Fill(gtx.Ops, th.Bg)
@@ -353,6 +371,11 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	a.layoutPage(pgtx, pageSafe)
 	cl.Pop()
 
+	if a.sheet != nil {
+		if a.sheet.Layout(gtx, a, gtx.Dp(safe.Bottom)) {
+			a.sheet = nil
+		}
+	}
 	if a.dialog != nil {
 		if a.dialog.Layout(gtx, a) {
 			a.dialog = nil

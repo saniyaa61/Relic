@@ -20,7 +20,7 @@ type entryRow struct {
 func (r *entryRow) Layout(gtx layout.Context, a *App, e *core.Entry) layout.Dimensions {
 	th := a.Theme
 	if r.click.Clicked(gtx) {
-		a.Push(&entryPlaceholder{entry: e})
+		a.Push(newEntryDetail(e.ID))
 	}
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	return r.click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {

@@ -191,7 +191,9 @@ func (f *entryForm) Layout(gtx layout.Context, a *App) layout.Dimensions {
 									"You need at least one section before adding entries. Set up your library first.")
 							})
 						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions { return bigButton(gtx, th, &f.newCat, "+ Create a category") }),
+						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+							return bigButton(gtx, th, &f.newCat, "+ Create a category")
+						}),
 					)
 				})
 			})

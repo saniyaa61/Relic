@@ -76,7 +76,7 @@ func TestEditEntryForm(t *testing.T) {
 	a, reload := libApp(t)
 	e := a.Lib.Entries[0]
 	films := a.Lib.Categories[0]
-	a.Push(&entryPlaceholder{entry: e})
+	a.Push(newEntryDetail(e.ID))
 	f := editEntryPage(a, e)
 	a.Push(f)
 	frame(a)
@@ -87,7 +87,7 @@ func TestEditEntryForm(t *testing.T) {
 	f.catID = films.ID // moving category changes the type
 	frame(a)
 	f.submit(a)
-	if _, ok := a.top().(*entryPlaceholder); !ok || a.toast.msg != "Entry updated ✦" {
+	if _, ok := a.top().(*entryDetail); !ok || a.toast.msg != "Entry updated ✦" {
 		t.Errorf("after saving an edit: top %T, toast %q", a.top(), a.toast.msg)
 	}
 	got := reload().Entry(e.ID)
