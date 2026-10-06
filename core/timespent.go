@@ -201,10 +201,7 @@ func (l *Library) ConsumedByCategory(x *TimeIndex) []CategoryTime {
 			if e.CategoryID != c.ID {
 				continue
 			}
-			f := e.Folder
-			if folderIndex(c, f) < 0 {
-				f = ""
-			}
+			f := consumedFolder(c, e)
 			g := groups[f]
 			if g == nil {
 				g = &GroupTime{Name: f}
@@ -230,6 +227,32 @@ func (l *Library) ConsumedByCategory(x *TimeIndex) []CategoryTime {
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].Minutes > out[j].Minutes })
 	return out
+}
+
+// consumedFolder is the folder an entry counts under on the Consumed page:
+// the category's own spelling of it, or "" (Uncategorised) when the entry
+// has none or its folder no longer exists.
+func consumedFolder(c *Category, e *Entry) string {
+	if i := folderIndex(c, e.Folder); i >= 0 {
+		return c.Folders[i]
+	}
+	return ""
+}
+
+// ConsumedFolder lists every entry of a Consumed folder group (time or
+// not), in library order: the "See all" page. ok is false if the category
+// is gone.
+func (l *Library) ConsumedFolder(categoryID, folder string) (entries []*Entry, ok bool) {
+	c := l.Category(categoryID)
+	if c == nil {
+		return nil, false
+	}
+	for _, e := range l.Entries {
+		if e.CategoryID == c.ID && consumedFolder(c, e) == folder {
+			entries = append(entries, e)
+		}
+	}
+	return entries, true
 }
 
 // ShareSlice is one segment of a share bar.

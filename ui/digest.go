@@ -19,8 +19,8 @@ import (
 )
 
 // yearBarStyle is how the Year digest's month bars are coloured. The
-// prototype fills every bar with an accent gradient; the owner hasn't
-// picked yet (open question in STATUS), so all three are here.
+// owner chose the prototype's gradient (A) on 2026-10-06, an agreed
+// exception to "no gradients"; the other two stay for snapshots.
 type yearBarStyle int
 
 const (
@@ -29,7 +29,7 @@ const (
 	barsFlat                         // C: flat accent, no highlight
 )
 
-var yearBars = barsPeak
+var yearBars = barsGradient
 
 var (
 	IconStar  = IconSVG(`<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`)

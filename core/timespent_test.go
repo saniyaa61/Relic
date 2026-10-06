@@ -127,6 +127,39 @@ func TestTotalsAgree(t *testing.T) {
 	}
 }
 
+// A folder named in a different case counts under the category's own
+// spelling; the "See all" page lists every entry of the group.
+func TestConsumedFolder(t *testing.T) {
+	l := newLib(t)
+	films := mustCat(t, l, "Movies", Film)
+	l.AddFolder(films.ID, "Classics")
+	a := mustEntry(t, l, films, EntryInput{Title: "a", Folder: "Classics", Fields: Fields{Duration: 100}}, t0)
+	b := mustEntry(t, l, films, EntryInput{Title: "b", Folder: "classics", Fields: Fields{Duration: 20}}, t0)
+	c := mustEntry(t, l, films, EntryInput{Title: "c", Folder: "Classics"}, t0) // no time
+	d := mustEntry(t, l, films, EntryInput{Title: "d", Folder: "Gone", Fields: Fields{Duration: 5}}, t0)
+
+	cats := l.ConsumedByCategory(NewTimeIndex(l.Entries))
+	if f := cats[0].Folders; len(f) != 2 || f[0].Name != "Classics" || f[0].Minutes != 120 {
+		t.Errorf("folders = %+v", f)
+	}
+	tests := []struct {
+		folder string
+		want   []*Entry
+	}{
+		{"Classics", []*Entry{c, b, a}}, // library order: newest first
+		{"", []*Entry{d}},
+	}
+	for _, tt := range tests {
+		got, ok := l.ConsumedFolder(films.ID, tt.folder)
+		if !ok || titles(got) != titles(tt.want) {
+			t.Errorf("%q: %s, want %s", tt.folder, titles(got), titles(tt.want))
+		}
+	}
+	if _, ok := l.ConsumedFolder("nope", ""); ok {
+		t.Error("a missing category should report !ok")
+	}
+}
+
 func TestShareBar(t *testing.T) {
 	mk := func(name string, m float64) CategoryTime {
 		return CategoryTime{Category: &Category{Name: name}, Minutes: m}

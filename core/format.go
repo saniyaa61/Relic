@@ -33,7 +33,9 @@ func FormatDurationOrZero(mins float64) string {
 }
 
 func oneDecimal(v float64, one, many string) string {
-	s := strconv.FormatFloat(v, 'f', 1, 64)
+	// Halves round up, as the prototype's toFixed does (6.25 → "6.3"),
+	// not to even.
+	s := strconv.FormatFloat(math.Floor(v*10+0.5)/10, 'f', 1, 64)
 	s = strings.TrimSuffix(s, ".0")
 	if s == "1" {
 		return s + " " + one

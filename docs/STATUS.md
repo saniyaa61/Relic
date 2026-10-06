@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 6 (Digest and Mood Trends).
+Last updated: 2026-10-06, after Phase 3 step 7 (Consumed).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 6 (Digest and Mood Trends).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Steps 1–6 done (shell, Library, entry form/page, Home, Favorites, Digest). Next: step 7 (Consumed). |
+| 3 Screens | **In progress.** Steps 1–7 done (shell, Library, entry form/page, Home, Favorites, Digest, Consumed). Next: step 8 (Year in Review image + share sheet). |
 
 ## What exists
 
@@ -30,6 +30,8 @@ Last updated: 2026-10-06, after Phase 3 step 6 (Digest and Mood Trends).
 - Fixed while comparing in step 5: the entry page's Top 5 pill read "#2" for first place; the title sat 6dp low and the first divider ~10dp low (the browser merges the meta line's margin with the rule's); the type badge and Top 5 pill are now the prototype badge's 19dp. The symbols font is also registered as italic, so "Rank it ✦" shows its ✦.
 - `ui/` step 6: `digest.go` (Week / Month / Year toggle, ‹ › within `DigestBounds`, hero with `Library.DigestNarrative`, stat grid with the 🔥 day streak, Best this period, Year's month bars and Top rated, Still going (`Entry.ProgressSummary`), sessions, "Share your year" (a stand-in page until step 8), Mood trends link, closing note, empty state) and `moods.go` (Mood Trends: What stands out, Feelings over time, Month by month). `MoodData.MonthTop` now returns counts (`TagCount`).
 - Differences from the prototype that are on purpose: "Finished this year" counts the imported finished entries (the importer gives them a finish date, SPEC §9; the prototype shows "—"); a month's top feelings break ties by overall frequency (core rule) rather than A–Z.
+- `ui/` step 7: `consumed.go` (Consumed, from Home's chip: the "All time, all worlds" hero with the total, "+X this month", the perspective line, the last-8-weeks sparkline and the category share bar; each category with its time, each folder with its time, "See all" and a row of up to 4 cards showing time; search across the library; the folder page "Category · Time spent" with all its entries and its own search). `core.Library.ConsumedFolder` lists a folder group; folders now group by the category's own spelling (case-insensitive). Durations round halves up like the prototype (6.25 hrs → "6.3 hrs").
+- Known small difference: the Go app shows "51 hrs" where the prototype shows "51.0 hrs" (core drops a trailing ".0"; Phase 1 rule).
 - `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
@@ -55,6 +57,7 @@ Decided 2026-10-06 (first cloud session):
 - **"Mark as finished" uses the theme's accent colour**, not the prototype's red.
 - **Date fields: the month calendar dialog is approved.**
 - **Streak pill keeps the colour 🔥** (option A, a bundled Noto Color Emoji image); 🎨 in Settings will use the same approach. Options B (line flame) and C (words only) remain in `home.go` behind `homeStreak` for snapshots.
+- **Year digest month bars use the prototype's gradient** (option A), an agreed exception to "no gradients". B and C stay in `digest.go` behind `yearBars` for snapshots.
 - **Journey notes keep the writer's paragraph breaks** (the prototype ran them together).
 - **Category and folder pages keep the bottom bar**, as in the prototype (overrides SPEC §5's "sub-pages hide the bottom bar" for these two pages).
 
@@ -72,7 +75,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **Year digest month bars.** The prototype fills bars with a gradient. Built three, switched by `yearBars` in `digest.go`: A gradient (prototype), **B flat accent2 with the busiest month in accent (current default, matches Mood Trends)**, C flat accent. Waiting for the owner's pick (sheet `s6-3-bar-options.png`).
+None right now.
 
 ## The owner's real data
 
@@ -102,6 +105,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 7: Consumed and its folder pages (SPEC §5 "Consumed", prototype `renderConsumed`). The Home Consumed chip opens a `comingSoon` page now; replace it. Core has `TimeIndex.Weekly` (sparkline), `ConsumedByCategory`, `ShareBar`, `Perspective`. Poster cards with time: `finishedCard.Layout(..., showTime=true)`. Watch for CSS margin collapsing (see CLAUDE.md) and borders: a card with a CSS border needs `card()` inset = the CSS padding; one without needs padding − 1.
+2. Next is step 8: Year in Review image + share sheet (SPEC §7, prototype `openYearCard`): a 1080 × 1350 PNG in the theme's colours, then save / share. The Year digest's "Share your year" card opens a `comingSoon` page now; replace it. Saving a file on Windows can use gioui.org/x/explorer (already used for the poster picker); Android/iOS sharing needs checking (show the owner options if a native share sheet isn't reachable from Gio).
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

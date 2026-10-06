@@ -18,6 +18,8 @@ func TestFormatDuration(t *testing.T) {
 		{60, "1 hr"},
 		{90, "1.5 hrs"},
 		{324, "5.4 hrs"},
+		{375, "6.3 hrs"}, // 6.25 rounds up, like the prototype
+		{3 * 60, "3 hrs"},
 		{120, "2 hrs"},
 		{72 * 60, "72 hrs"},
 		{72*60 + 1, "3 days"},

@@ -15,7 +15,8 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"lib-folder", "lib-folder-search", "lib-folder-empty",
 	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
 	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
-	"digest-prev", "digest-week", "digest-year", "digest-year-gradient", "digest-year-flat", "moods", "digest-empty",
+	"digest-prev", "digest-week", "digest-year", "digest-year-peak", "digest-year-flat", "moods", "digest-empty",
+	"consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
@@ -40,7 +41,7 @@ func (a *App) ShowForSnapshot(screen string) error {
 		a.Go(TabNew)
 	case "favorites", "fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats":
 		return a.favoritesForSnapshot(screen)
-	case "digest", "digest-prev", "digest-week", "digest-year", "digest-year-gradient", "digest-year-flat", "digest-empty":
+	case "digest", "digest-prev", "digest-week", "digest-year", "digest-year-peak", "digest-year-flat", "digest-empty":
 		if screen == "digest-empty" {
 			a.Lib.Entries = nil
 		}
@@ -52,10 +53,26 @@ func (a *App) ShowForSnapshot(screen string) error {
 			p.month = b.StepMonth(b.Ceiling, -1)
 		case "digest-week":
 			p.kind = core.WeekPeriod
-		case "digest-year", "digest-year-gradient", "digest-year-flat":
+		case "digest-year", "digest-year-peak", "digest-year-flat":
 			p.kind = core.YearPeriod
-			yearBars = map[string]yearBarStyle{"digest-year": barsPeak, "digest-year-gradient": barsGradient, "digest-year-flat": barsFlat}[screen]
+			yearBars = map[string]yearBarStyle{"digest-year": barsGradient, "digest-year-peak": barsPeak, "digest-year-flat": barsFlat}[screen]
 		}
+	case "consumed", "consumed-search", "consumed-empty":
+		if screen == "consumed-empty" {
+			a.Lib.Entries = nil
+		}
+		p := &consumedPage{}
+		a.Push(p)
+		if screen == "consumed-search" {
+			p.search.Toggle(a)
+			p.search.input.Editor.SetText("entry 1")
+		}
+	case "consumed-folder":
+		cats := a.Lib.ConsumedByCategory(a.timeIndex())
+		if len(cats) == 0 {
+			return fmt.Errorf("%s needs a library with time (use -archive)", screen)
+		}
+		a.Push(&consumedFolderPage{key: folderKey{cats[0].Category.ID, cats[0].Folders[0].Name}})
 	case "moods":
 		a.Go(TabDigest)
 		a.Push(&moodsPage{})

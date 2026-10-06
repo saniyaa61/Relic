@@ -180,3 +180,10 @@ func srgbToLinear(v float64) float64 {
 	}
 	return math.Pow((v+0.055)/1.055, 2.4)
 }
+
+// mixSRGB is fg at opacity a over bg, mixed the way a browser does (in
+// sRGB), for CSS opacity on an opaque background.
+func mixSRGB(fg, bg color.NRGBA, a float32) color.NRGBA {
+	m := func(f, b uint8) uint8 { return uint8(math.Round(float64(f)*float64(a) + float64(b)*float64(1-a))) }
+	return color.NRGBA{R: m(fg.R, bg.R), G: m(fg.G, bg.G), B: m(fg.B, bg.B), A: 0xFF}
+}

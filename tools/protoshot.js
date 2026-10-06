@@ -2,7 +2,7 @@
 // for side-by-side checks against cmd/snapshot. Uses the bundled fonts
 // (Google Fonts may be unreachable) and the pre-installed Chromium.
 //
-//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest]
+//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest|consumed]
 //
 // HEIGHT=1900 for a taller window (long forms). NOW=2026-09-29T09:00:00Z fixes the clock. MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
@@ -78,6 +78,12 @@ const shots = {
     ['digest-year', () => setDigestPeriod('year')],
     ['moods', () => openMoods()],
     ['digest-empty', () => { entries = []; nav('digest'); }],
+  ],
+  consumed: [
+    ['consumed', () => openConsumed()],
+    ['consumed-search', () => { crSearchOpen = true; crSearchQuery = 'entry 1'; renderConsumedRoot(); }],
+    ['consumed-folder', () => { crSearchOpen = false; crSearchQuery = ''; const cb = buildConsumedCatBlocks()[0]; openConsumedFolder(cb.sec.id, cb.cards[0].name); }],
+    ['consumed-empty', () => { entries = []; openConsumed(); }],
   ],
   library: [
     ['lib-root', () => nav('library')],

@@ -64,7 +64,7 @@ Build in this order, checking each against the prototype side by side:
 4. Home with stat chips, Still with you, Recently finished, memory card; the three "see all" pages. (Built.)
 5. Favorites with Top 5. (Built.)
 6. Digest (week / month / year), Mood Trends. (Built.)
-7. Consumed and its folder pages.
+7. Consumed and its folder pages. (Built.)
 8. Year in Review image + share sheet.
 9. Settings, export / import, onboarding.
 

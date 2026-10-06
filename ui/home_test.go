@@ -24,9 +24,9 @@ func TestHomeChipsOpenTheirPages(t *testing.T) {
 			if p.kind != want {
 				t.Errorf("chip %d opened %v, want %v", i, p.kind, want)
 			}
-		case *comingSoon:
+		case *consumedPage:
 			if want != "Consumed" {
-				t.Errorf("chip %d opened the Consumed placeholder", i)
+				t.Errorf("chip %d opened Consumed", i)
 			}
 		default:
 			t.Errorf("chip %d opened %T", i, p)

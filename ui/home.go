@@ -83,7 +83,7 @@ func (h *homePage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 		a.Push(newPosterPage(pageAllEntries))
 	}
 	if h.chips[1].Clicked(gtx) {
-		a.Push(&comingSoon{eyebrow: "Home", title: "Consumed", step: 7})
+		a.Push(&consumedPage{})
 	}
 	if h.chips[2].Clicked(gtx) || h.allLink.Clicked(gtx) {
 		a.Push(newPosterPage(pageRecentlyFinished))
