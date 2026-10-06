@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 2.
+Last updated: 2026-10-06, after Phase 2 and the readiness audit (Setup section, `.env` ignored).
 
 ## Where we are
 
@@ -69,7 +69,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 - The cloud session is Linux. The owner works on Windows 11 in VS Code with a 3.8 GB RAM laptop and no Android phone (so no local emulator). Write instructions for the owner as Windows + VS Code + command-line steps.
 - `go test ./...` on Linux needs Gio's system libraries for the `ui` package (the apt list is in the workflow's "Install Gio's Linux libraries" step). If they can't be installed, run `go test ./core/... ./store/... ./importer/...` and say so.
-- There's no display in the cloud, so `go run ./cmd/relic` won't open a window. Check screens with `cmd/snapshot` PNGs and the CI emulator screenshots, and ask the owner to try the Windows build (`go run ./cmd/relic`).
+- There's no display in the cloud, so `go run ./cmd/relic` won't open a window. Check screens with `cmd/snapshot` PNGs (needs `EGL_PLATFORM=surfaceless`; see CLAUDE.md "Setup" for the cloud setup script and variables) and the CI emulator screenshots, and ask the owner to try the Windows build (`go run ./cmd/relic`).
 - Commit and push after each finished piece (CLAUDE.md). Commit messages end with the Co-Authored-By line given by the harness.
 
 ## Phase 3 — how to start
