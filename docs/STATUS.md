@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 2 (Library).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Step 1 (app shell) done. Step 2 (Library) built and pushed; waiting for the owner's Windows check and two answers (below). Step 3 (New/Edit entry, entry detail) is next. |
+| 3 Screens | **In progress.** Step 1 (app shell) done. Step 2 (Library) done. Step 3 (New/Edit entry, entry detail) in progress. |
 
 ## What exists
 
@@ -44,6 +44,8 @@ Decided 2026-10-06 (first cloud session):
 - **The app remembers the last light/dark mode, including after import.** The importer leaves the mode empty and `importer.Result.KeepMode` copies the app's current mode in; `cmd/import` does this, and the Settings import (step 9) must too. (SPEC §2, §8)
 - **Middle tab says "New"** (SPEC §5), not the prototype's "Add".
 - **Symbols from Noto Sans Symbols 2 approved** (★ ♥ ✓ ✕ ✦ as bundled).
+- **"What lives here" is the dropdown (option A)**, as built.
+- **Category and folder pages keep the bottom bar**, as in the prototype (overrides SPEC §5's "sub-pages hide the bottom bar" for these two pages).
 
 The two new form fields (Episodes rewatched, Length (mins)) are not in the prototype. The owner approved them from these sketches, so build them like this, styled like neighbouring fields:
 
@@ -59,10 +61,8 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **(Asked 2026-10-06, awaiting answer)** "What lives here" picker: A dropdown list (built) or B chips all visible. Swapping is small: `typePicker` in `ui/typepicker.go`.
-2. **(Asked 2026-10-06, awaiting answer)** The category and folder pages keep the bottom bar, as the prototype does, although SPEC §5 says sub-pages hide it. Kept the prototype's way unless the owner says otherwise (`ShowsNav` on the page).
-3. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
-4. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
+1. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+2. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
 
 ## The owner's real data
 

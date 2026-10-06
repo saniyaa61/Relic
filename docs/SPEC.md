@@ -215,7 +215,7 @@ Shows the **single most powerful sentence** the user has written about the entry
 
 ## 5. Screens
 
-Bottom navigation: **Home · Library · New · Favorites · Digest**. Sub-pages hide the bottom bar and have a back arrow (top-left) and, where relevant, search (top-right).
+Bottom navigation: **Home · Library · New · Favorites · Digest**. Sub-pages hide the bottom bar (except the Library's category and folder pages, which keep it, as in the prototype) and have a back arrow (top-left) and, where relevant, search (top-right).
 
 **Onboarding (first launch)** — "What should we call you?" (optional) → Home, then immediately opens *New category* if there are none.
 
