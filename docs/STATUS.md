@@ -78,7 +78,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 ## CI (GitHub Actions, `.github/workflows/build.yml`)
 
 - Jobs: vet+test (Linux, installs Gio's X11/Wayland libs), Android APK, Android emulator run (screenshot + checks the log for `relic: store ok, launch 1/2`), iOS simulator run on an Intel Mac (same check).
-- The latest run (Phase 2, commit 6e240a9) passed every job. The two runs before it failed **only** in the emulator/simulator launch steps, from slow cloud machines: the iOS app started after the fixed `sleep`s had passed, and one Android emulator boot was cancelled at about 15 min. The code built and its tests passed in those runs. **Suggested fix, not yet done:** replace the fixed sleeps with polling loops that wait for the "store ok" log line (up to ~2 min), and give the emulator step a longer boot timeout. Do this if failures recur.
+- Emulator and simulator launches used fixed pauses and failed now and then on slow cloud machines (most recently the iOS step on 2026-10-06: the simulator took ~3 min to boot). They now wait up to 3 minutes for the app's "store ok" log line instead. If a launch step still fails, read its log before calling it a flake.
 - Download results from the run's Artifacts section: `relic-apk`, `emulator-screenshots`, `ios-screenshots`.
 
 ## How the owner checks each step (Windows)
