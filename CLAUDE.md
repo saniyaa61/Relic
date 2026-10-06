@@ -16,6 +16,7 @@ Relic ("your stories, preserved") is a personal archive for films, dramas, books
 - Local storage: **SQLite via github.com/ncruces/go-sqlite3** (SQLite translated to pure Go, no cgo), in `store/`. Uses Go's own file I/O, so it runs inside Android's syscall filter; builds for Windows, Android and iOS with no C toolchain. Schema changes are numbered migrations tracked in `PRAGMA user_version`. (modernc.org/sqlite was rejected: it crashed on Android x86_64.)
 - Architecture: pure `core/` package for every rule in SPEC §4. UI and storage depend on core, never the other way round.
 - Offline-first: the app works fully without a network. Sync comes in Phase 5.
+- Storage (Phase 2): tables per record type, times as fixed-width UTC text, type-specific fields and lists as JSON. UI writes through `store.Store` (`Load`, `ReplaceAll`, `Update` for one transaction). Posters are JPEG files (long edge ≤ 600 px) in a `posters/` folder beside the database; entries hold the file name. Imported entries and categories keep their prototype ids.
 - Core model (Phase 1): ids are random 128-bit hex. Entries reference categories by id, so renaming a category touches nothing else. A session's minutes are optional (`nil` = not logged, so books estimate 1.5 min/page; an explicit 0 counts as 0); the importer must map the prototype's `mins: 0` to "not logged". Partial rewatches store "episodes rewatched"; music counts album length (or tracks × 3.5 min). Totals (episodes, pages) of 0 mean "not given" and never count as reached. Editing an entry doesn't rewrite the start session's "logged as finished" flag.
 
 Update this section when a decision is made.
@@ -62,6 +63,9 @@ Update this section when a decision is made.
 - Checks: `go vet ./...` and `go test ./...`
 - Run on Windows: `go run ./cmd/relic`
 - Screen to PNG: `go run ./cmd/snapshot -o build/spike.png -scale 2`
+- Import the prototype archive into a database and print counts, time and Top 5: `go run ./cmd/import -in ../relic-archive.json -db build/relic.db` (posters go to `build/posters/`).
+- Compare an import with the prototype's own formulas: `go test ./importer -run Prototype -v` (scrubbed copy); add `RELIC_ARCHIVE=C:/Users/saniy/Downloads/relic-archive.json` to also check the real archive.
+- Refresh the scrubbed test copy after a new export: `go run ./cmd/scrub -in ../relic-archive.json -out importer/testdata/scrubbed-archive.json`. Never commit the real archive.
 - Android APK locally (needs `ANDROID_HOME`, the NDK, and JDK 17's `bin` on PATH for `keytool`): `gogio -target android -arch arm64,amd64 -minsdk 24 -appid com.saniyaa61.relic -name Relic -o build/relic.apk ./cmd/relic`
 - Android on an emulator: push to GitHub; the **Build** workflow uploads `relic-apk` and `emulator-screenshots` as run artifacts.
 - iOS: needs a Mac (Phase 4).

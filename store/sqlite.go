@@ -15,6 +15,74 @@ var migrations = []string{
 		key   TEXT PRIMARY KEY,
 		value TEXT NOT NULL
 	)`,
+	// 2: the library. Times are RFC 3339 UTC text (NULL = not set); lists and
+	// type-specific fields are JSON text.
+	`CREATE TABLE profile (
+		id            INTEGER PRIMARY KEY CHECK (id = 1),
+		name          TEXT NOT NULL,
+		first_used_at TEXT,
+		theme         TEXT NOT NULL,
+		mode          TEXT NOT NULL,
+		custom_base   TEXT NOT NULL,
+		custom_accent TEXT NOT NULL
+	);
+	CREATE TABLE categories (
+		id         TEXT PRIMARY KEY,
+		position   INTEGER NOT NULL,
+		name       TEXT NOT NULL,
+		type       TEXT NOT NULL,
+		folders    TEXT NOT NULL,
+		created_at TEXT NOT NULL
+	);
+	CREATE TABLE entries (
+		id          TEXT PRIMARY KEY,
+		category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+		folder      TEXT NOT NULL,
+		type        TEXT NOT NULL,
+		title       TEXT NOT NULL,
+		poster      TEXT NOT NULL,
+		rating      REAL NOT NULL,
+		tags        TEXT NOT NULL,
+		review      TEXT NOT NULL,
+		status      TEXT NOT NULL,
+		created_at  TEXT NOT NULL,
+		finished_at TEXT,
+		favorite    INTEGER NOT NULL,
+		fields      TEXT NOT NULL
+	);
+	CREATE INDEX entries_category ON entries(category_id);
+	CREATE TABLE sessions (
+		id               TEXT PRIMARY KEY,
+		entry_id         TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+		at               TEXT NOT NULL,
+		note             TEXT NOT NULL,
+		is_start         INTEGER NOT NULL,
+		started_finished INTEGER NOT NULL,
+		episodes         INTEGER NOT NULL,
+		from_page        INTEGER NOT NULL,
+		to_page          INTEGER NOT NULL,
+		minutes          INTEGER
+	);
+	CREATE INDEX sessions_entry ON sessions(entry_id);
+	CREATE TABLE rewatches (
+		id         TEXT PRIMARY KEY,
+		entry_id   TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+		at         TEXT NOT NULL,
+		note       TEXT NOT NULL,
+		rating     REAL NOT NULL,
+		full       INTEGER NOT NULL,
+		episodes   INTEGER NOT NULL,
+		start_date TEXT NOT NULL,
+		end_date   TEXT NOT NULL
+	);
+	CREATE INDEX rewatches_entry ON rewatches(entry_id);
+	CREATE TABLE favourites (
+		category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+		list        TEXT NOT NULL CHECK (list IN ('top', 'order')),
+		position    INTEGER NOT NULL,
+		entry_id    TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+		PRIMARY KEY (category_id, list, position)
+	)`,
 }
 
 // DB is Relic's local SQLite database.

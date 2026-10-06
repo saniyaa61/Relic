@@ -88,6 +88,13 @@ func TestDateHelpers(t *testing.T) {
 	if z, err := ParseDate(""); err != nil || !z.IsZero() {
 		t.Errorf("empty ParseDate = %v, %v", z, err)
 	}
+	var round Date
+	if b, _ := p.MarshalText(); round.UnmarshalText(b) != nil || round != p {
+		t.Errorf("text round trip = %v", round)
+	}
+	if b, _ := (Date{}).MarshalText(); len(b) != 0 {
+		t.Errorf("zero MarshalText = %q", b)
+	}
 	if _, err := ParseDate("bad"); err == nil {
 		t.Error("expected error")
 	}

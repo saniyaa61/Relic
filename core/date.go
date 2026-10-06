@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -24,6 +25,7 @@ func DateOf(t time.Time, loc *time.Location) Date {
 
 // ParseDate reads "YYYY-MM-DD". An empty string gives the zero Date.
 func ParseDate(s string) (Date, error) {
+	s = strings.TrimSpace(s)
 	if s == "" {
 		return Date{}, nil
 	}
@@ -39,6 +41,24 @@ func (d Date) IsZero() bool { return d == Date{} }
 
 // String formats d as "YYYY-MM-DD".
 func (d Date) String() string { return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day) }
+
+// MarshalText writes "YYYY-MM-DD", or "" for the zero Date.
+func (d Date) MarshalText() ([]byte, error) {
+	if d.IsZero() {
+		return []byte{}, nil
+	}
+	return []byte(d.String()), nil
+}
+
+// UnmarshalText reads what MarshalText writes.
+func (d *Date) UnmarshalText(b []byte) error {
+	p, err := ParseDate(string(b))
+	if err != nil {
+		return err
+	}
+	*d = p
+	return nil
+}
 
 func (d Date) utc() time.Time { return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, time.UTC) }
 

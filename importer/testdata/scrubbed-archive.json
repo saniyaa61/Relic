@@ -1,0 +1,646 @@
+{
+  "createdAt": "2026-10-04T14:10:24.990Z",
+  "customAccent": "#6f75be",
+  "customBase": "#bb356f",
+  "entries": [
+    {
+      "cast": "",
+      "category": "Series 2",
+      "createdAt": "2026-09-28T11:37:52.881Z",
+      "episodeDuration": 65,
+      "folder": "Folder 2.1",
+      "id": "e1790595472881",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOQooor3TxQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z",
+      "rating": 4.5,
+      "review": "X xxxxxxxxxx xxxx xxx xxxxxxx xx xxxxx xxxx. Xxxxx'x xxxxxxx xxxxxxxxx xxxx xxxx. Xxxx xxx xxxx xxxx. X xxxxx'x xxx x xxxxx xx xxx xxxx xxxx xxx. Xxxx xxx- xx'x xxxx xxx xxxxx xxx xxxx xxxxxx xxxxx xxxxx xxx.\n\nXx xxx xxx xxxxxxx xx xxxxxx xxx xxxx xxx xxxx xxx xxxxxxx xx xxxxxx xx xxx xxxx xxxx xxxx xx xxxx xxx xxxx xxxx xxx xx xxx xx  ",
+      "rewatches": [],
+      "section": "Series 2",
+      "sessions": [
+        {
+          "date": "2026-09-28T11:37:52.881Z",
+          "doneAtStart": false,
+          "eps": 7,
+          "first": true,
+          "kind": "session",
+          "note": "X xxxxxxxxxx xxxx xxx xxxxxxx xx xxxxx xxxx. Xxxxx'x xxxxxxx xxxxxxxxx xxxx xxxx. Xxxx xxx xxxx xxxx. X xxxxx'x xxx x xxxxx xx xxx xxxx xxxx xxx. Xxxx xxx- xx'x xxxx xxx xxxxx xxx xxxx xxxxxx xxxxx xxxxx xxx.\n\nXx xxx xxx xxxxxxx xx xxxxxx xxx xxxx xxx xxxx xxx xxxxxxx xx xxxxxx xx xxx xxxx xxxx xxxx xx xxxx xxx xxxx xxxx xxx xx xxx xx  "
+        }
+      ],
+      "status": "ongoing",
+      "tags": [
+        "Comforting",
+        "Slow-burn",
+        "Beautiful"
+      ],
+      "title": "Entry 1",
+      "totalEpisodes": 16,
+      "type": "series",
+      "watchedEpisodes": 7
+    },
+    {
+      "cast": "Xxxxxxxxx Xxxxxxx",
+      "category": "Films 1",
+      "createdAt": "2026-09-28T11:34:19.434Z",
+      "director": "",
+      "duration": 245,
+      "folder": "Folder 1.1",
+      "id": "e1790595259434",
+      "language": "Xxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AObooor2DywooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z",
+      "rating": 4,
+      "review": "Xxxxx xxxx xxx xxxx xxx xxx xxxxxxxxx. Xxx xxxx xxxxx xxxx xxxx xxxx xxxxx xxx xxx xxxxxx xxxxx xxx xxxx xxx. Xxx xxxx xxxxxx xxxxxxx. Xxx xxxxxx xxx xxxx xxxxx xxxx xxx xxxxxxx. Xxx xxxx xx- xxxx xxx xxxx xx xxx xxxxx xxxxx. Xxxxxxx- xxx x xxxxx xxxxx xx 7 xxxxxxxx xxxx xxxxxx xxxx xxx xx xx xxxxxxxxxx xxxxxxxxxx- xxxx xxx xxxxxxxxxx xxxx",
+      "rewatches": [],
+      "section": "Films 1",
+      "sessions": [
+        {
+          "date": "2026-09-28T11:34:19.434Z",
+          "doneAtStart": true,
+          "first": true,
+          "kind": "session",
+          "note": "Xxxxx xxxx xxx xxxx xxx xxx xxxxxxxxx. Xxx xxxx xxxxx xxxx xxxx xxxx xxxxx xxx xxx xxxxxx xxxxx xxx xxxx xxx. Xxx xxxx xxxxxx xxxxxxx. Xxx xxxxxx xxx xxxx xxxxx xxxx xxx xxxxxxx. Xxx xxxx xx- xxxx xxx xxxx xx xxx xxxxx xxxxx. Xxxxxxx- xxx x xxxxx xxxxx xx 7 xxxxxxxx xxxx xxxxxx xxxx xxx xx xx xxxxxxxxxx xxxxxxxxxx- xxxx xxx xxxxxxxxxx xxxx"
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Emotional",
+        "Bittersweet"
+      ],
+      "title": "Entry 2",
+      "type": "film",
+      "watchedDate": "2026-09-25"
+    },
+    {
+      "category": "Things 8",
+      "createdAt": "2026-09-20T01:06:33.556Z",
+      "creator": "",
+      "duration": "",
+      "folder": "",
+      "id": "e1789866393556",
+      "platform": "XXxxxx",
+      "poster": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAA8CAIAAACb22+3AAAAQElEQVR4nOzNMREAIAwEMI5DIEIqpaLrocsviYG8X30SbmQVi8VisVgsFovFYrFYLBaLxWKxWCwWi8VLEwAA//9smQHDiyIrWgAAAABJRU5ErkJggg==",
+      "rating": 4,
+      "review": "Xxxxxx xxxxxxx xxxx xxxx, xxxxx xx xxxx xxxxx xxx xxxxx",
+      "rewatches": [],
+      "section": "Things 8",
+      "sessions": [
+        {
+          "date": "2026-09-20T01:06:33.556Z",
+          "doneAtStart": true,
+          "first": true,
+          "kind": "session",
+          "note": "Xxxxxx xxxxxxx xxxx xxxx, xxxxx xx xxxx xxxxx xxx xxxxx"
+        }
+      ],
+      "status": "finished",
+      "tags": [],
+      "title": "Entry 3",
+      "type": "other",
+      "watchedDate": "2026-08-03"
+    },
+    {
+      "category": "Podcasts 4",
+      "createdAt": "2026-09-20T01:03:31.615Z",
+      "folder": "",
+      "host": "",
+      "id": "e1789866211615",
+      "language": "Xxxxxxx",
+      "platform": "Xxxxxx Xxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AKVFFFdhzBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf//Z",
+      "rating": 0,
+      "review": "X xxxxx xxxx xxx xxxxxxx, xxx x xxxxxxx xx xxxx xxxxxx xx xx xxxx xx xxxx X xx xxx xxxxxxxxx xxxxx xxxx.",
+      "rewatches": [],
+      "section": "Podcasts 4",
+      "sessions": [
+        {
+          "date": "2026-09-20T01:03:31.615Z",
+          "doneAtStart": true,
+          "eps": 0,
+          "first": true,
+          "kind": "session",
+          "note": "X xxxxx xxxx xxx xxxxxxx, xxx x xxxxxxx xx xxxx xxxxxx xx xx xxxx xx xxxx X xx xxx xxxxxxxxx xxxxx xxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [],
+      "title": "Entry 4",
+      "totalEpisodes": 4,
+      "type": "podcast",
+      "watchedDate": "2026-09-27",
+      "watchedEpisodes": 0
+    },
+    {
+      "category": "Shorts 5",
+      "createdAt": "2026-09-20T00:57:40.672Z",
+      "creator": "Xxxx xxxx Xx",
+      "duration": 52,
+      "folder": "",
+      "id": "e1789865860671",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAA8CAIAAACb22+3AAAAQElEQVR4nOzNMREAIAwEMI5DNFMVVHQ9dPklMZD3q0/CjaxisVgsFovFYrFYLBaLxWKxWCwWi8VisXhpAgAA///ZfwH9j8iuEQAAAABJRU5ErkJggg==",
+      "rating": 5,
+      "review": "Xxxxxxx xxx xxxxx xxx xxxxx xxx xxxx xxxx xx xx xxx xxxx X xx xxxxxxxx xxxxxxx xx xxxxxx. Xxxxxx xx xxxxxxx xxxxxxxxxx xxxxxxxxx xxx xxxxxxxxx.",
+      "rewatches": [],
+      "section": "Shorts 5",
+      "sessions": [
+        {
+          "date": "2026-09-20T00:57:40.672Z",
+          "doneAtStart": true,
+          "first": true,
+          "kind": "session",
+          "mins": 0,
+          "note": "Xxxxxxx xxx xxxxx xxx xxxxx xxx xxxx xxxx xx xx xxx xxxx X xx xxxxxxxx xxxxxxx xx xxxxxx. Xxxxxx xx xxxxxxx xxxxxxxxxx xxxxxxxxx xxx xxxxxxxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [],
+      "title": "Entry 5",
+      "type": "short",
+      "url": "xxxxx://xxx.xxxxxxx.xxx/xxxxx?x=XXXX-XxXxXX&x=1562x",
+      "watchedDate": "2026-08-31"
+    },
+    {
+      "category": "Things 7",
+      "createdAt": "2026-09-19T08:46:57.851Z",
+      "creator": "",
+      "duration": "2 xxxxx",
+      "folder": "",
+      "id": "e1789807617851",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/ALNFFFUUFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k=",
+      "rating": 3,
+      "review": "Xxxx xxx xxxxx",
+      "rewatches": [],
+      "section": "Things 7",
+      "sessions": [
+        {
+          "date": "2026-09-19T08:47:46.018Z",
+          "kind": "session",
+          "mins": 20,
+          "note": "xxxxxxxx xx xxxxxx. xxxxxxxx"
+        },
+        {
+          "date": "2026-09-19T08:46:57.851Z",
+          "doneAtStart": false,
+          "first": true,
+          "kind": "session",
+          "mins": 67,
+          "note": "Xxxx xxx xxxxx"
+        }
+      ],
+      "status": "ongoing",
+      "tags": [
+        "Slow-burn",
+        "Beautiful"
+      ],
+      "title": "Entry 6",
+      "type": "other",
+      "watchedDate": "2026-09-26"
+    },
+    {
+      "cast": "",
+      "category": "Series 2",
+      "createdAt": "2026-09-15T19:40:37.890Z",
+      "episodeDuration": 60,
+      "favorite": true,
+      "folder": "Folder 2.1",
+      "id": "e1789501237890",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/ANSiiiszcKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=",
+      "rating": 4,
+      "review": "Xxxx xxxxx xxxxxx xx xxxxx xxx xx xxxx xxxxx. Xxx x xxxxxx xxxxxx xxxxxxx. Xxxx xxxx xxxxxxxxxx xxxx! Xx xxxxx xxxxxxxxxxxx xxxxxx xxxxxx. xx xx 3xx xxx xxxx xxx xxxxx xxxxxxxxx.",
+      "rewatches": [],
+      "section": "Series 2",
+      "sessions": [
+        {
+          "date": "2026-09-15T19:40:37.890Z",
+          "doneAtStart": true,
+          "eps": 12,
+          "first": true,
+          "kind": "session",
+          "note": "Xxxx xxxxx xxxxxx xx xxxxx xxx xx xxxx xxxxx. Xxx x xxxxxx xxxxxx xxxxxxx. Xxxx xxxx xxxxxxxxxx xxxx! Xx xxxxx xxxxxxxxxxxx xxxxxx xxxxxx. xx xx 3xx xxx xxxx xxx xxxxx xxxxxxxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Funny",
+        "Life-changing"
+      ],
+      "title": "Entry 7",
+      "totalEpisodes": 12,
+      "type": "series",
+      "watchedEpisodes": 12
+    },
+    {
+      "cast": "",
+      "category": "Series 2",
+      "createdAt": "2026-09-15T19:29:36.274Z",
+      "episodeDuration": 67,
+      "favorite": true,
+      "folder": "Folder 2.1",
+      "id": "e1789500576274",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOgooorlO0KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Z",
+      "rating": 3,
+      "review": "Xxxx xxxxx xxxxxxx. Xxx xxxxxx xxxxxxxx xxxxx xxxxx xx xxxx xxxx xxx xxxxx xxxx xxx xxxxx xxx xxxxxxx xx xxx xxx xxx. Xxx xxx xxx xxx xxx xx xxx xxxxxxxxxxxx xxxx. Xxx xxx xxxxxx xxxxxx xxxxxxxx, xxxxx xxx xxxxxxxxxx xxxxxxxxx.",
+      "rewatches": [],
+      "section": "Series 2",
+      "sessions": [
+        {
+          "date": "2026-09-15T19:29:36.274Z",
+          "doneAtStart": true,
+          "eps": 12,
+          "first": true,
+          "kind": "session",
+          "note": "Xxxx xxxxx xxxxxxx. Xxx xxxxxx xxxxxxxx xxxxx xxxxx xx xxxx xxxx xxx xxxxx xxxx xxx xxxxx xxx xxxxxxx xx xxx xxx xxx. Xxx xxx xxx xxx xxx xx xxx xxxxxxxxxxxx xxxx. Xxx xxx xxxxxx xxxxxx xxxxxxxx, xxxxx xxx xxxxxxxxxx xxxxxxxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Comforting",
+        "Slow-burn",
+        "Beautiful"
+      ],
+      "title": "Entry 8",
+      "totalEpisodes": 12,
+      "type": "series",
+      "watchedEpisodes": 12
+    },
+    {
+      "cast": "",
+      "category": "Series 2",
+      "createdAt": "2026-09-15T19:21:15.531Z",
+      "episodeDuration": 64,
+      "favorite": true,
+      "folder": "",
+      "id": "e1789500075530",
+      "platform": "Xxxxxx Xxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOrooorgPTCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z",
+      "rating": 4,
+      "review": "Xxxxxxx 6 xxxxxxxx xxxxx xxx, xxx xxxx xxxx xxx-\nXXXX XXXXXXXXXXXXX. Xx xxxxx xxxx xxxx xxxxxxx xxxxxxxxx xxxxxxx xxxx xxxx xxxx xxxxxxxx. X xxx xxxx xxxxxxx xxxx'xx xx xxx xxxxx-xxxxx",
+      "rewatches": [],
+      "section": "Series 2",
+      "sessions": [
+        {
+          "date": "2026-09-18T21:43:46.617Z",
+          "eps": 1,
+          "kind": "session",
+          "note": "Xxxxx'x xxxxxxx xxx xxx xxxxx xxx xxxxxxxxxxx xxx xx x xxxxx xxx xxx. X xxx xxxx xxxxxxxxx xxxx xxx xxx xxxxx xx xxxx xxxxx xxx xxxx xx xxx xxxx xxxx xxx. Xxx xxx, xxxxx xxx xxxxx xx xxxxxxxx xxxxxxx xxx xxxx xxxxxxxx xxx xxxxxxx, xxx'x xxxx xxx xx xxx xxxxxxxx xx xxxxxxx xxxxxxx."
+        },
+        {
+          "date": "2026-09-18T07:44:01.100Z",
+          "eps": 3,
+          "kind": "session",
+          "note": "Xxxx- xx xxx xx xxxx xxxxx xxxxx-xxxxx xxxx xxxx xxx xxxxx xx xxx xxxxxxxx xxxx xxxx xxxxx xx xxxx xxx xxxxx xxxx xxxx xxxxxxxxxxxxxxxxx xxx xxxxx xxxxxxx xxxxxxx xx xxxx xxxxxx xxxx.  Xxxxxxxxxx'x xxxxxx xxx xxx xxxxx xxxxxxx xxxx xx xxx xxxx x xxxxxxx. Xxx xxxxx xxx 3 xxxx xxxxxxxx xxx xx xxxxx xxxx xx xxxx xxxxxxxxx xx x xx xxxxxx~ X_X"
+        },
+        {
+          "date": "2026-09-15T19:21:15.531Z",
+          "doneAtStart": false,
+          "eps": 6,
+          "first": true,
+          "kind": "session",
+          "note": "Xxxxxxx 6 xxxxxxxx xxxxx xxx, xxx xxxx xxxx xxx-\nXXXX XXXXXXXXXXXXX. Xx xxxxx xxxx xxxx xxxxxxx xxxxxxxxx xxxxxxx xxxx xxxx xxxx xxxxxxxx. X xxx xxxx xxxxxxx xxxx'xx xx xxx xxxxx-xxxxx"
+        }
+      ],
+      "status": "ongoing",
+      "tags": [
+        "Emotional",
+        "Romantic",
+        "Bittersweet"
+      ],
+      "title": "Entry 9",
+      "totalEpisodes": 12,
+      "type": "series",
+      "watchedEpisodes": 10
+    },
+    {
+      "cast": "Xxxxxx Xxxxxx, Xxxxx Xxxxx xxx Xxxxxxxx",
+      "category": "Films 1",
+      "createdAt": "2026-09-15T12:21:07.495Z",
+      "director": "",
+      "duration": 130,
+      "favorite": true,
+      "folder": "Folder 1.1",
+      "id": "e1789474867495",
+      "language": "Xxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AO2oooryj2AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z",
+      "rating": 3,
+      "review": "Xxx xxxxxx xxxxxx xxx xxxxxx xxxx xxx. Xxxx xxx xxx xxxxx xxxx x xxxx xxx xx xxx xxxxx x xxxxxxxxx xxx xxxx xxxx xxxx xx.",
+      "rewatches": [],
+      "section": "Films 1",
+      "sessions": [
+        {
+          "date": "2026-09-15T12:21:07.495Z",
+          "doneAtStart": true,
+          "first": true,
+          "kind": "session",
+          "note": "Xxx xxxxxx xxxxxx xxx xxxxxx xxxx xxx. Xxxx xxx xxx xxxxx xxxx x xxxx xxx xx xxx xxxxx x xxxxxxxxx xxx xxxx xxxx xxxx xx."
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Beautiful",
+        "Romantic"
+      ],
+      "title": "Entry 10",
+      "type": "film",
+      "watchedDate": "2026-09-10"
+    },
+    {
+      "author": "Xxxxxx Xxxxx",
+      "category": "Books 3",
+      "createdAt": "2026-09-15T06:48:08.999Z",
+      "favorite": true,
+      "folder": "Folder 3.1",
+      "id": "e1789454888999",
+      "pagesRead": 40,
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/APQaKKK8Q90KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q==",
+      "publisher": "2023",
+      "rating": 1,
+      "review": "Xxxx xxxxxxx xxxx xxxx xxx xxxxxxxx, xxx xxxxx xxx xxxxxxxx xxx xxxxxxx xxxx x xx xxxxxx xx xxx xx xx xxxxx. Xxxxxxxx xxxxxxx xxx xxxxx xxxxxx xx xxxxxxx. Xxxxx xxxx X'xx xxxxx x xxx xxxx xxxx xxxx.",
+      "rewatches": [],
+      "section": "Books 3",
+      "sessions": [
+        {
+          "date": "2026-09-20T00:53:20.528Z",
+          "from": 20,
+          "kind": "session",
+          "mins": 20,
+          "note": "Xxxx xxxxx xxxxxxxxxx xx xxxx xxx xxx xxx'x xxxxx xxxx. Xxx xxx xxxxx xxxxxxxxx xxx xxxxxxxxx xxxx.",
+          "to": 40
+        },
+        {
+          "date": "2026-09-15T06:48:08.999Z",
+          "doneAtStart": false,
+          "first": true,
+          "from": 0,
+          "kind": "session",
+          "mins": 48,
+          "note": "Xxxx xxxxxxx xxxx xxxx xxx xxxxxxxx, xxx xxxxx xxx xxxxxxxx xxx xxxxxxx xxxx x xx xxxxxx xx xxx xx xx xxxxx. Xxxxxxxx xxxxxxx xxx xxxxx xxxxxx xx xxxxxxx. Xxxxx xxxx X'xx xxxxx x xxx xxxx xxxx xxxx.",
+          "to": 20
+        }
+      ],
+      "startDate": "2026-09-01",
+      "status": "ongoing",
+      "tags": [],
+      "title": "Entry 11",
+      "totalPages": 512,
+      "type": "book"
+    },
+    {
+      "cast": "XXX",
+      "category": "Series 2",
+      "createdAt": "2026-06-16T08:45:16.028Z",
+      "episodeDuration": 60,
+      "favorite": true,
+      "folder": "Folder 2.1",
+      "id": "e1781599516028",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/ACiiitj8wCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA/9k=",
+      "rating": 5,
+      "review": "X xxxx xxxxxxx xxxxx. Xxxx xxxx xxxx xxxx x xxxx xxx xxx. X'x xxxxxx xxxxx xx xxx xxxxx xx xxxx",
+      "rewatches": [],
+      "section": "Series 2",
+      "sessions": [
+        {
+          "date": "2026-09-19T08:36:12.460Z",
+          "eps": 1,
+          "kind": "session",
+          "note": "Xxxx xxxx xxxxxx xxxxx xx xxxxxx xxx xxxx xxxx, xxxxxxxx, xxx xxxx xxx xxx xxxxx. Xxxxxx xxxx xxxxxxxx xxxx xxxx xx x xxxxxx xxx xxxxx xxxxxxx xxxx xx xxxx xx xxxxx xxxxxxxxx"
+        },
+        {
+          "date": "2026-06-16T08:45:16.028Z",
+          "doneAtStart": false,
+          "eps": 1,
+          "first": true,
+          "kind": "session",
+          "note": "X xxxx xxxxxxx xxxxx. Xxxx xxxx xxxx xxxx x xxxx xxx xxx. X'x xxxxxx xxxxx xx xxx xxxxx xx xxxx"
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Bittersweet",
+        "Rewatch-worthy",
+        "Beautiful"
+      ],
+      "title": "Entry 12",
+      "totalEpisodes": 2,
+      "type": "series",
+      "watchedEpisodes": 2
+    },
+    {
+      "cast": "",
+      "category": "Films 1",
+      "createdAt": "2026-06-16T08:34:57.839Z",
+      "director": "",
+      "duration": 120,
+      "favorite": true,
+      "folder": "Folder 1.2",
+      "id": "e1781598897839",
+      "language": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/ALdFFFB+bBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf//Z",
+      "rating": 3,
+      "review": "Xxx xxxxx xxx xxxxx xxxxx xxx xxxxxxxx. Xxx x xxxxx xxxxxxxxxxx xxxxx xxx xxx xx xxxx xxx xxxxxx, xxxxx xx xxxxx xxxxxxxx xxx xxxx xxx xxxxx xx xxxxxx. Xxx xxxxxx xxxxxxxxxx xxxxxx xxxxx xxx xxxx xxx xx xxx xxxxxxxxxx xxxxxx.",
+      "rewatches": [],
+      "section": "Films 1",
+      "sessions": [
+        {
+          "date": "2026-06-16T08:34:57.839Z",
+          "doneAtStart": true,
+          "first": true,
+          "kind": "session",
+          "note": "Xxx xxxxx xxx xxxxx xxxxx xxx xxxxxxxx. Xxx x xxxxx xxxxxxxxxxx xxxxx xxx xxx xx xxxx xxx xxxxxx, xxxxx xx xxxxx xxxxxxxx xxx xxxx xxx xxxxx xx xxxxxx. Xxx xxxxxx xxxxxxxxxx xxxxxx xxxxx xxx xxxx xxx xx xxx xxxxxxxxxx xxxxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Disturbing",
+        "Quiet"
+      ],
+      "title": "Entry 13",
+      "type": "film",
+      "watchedDate": "2026-06-15"
+    },
+    {
+      "createdAt": "2026-06-07T12:22:23.643Z",
+      "episodeDuration": 60,
+      "favorite": true,
+      "folder": "Folder 2.1",
+      "id": "e1780834943643",
+      "platform": "Xxxxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/ANeiiisj87CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z",
+      "rating": 5,
+      "review": "Xxxxxxx 1:\nXx xxx xxxxx xxxx xxxxxxxx xxxx xxx xxx xxxxxxx xxxxxxxxx xx xxxxxx. Xxx xx xxx xxxxxxx xx xxx xx xxx xxxxxxxxxx xxxxx xx xxxxxx xxx xxxx xxx xxx xxxxxx. Xxx xxxxxxxxxxx xx xxx xxxxx, xxxxxx xxx xxx xxx xxx xxxxxxxx xxx x xxxxxx. Xxx xxxxxxxx xxx xxxx, xxx xxx xxxxxxx xxxx xxxxxxxx.",
+      "rewatches": [
+        {
+          "date": "2026-06-18T09:00:00.000Z",
+          "kind": "rewatch",
+          "note": "xxxxxx xxx xxxx xxxxxxxx. x xxxxxxx xxxx xx xx xxxxx xx xxxxx xxxx xxxx"
+        }
+      ],
+      "section": "Series 2",
+      "sessions": [
+        {
+          "date": "2026-06-16T08:30:33.706Z",
+          "eps": 2,
+          "kind": "session",
+          "note": "xxxxxx xxxxx xxxx? xxxxx xxx 10 xxxxxxxx xx xxxx xxxxxx. XXXXXX! xxx xxxxx xxxxxxxx xxx xx xx xxxxxxxx xxxxx!\nXxx xxxxx xx xxx xxxxxxxxxxx. X xxxxxxxxxx xxxx xxx xxxx xxxxxxx xxx x xxxxxx xxxxxx xxx xxxxxxxx"
+        },
+        {
+          "date": "2026-06-14T13:41:50.277Z",
+          "eps": 4,
+          "kind": "session",
+          "note": "Xxxx xxx xxxxx xxxxxxxx xxxxxxxxx. Xxxx xxxxx xxxx xxx xxx xxxx xxxx xxxxxxxx xxx xxxxxxxxxx xxxxxxx xxxx xxx xxxxx xxx xxx xxxx xxxxxxxx xxxxx xxx xxxxxx xxx xx xxxxxxx xxx xxxx xxxx xxxx. Xx xxxxxx xxx x xxxxxxx xx x xxxxxxx xxxxxxxxxx xx xxx xxx xxx xxx xxxxxx xxx xxxxxxxx xxx xx "
+        },
+        {
+          "date": "2026-06-12T08:36:48.415Z",
+          "eps": 1,
+          "kind": "session",
+          "note": "Xxx xxxxx xxxx xx xxxxxxxx xxxxxxx. Xxx xxxxxxx xxx xxxx xxx xxxxx xxx xxx xxx Xx Xxx Xxx'x xxxxxxx. Xx xxxxx xxx. Xxx xxx xx xx xxxxxxxx xx xxx xxxxx xxxxxx xxxxxxx xx xxx xxxxxxxxxxx xxxxxx. Xx xx xxxxxxxx, xxxxxxxx, xx xxxxxxx. "
+        },
+        {
+          "date": "2026-06-07T12:22:23.643Z",
+          "doneAtStart": true,
+          "eps": 1,
+          "first": true,
+          "kind": "session",
+          "note": "Xxxxxxx 1:\nXx xxx xxxxx xxxx xxxxxxxx xxxx xxx xxx xxxxxxx xxxxxxxxx xx xxxxxx. Xxx xx xxx xxxxxxx xx xxx xx xxx xxxxxxxxxx xxxxx xx xxxxxx xxx xxxx xxx xxx xxxxxx. Xxx xxxxxxxxxxx xx xxx xxxxx, xxxxxx xxx xxx xxx xxx xxxxxxxx xxx x xxxxxx. Xxx xxxxxxxx xxx xxxx, xxx xxx xxxxxxx xxxx xxxxxxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Emotional",
+        "Profound"
+      ],
+      "title": "Entry 14",
+      "totalEpisodes": 8,
+      "type": "series",
+      "watchedEpisodes": 8
+    },
+    {
+      "cast": "Xxxxxx Xxxxxx, Xxxxx Xxxxx",
+      "category": "Films 1",
+      "createdAt": "2026-06-07T10:50:23.091Z",
+      "director": "",
+      "duration": 140,
+      "favorite": true,
+      "folder": "",
+      "id": "e1780829423091",
+      "language": "Xxxxx",
+      "poster": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIADwAKAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOiooorkPgQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/Z",
+      "rating": 3.5,
+      "review": "X xxxx xxxxx xxxxx xxxxxxxxxxx xxxxxxx xxxxxx xxx xxxxxx xxx xxx xxx xxxxxx xxxxx xxxx xxxx.",
+      "rewatches": [
+        {
+          "date": "2026-06-12T09:00:00.000Z",
+          "kind": "rewatch",
+          "note": "Xxx xxxxx xx xxxxxxxxx xxxxx. Xxx xxx xxx xxxxx xx xxxxxxx xxx xxxxx xxx xxxxx xxxx xxxxx xxxxxxxxxxx xxxxxxxx xxx~"
+        }
+      ],
+      "section": "Films 1",
+      "sessions": [
+        {
+          "date": "2026-06-07T10:50:23.091Z",
+          "doneAtStart": true,
+          "first": true,
+          "kind": "session",
+          "note": "X xxxx xxxxx xxxxx xxxxxxxxxxx xxxxxxx xxxxxx xxx xxxxxx xxx xxx xxx xxxxxx xxxxx xxxx xxxx."
+        }
+      ],
+      "status": "finished",
+      "tags": [
+        "Funny",
+        "Bittersweet"
+      ],
+      "title": "Entry 15",
+      "type": "film",
+      "watchedDate": "2026-06-02"
+    }
+  ],
+  "favoriteOrder": {
+    "Books 3": [
+      "e1789454888999"
+    ],
+    "Films 1": [
+      "e1789474867495",
+      "e1781598897839",
+      "e1780829423091"
+    ],
+    "Podcasts 4": [],
+    "Series 2": [
+      "e1789501237890",
+      "e1789500576274",
+      "e1781599516028",
+      "e1780834943643"
+    ],
+    "Shorts 5": [],
+    "Things 7": [],
+    "Things 8": []
+  },
+  "sections": [
+    {
+      "folders": [
+        "Folder 1.1",
+        "Folder 1.2"
+      ],
+      "id": "s1780829186718",
+      "name": "Films 1"
+    },
+    {
+      "folders": [
+        "Folder 2.1",
+        "Folder 2.2",
+        "Folder 2.3"
+      ],
+      "id": "s1780831524593",
+      "name": "Series 2"
+    },
+    {
+      "folders": [
+        "Folder 3.1"
+      ],
+      "id": "s1780844533592",
+      "name": "Books 3",
+      "type": "book"
+    },
+    {
+      "folders": [],
+      "id": "s1780845301471",
+      "name": "Podcasts 4",
+      "type": "podcast"
+    },
+    {
+      "folders": [
+        "Folder 5.1",
+        "Folder 5.2"
+      ],
+      "id": "s1780845316988",
+      "name": "Shorts 5",
+      "type": "short"
+    },
+    {
+      "folders": [],
+      "id": "s1780845326070",
+      "name": "Music 6",
+      "type": "music"
+    },
+    {
+      "folders": [],
+      "id": "s1780910281292",
+      "name": "Things 7",
+      "type": "other"
+    },
+    {
+      "folders": [],
+      "id": "s1789866245573",
+      "name": "Things 8",
+      "type": "other"
+    }
+  ],
+  "theme": "custom",
+  "topFavorites": {
+    "Series 2": [
+      "e1789500075530"
+    ]
+  },
+  "userName": "Reader"
+}
