@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 3 (entry form, entry page, logging).
+Last updated: 2026-10-06, after Phase 3 step 4 (Home and the "see all" pages).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 3 (entry form, entry page, logging)
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Step 1 (app shell) done. Steps 1–3 done. Step 4 (Home and the three "see all" pages) in progress. |
+| 3 Screens | **In progress.** Steps 1–4 done (shell, Library, entry form/page, Home). Next: step 5 (Favorites with Top 5). |
 
 ## What exists
 
@@ -22,9 +22,10 @@ Last updated: 2026-10-06, after Phase 3 step 3 (entry form, entry page, logging)
 - `store/` — SQLite (migration 2 = library schema). `store.Store`: `Load`, `ReplaceAll`, `Update(func(Writer) error)` for single-transaction saves (`SaveProfile`, `SaveCategories`, `SaveEntry`, `DeleteEntry`, `SaveFavourites`). Posters are files in `posters/` beside the database (`WritePosters`, `RemoveUnusedPosters`); `Entry.Poster` is just the file name.
 - `importer/` — `importer.Read` turns `relic-archive.json` into a `core.Library` plus resized JPEG posters and a `Report` of repairs (SPEC §9). `importer.Summarize` prints counts/time/Top 5.
 - `cmd/import` (archive → database + summary), `cmd/scrub` (makes a de-personalised test copy), `cmd/snapshot` (any shell state → PNG, in any theme), `cmd/relic` (the app: loads the library, runs the shell, logs a store launch counter that CI checks).
-- `ui/` app shell (Phase 3 step 1): `App` (tabs, sub-page stack, back order, dialog, toast, `SetTheme` saving the profile), all 6 themes × light/dark + custom palette (`PaletteFor`, `CustomPalette`, tested against the tokens and the prototype's own JS), bottom nav, logo top bar, sub-page bar with search (`Search`), `PromptDialog` / `ConfirmDialog`, toasts, `IconSVG` (prototype SVG icons), `Paragraph` (CSS line-height), `shade()` (browser-matching translucent black). Tabs other than Home are placeholders; Home is a temporary "shell preview" with buttons for dialogs, toasts and a theme picker sub-page. `preview.go` and `snapshot.go` hold the temporary bits.
+- `ui/` app shell (Phase 3 step 1): `App` (tabs, sub-page stack, back order, dialog, toast, `SetTheme` saving the profile), all 6 themes × light/dark + custom palette (`PaletteFor`, `CustomPalette`, tested against the tokens and the prototype's own JS), bottom nav, logo top bar, sub-page bar with search (`Search`), `PromptDialog` / `ConfirmDialog`, toasts, `IconSVG` (prototype SVG icons), `Paragraph` (CSS line-height), `shade()` (browser-matching translucent black). Favorites and Digest tabs are placeholders until steps 5–6; the Home gear opens a temporary theme picker (`preview.go`) until Settings (step 9). `snapshot.go` holds the snapshot states.
 - `ui/` Library (step 2), `library.go`: categories grid with the fanned poster stack, ☰ menus (Rename / Delete), dashed "+ New category" tile, category page (folder grid, "+ New folder", Uncategorised rows), folder page, scoped search on all three, card drop-in animation. Dialogs use the prototype's wording; changes save through `App.save` (reloads from the store if a save fails). Entry rows open a placeholder until step 3. Shared pieces: `entryrow.go` (entry rows, stars, tag chips, empty state, `searchResults`), `libparts.go` (`addTile`, `cardMenu`, `cardDrop`, dashed borders), `typepicker.go` ("What lives here"), `images.go` (posters read from `App.PosterDir`, resized once and cached). `core` gained `SetCategoryType` and `CoverEntries`.
 - `ui/` step 3: `entryform.go` (New / Edit form; `formfields.go` holds each type's fields, incl. podcast "Ep. length" and music "Length"), `entrydetail.go` (hero, badges + Top 5 pill, meta chips with total time, progress, Your words, tags, cast, journey timeline, favourite, two-tap delete), `logsheet.go` + `sheet.go` (bottom sheet to log / edit sessions and rewatches, partial rewatch "Episodes rewatched", the reached-the-end prompt, deleting journey items). Controls: `dropdown` (category, folder, type), `dateField` + month calendar dialog, multi-line `Input`, `starInput` (half stars), `tagPicker`, `uploadBox` (system file picker via gioui.org/x/explorer, `App.ChooseImage`; pictures resized by `store.ResizePoster`). `App.timeIndex()` builds time events once per frame.
+- `ui/` step 4: `home.go` (greeting with the name in italic accent, streak pill, stat-chip ribbon, "Log something new", memory card "One year ago", Still with you / Recently finished rows, the empty state; `posterPage` for the three "see all" pages — Still with you, Recently finished, All entries — each with scoped search). Chips: Total → All entries, Finished → Recently finished, Ongoing → Still with you, Consumed → a "coming in step 7" page. `postercard.go` (ongoing card with progress ring and the "✓ Finished?" badge that asks before finishing; finished card). `emoji.go` draws bundled colour-emoji PNGs (`assets/emoji`, Noto Color Emoji, OFL) for 🔥 and 🎨. `cmd/snapshot -now` fixes the clock.
 - `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
@@ -65,7 +66,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+1. **Streak pill (🔥).** Gio can't draw colour emoji. Built three options, switched by `homeStreak` in `home.go`: **A** bundled Noto colour-emoji image (current default, looks like the prototype), **B** a line flame icon in the accent colour, **C** words only. Waiting for the owner's pick. The same choice will apply to 🎨 in Settings (step 9).
 
 ## The owner's real data
 
@@ -95,6 +96,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 4: Home (stat chips, Still with you, Recently finished, memory card) and the three "see all" pages. Replace `homePreview` in `preview.go`; `ui/postercard.go` and `ui/chip.go` are the Phase 0 spike's poster card and stat chip, to be brought up to date. Entry pages open with `newEntryDetail(id)`; time comes from `App.timeIndex()`. Settle the colour-emoji question (🔥 streak pill) with options first. Sub-pages go through `App.Push`, dialogs `App.ShowDialog`, sheets `App.ShowSheet`, saves `App.save`.
+2. Next is step 5: Favorites with Top 5 (SPEC §6, prototype `renderFavorites`). Replace the Favorites placeholder in `app.go`. Reuse `posterPage`/`gridRow`/`ongoingCard`/`finishedCard` where the prototype uses the same cards. Entry pages open with `newEntryDetail(id)`; time comes from `App.timeIndex()`. Sub-pages go through `App.Push`, dialogs `App.ShowDialog`, sheets `App.ShowSheet`, saves `App.save`.
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

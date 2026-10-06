@@ -93,7 +93,7 @@ func NewApp(th *Theme, lib *core.Library, db *store.DB) *App {
 	a := &App{Theme: th, Lib: lib, DB: db, Now: time.Now, Loc: time.Local}
 	th.Palette = PaletteFor(lib.Profile)
 	a.roots = [tabCount]Screen{
-		TabHome:      &homePreview{},
+		TabHome:      &homePage{},
 		TabLibrary:   &libraryRoot{},
 		TabNew:       newEntryPage(),
 		TabFavorites: &placeholder{eyebrow: "Favorites", title: "The ones you love", step: 5},

@@ -36,6 +36,7 @@ func main() {
 	accent := flag.String("accent", "#C4956A", "custom theme accent colour")
 	top := flag.Float64("top", 0, "status bar height in dp, to check the safe area")
 	bottom := flag.Float64("bottom", 0, "system navigation bar height in dp")
+	nowFlag := flag.String("now", "", "pretend it is this time (RFC 3339, e.g. 2026-09-29T09:00:00Z), for streaks and dates")
 	archive := flag.String("archive", "", "prototype archive to show (e.g. importer/testdata/scrubbed-archive.json)")
 	flag.Parse()
 
@@ -57,6 +58,14 @@ func main() {
 	}
 	a := ui.NewApp(th, lib, nil)
 	a.PosterDir = posterDir
+	if *nowFlag != "" {
+		t, err := time.Parse(time.RFC3339, *nowFlag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		a.Now = func() time.Time { return t }
+		a.Loc = time.UTC
+	}
 	if err := a.ShowForSnapshot(*screen); err != nil {
 		log.Fatal(err)
 	}

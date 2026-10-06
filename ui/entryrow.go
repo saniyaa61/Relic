@@ -178,6 +178,14 @@ func (l *entryList) widgets(a *App, entries []*core.Entry) []layout.Widget {
 // rows, or an empty state. Pages pass their own entry set and scope label;
 // the matching itself is core.Library.Search (SPEC §4.9).
 func searchResults(a *App, list *entryList, scopeEntries []*core.Entry, query, scope string, emptyIcon *Icon) []layout.Widget {
+	return searchResultsWith(a, scopeEntries, query, scope, emptyIcon, 10, func(matched []*core.Entry) []layout.Widget {
+		return list.widgets(a, matched)
+	})
+}
+
+// searchResultsWith is searchResults with the page's own result layout
+// (poster rows on the Home pages) and closing space.
+func searchResultsWith(a *App, scopeEntries []*core.Entry, query, scope string, emptyIcon *Icon, spacer float32, body func([]*core.Entry) []layout.Widget) []layout.Widget {
 	th := a.Theme
 	matched := a.Lib.Search(scopeEntries, query)
 	header := func(gtx layout.Context) layout.Dimensions {
@@ -191,9 +199,9 @@ func searchResults(a *App, list *entryList, scopeEntries []*core.Entry, query, s
 			return emptyState(gtx, th, emptyIcon, core.NoResults(query))
 		})
 	} else {
-		rows = append(rows, list.widgets(a, matched)...)
+		rows = append(rows, body(matched)...)
 	}
-	return append(rows, layout.Spacer{Height: 10}.Layout)
+	return append(rows, layout.Spacer{Height: unitDp(spacer)}.Layout)
 }
 
 // plural is "1 entry" / "3 entries" style counting.

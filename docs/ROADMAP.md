@@ -61,7 +61,7 @@ Build in this order, checking each against the prototype side by side:
 1. App shell: theme tokens, fonts, bottom navigation, back behaviour, dialogs, toasts. (Built.)
 2. Library: categories → category → folder, create / rename / delete, poster fan, search. (Built.)
 3. New / Edit entry form; Entry detail with journey, logging, editing, finished prompt. (Built.)
-4. Home with stat chips, Still with you, Recently finished, memory card; the three "see all" pages.
+4. Home with stat chips, Still with you, Recently finished, memory card; the three "see all" pages. (Built.)
 5. Favorites with Top 5.
 6. Digest (week / month / year), Mood Trends.
 7. Consumed and its folder pages.

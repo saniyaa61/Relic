@@ -65,7 +65,7 @@ func TestDatesAndGreeting(t *testing.T) {
 	if got := FormatDate(when, ist); got != "5 October 2026" {
 		t.Errorf("FormatDate = %q", got)
 	}
-	if got := FormatToday(when, ist); got != "Monday, 5 October" {
+	if got := FormatToday(when, ist); got != "Monday 5 October" {
 		t.Errorf("FormatToday = %q", got)
 	}
 	tests := []struct {

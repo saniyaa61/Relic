@@ -72,7 +72,7 @@ func FormatDate(t time.Time, loc *time.Location) string {
 
 // FormatToday is the Home date line, "Monday, 5 October".
 func FormatToday(now time.Time, loc *time.Location) string {
-	return now.In(loc).Format("Monday, 2 January")
+	return now.In(loc).Format("Monday 2 January") // as the prototype (en-GB): "Tuesday 6 October"
 }
 
 // Greeting is "Good morning" before noon, "Good afternoon" before 5pm,

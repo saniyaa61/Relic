@@ -4,7 +4,7 @@
 //
 //   node tools/protoshot.js <repo> <out-dir> [shell|library]
 //
-// HEIGHT=1900 for a taller window (long forms). MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
+// HEIGHT=1900 for a taller window (long forms). NOW=2026-09-29T09:00:00Z fixes the clock. MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
 // category. Add shot lists below for other screens.
 const { chromium } = require('/opt/node-tools/node_modules/playwright');
@@ -54,6 +54,15 @@ const shots = {
     ['log-edit', () => { closeLogSheet(); showDetail(entries[0].id); openLogSheet(entries[0].id, 'session', 0); }],
     ['reached-end', () => { closeLogSheet(); const e = entries[0]; openConfirmModal({ title: 'Looks like you reached the end!', sub: `You've caught up with every bit of ${e.title}. Mark it as finished?`, confirm: 'Mark as finished', cancel: 'Not yet', onConfirm: () => {} }); }],
   ],
+  home: [
+    ['home', () => nav('home')],
+    ['home-memory', () => { const e = entries.find(x => x.status === 'finished'); const d = new Date(); d.setFullYear(d.getFullYear() - 1); e.createdAt = d.toISOString(); renderHome(); }],
+    ['home-finished-badge', () => { load(); const e = entries.find(x => x.status === 'ongoing' && x.totalEpisodes > (x.watchedEpisodes || 0)); e.sessions.push({ date: new Date().toISOString(), eps: e.totalEpisodes - e.watchedEpisodes, kind: 'session' }); recomputeProgress(e); renderHome(); }],
+    ['swy', () => openStillWithYou()],
+    ['rf', () => openRecentFinished()],
+    ['ae', () => openAllEntries()],
+    ['swy-search', () => { openStillWithYou(); swySearchOpen = true; swySearchQuery = 'entry 1'; renderStillWithYou(); }],
+  ],
   library: [
     ['lib-root', () => nav('library')],
     ['lib-new-category', () => goAddCategory()],
@@ -77,6 +86,7 @@ const shots = {
   const page = await browser.newPage({ viewport: { width: 400, height: Number(process.env.HEIGHT || 800) }, deviceScaleFactor: 2 });
   await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
   const url = 'file://' + path.join(repo, 'reference/relic.html');
+  if (process.env.NOW) await page.clock.setFixedTime(new Date(process.env.NOW));
   await page.goto(url);
   const mode = process.env.MODE || 'light';
   let data = { userName: 'Saniya', theme: 'linen', sections: [{ id: 's1', name: 'Films', type: 'film', folders: [] }], entries: [] };

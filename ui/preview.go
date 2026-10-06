@@ -30,63 +30,6 @@ func (p *placeholder) Layout(gtx layout.Context, a *App) layout.Dimensions {
 	})
 }
 
-// homePreview stands in for Home (step 4) with buttons that try each part
-// of the shell: dialogs, toasts and a sub-page.
-type homePreview struct {
-	settings                                  IconButton
-	prompt, confirm, toast, toastErr, subPage widget.Clickable
-	list                                      widget.List
-}
-
-func (h *homePreview) Layout(gtx layout.Context, a *App) layout.Dimensions {
-	th := a.Theme
-	if h.settings.Click.Clicked(gtx) || h.subPage.Clicked(gtx) {
-		a.Push(&themePreview{})
-	}
-	if h.prompt.Clicked(gtx) {
-		a.ShowDialog(PromptDialog("New category",
-			"Call it whatever makes sense to you — Films, Comfort Rewatches, Books for the train.",
-			"Category name", "e.g. Films", "", "Create",
-			func(a *App, v string) { a.Toast("Preview only — “" + v + "” wasn't saved") }))
-	}
-	if h.confirm.Clicked(gtx) {
-		a.ShowDialog(ConfirmDialog("Delete this entry?",
-			"This piece of your journey will be removed. This can't be undone.", "", "Delete",
-			func(a *App) { a.Toast("Preview only — nothing was deleted") }))
-	}
-	if h.toast.Clicked(gtx) {
-		a.Toast("Session logged ✦")
-	}
-	if h.toastErr.Clicked(gtx) {
-		a.ToastError("You already have that category")
-	}
-	return scrollPage(gtx, &h.list, []layout.Widget{
-		func(gtx layout.Context) layout.Dimensions {
-			return logoBar(gtx, th, func(gtx layout.Context) layout.Dimensions {
-				return h.settings.Layout(gtx, th, IconSettings)
-			})
-		},
-	}, []layout.Widget{
-		func(gtx layout.Context) layout.Dimensions {
-			return pageHead(gtx, th, "App shell preview", "Home",
-				"The real Home screen arrives in step 4. Until then, try the parts every screen will share.")
-		},
-		func(gtx layout.Context) layout.Dimensions {
-			return wideButton(gtx, th, &h.prompt, nil, "Show a dialog")
-		},
-		func(gtx layout.Context) layout.Dimensions {
-			return wideButton(gtx, th, &h.confirm, nil, "Ask before deleting")
-		},
-		func(gtx layout.Context) layout.Dimensions { return wideButton(gtx, th, &h.toast, nil, "Show a toast") },
-		func(gtx layout.Context) layout.Dimensions {
-			return wideButton(gtx, th, &h.toastErr, nil, "Show an error toast")
-		},
-		func(gtx layout.Context) layout.Dimensions {
-			return wideButton(gtx, th, &h.subPage, IconSettings, "Open a sub-page (theme picker)")
-		},
-	})
-}
-
 // themePreview is a sub-page for trying every theme and both modes. The
 // choice is saved, so it is remembered next launch. The real picker is
 // part of Settings (step 9).

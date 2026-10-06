@@ -14,3 +14,9 @@ var Fonts embed.FS
 //
 //go:embed logo.webp
 var Logo []byte
+
+// Emoji holds the few colour emoji the app shows (🔥, 🎨) as PNGs from
+// Noto Color Emoji (OFL), since Gio can't draw colour emoji from a font.
+//
+//go:embed emoji/*.png
+var Emoji embed.FS

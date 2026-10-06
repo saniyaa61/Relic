@@ -14,6 +14,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"lib-category", "lib-category-films", "lib-category-empty", "lib-new-folder", "lib-delete-folder",
 	"lib-folder", "lib-folder-search", "lib-folder-empty",
 	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
+	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
 
@@ -57,6 +58,42 @@ func (a *App) ShowForSnapshot(screen string) error {
 		a.Toast("Session logged ✦")
 	case "toast-error":
 		a.ToastError("You already have that category")
+	case "home-empty":
+		a.Lib.Categories, a.Lib.Entries = nil, nil
+	case "home-memory":
+		// Pretend the newest finished entry was logged a year ago today.
+		for _, e := range a.Lib.Entries {
+			if e.Status == core.Finished {
+				e.CreatedAt = t0.AddDate(-1, 0, 0)
+				break
+			}
+		}
+	case "home-streak-icon":
+		homeStreak = streakIcon
+	case "home-streak-plain":
+		homeStreak = streakPlain
+	case "home-finished-badge":
+		// Bring an ongoing series to its last episode.
+		for _, e := range a.Lib.Entries {
+			if e.Status == core.Ongoing && e.Type.TracksProgress() && !e.ReachedEnd() {
+				if done, total, _ := e.Progress(); total > 0 {
+					n := total - done
+					e.LogSession(core.SessionInput{Episodes: &n, FromPage: &done, ToPage: &total}, t0)
+					break
+				}
+			}
+		}
+	case "swy":
+		a.Push(newPosterPage(pageStillWithYou))
+	case "rf":
+		a.Push(newPosterPage(pageRecentlyFinished))
+	case "ae":
+		a.Push(newPosterPage(pageAllEntries))
+	case "swy-search":
+		p := newPosterPage(pageStillWithYou)
+		a.Push(p)
+		p.search.Toggle(a)
+		p.search.input.Editor.SetText("entry 1")
 	default:
 		if strings.HasPrefix(screen, "detail") || strings.HasPrefix(screen, "log-") || strings.HasPrefix(screen, "reached-end") {
 			return a.detailForSnapshot(screen)
