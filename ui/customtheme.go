@@ -8,7 +8,6 @@ package ui
 import (
 	"image"
 	"image/color"
-	"strings"
 
 	"gioui.org/f32"
 	"gioui.org/font"
@@ -104,14 +103,6 @@ func customTileTop(gtx layout.Context, a *App, name string, size image.Point, r 
 	st.Pop()
 }
 
-// customSwatches are the colours offered for a custom palette: the
-// built-in themes' own accents first, then a few more in the same spirit.
-var customSwatches = []string{
-	"#7A5C3A", "#C4956A", "#5A3E9A", "#9B74D4", "#C4756A", "#E8A89F",
-	"#3D6B3A", "#7AAD76", "#C05880", "#E090B0", "#3A5A8A", "#7090C0",
-	"#8B4513", "#B8860B", "#2F4F4F", "#6B8E23", "#800020", "#4B0082",
-}
-
 // customPicker is the box under the tiles when Custom is chosen: base
 // tone and accent colour, each opening a colour dialog, and Apply.
 type customPicker struct {
@@ -203,50 +194,4 @@ func colourSwatch(gtx layout.Context, th *Theme, hex string, w, h float32, ring 
 		rrect(gtx, size, r, c)
 	}
 	return layout.Dimensions{Size: size}
-}
-
-// openColourDialog offers the swatches and a hex field; "Use colour"
-// hands back the choice.
-func openColourDialog(a *App, title, current string, pick func(string)) {
-	chosen := strings.ToUpper(current)
-	clicks := make([]widget.Clickable, len(customSwatches))
-	d := PromptDialog(title, "Pick a colour, or type its hex code.", "Hex", "#7A5C3A", chosen, "Use colour", nil)
-	d.focusField = false
-	d.OnConfirm = func(a *App, v string) {
-		v = strings.ToUpper(strings.TrimSpace(v))
-		if !strings.HasPrefix(v, "#") {
-			v = "#" + v
-		}
-		if _, ok := ParseHex(v); !ok {
-			a.ToastError("That isn't a colour code, like #7A5C3A.")
-			return
-		}
-		pick(v)
-	}
-	d.Body = func(gtx layout.Context, a *App) layout.Dimensions {
-		th := a.Theme
-		for i := range clicks {
-			if clicks[i].Clicked(gtx) {
-				d.input.Editor.SetText(customSwatches[i])
-			}
-		}
-		chosen = strings.ToUpper(strings.TrimSpace(d.input.Editor.Text()))
-		cols := 6
-		gap := gtx.Dp(8)
-		w := (gtx.Constraints.Max.X - (cols-1)*gap) / cols
-		y := 0
-		for i, hex := range customSwatches {
-			x := (i % cols) * (w + gap)
-			y = (i / cols) * (w + gap)
-			st := op.Offset(image.Pt(x, y)).Push(gtx.Ops)
-			cgtx := gtx
-			cgtx.Constraints = layout.Exact(image.Pt(w, w))
-			clicks[i].Layout(cgtx, func(gtx layout.Context) layout.Dimensions {
-				return colourSwatch(gtx, th, hex, float32(w)/gtx.Metric.PxPerDp, float32(w)/gtx.Metric.PxPerDp, hex == chosen)
-			})
-			st.Pop()
-		}
-		return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, y+w)}
-	}
-	a.ShowDialog(d)
 }
