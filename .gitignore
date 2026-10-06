@@ -11,3 +11,8 @@ relic-archive.json
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+
+# Local environment and secrets: never commit
+.env
+.env.*
+!.env.example

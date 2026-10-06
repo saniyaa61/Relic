@@ -59,6 +59,15 @@ Update this section when a decision is made.
 - Ask before changing anything visual that the spec doesn't define.
 - Report honestly: say what was tested and how, and what wasn't.
 
+## Setup
+
+- **Windows (the owner's laptop):** install Go (the version in `go.mod`, or any newer Go, which fetches it automatically), Git and VS Code with the Go extension. `go run ./cmd/relic` then works with no further steps. Android tools (SDK, NDK, JDK 17, `gogio`) are only needed to build the APK locally; CI builds it otherwise.
+- **Linux / cloud sessions:** the `ui` package needs Gio's system libraries, the same list as the "Install Gio's Linux libraries" step in `.github/workflows/build.yml` (keep the two in step):
+  `apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev`
+  The cloud environment's setup script installs these. Without them, only `go test ./core/... ./store/... ./importer/...` runs.
+- **No display (cloud):** set `EGL_PLATFORM=surfaceless` so `cmd/snapshot` can render PNGs.
+- No API keys or secrets are needed. Never commit `.env` files or the real archive (both are gitignored).
+
 ## Commands
 
 - Checks: `go vet ./...` and `go test ./...`
