@@ -65,7 +65,7 @@ func TestMoodTrends(t *testing.T) {
 	if d.MaxCount() != 1 {
 		t.Errorf("MaxCount = %d", d.MaxCount())
 	}
-	if got := d.MonthTop(0, 3); !reflect.DeepEqual(got, []string{"Quiet", "Gothic"}) {
+	if got := d.MonthTop(0, 3); !reflect.DeepEqual(got, []TagCount{{"Quiet", 1}, {"Gothic", 1}}) {
 		t.Errorf("May top = %v", got)
 	}
 	// 6 months: recent = last 3, earlier = first 3.

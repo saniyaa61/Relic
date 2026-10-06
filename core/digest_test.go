@@ -131,3 +131,55 @@ func TestStillGoing(t *testing.T) {
 		t.Error("empty")
 	}
 }
+
+func TestDigestNarrative(t *testing.T) {
+	l := newLib(t)
+	films := mustCat(t, l, "Films", Film)
+	now := at(ist, 2026, 9, 29, 9, 0)
+	e := &Entry{}
+	week := LastWeek(now)
+	month := MonthOfDigest(Month{2026, 9}, ist)
+	year := YearOfDigest(2026, ist)
+	tests := []struct {
+		name   string
+		st     DigestStats
+		p      Period
+		streak int
+		want   string
+	}{
+		{"quiet week", DigestStats{}, week, 0, "A quiet week. Sometimes stillness is its own kind of nourishment."},
+		{"week", DigestStats{Sessions: 2, Minutes: 702, TopCategory: films.ID}, week, 3,
+			"You spent 11.7 hrs in other worlds this week. Mostly in Films. 3 days in a row now."},
+		{"week, no time, streak of one", DigestStats{Sessions: 1}, week, 1, "You spent a little time in other worlds this week."},
+		{"quiet month", DigestStats{}, month, 0, "A quiet month in the library. Your next story is out there, waiting."},
+		{"month", DigestStats{New: []*Entry{e}, Minutes: 30, TopCategory: films.ID, TopTag: "Quiet"}, month, 0,
+			"1 new entry, 30 min spent living inside them. Most of it in Films. The feeling that kept returning: Quiet."},
+		{"month, time only", DigestStats{Minutes: 90}, month, 0, "0 new entries, 1.5 hrs spent living inside them."},
+		{"empty year", DigestStats{}, year, 0, "2026 hasn't started yet, or nothing was logged. Either way, the page is blank and waiting."},
+		{"year", DigestStats{New: []*Entry{e, e}, Finished: []*Entry{e}, Minutes: 4752, TopCategory: films.ID, TopTag: "Beautiful"}, year, 0,
+			"You gave 3.3 days to other worlds in 2026. You finished 1 story. More than anywhere else, you lived in Films. And the feeling you returned to most: Beautiful."},
+		{"future", DigestStats{}, MonthOfDigest(Month{2026, 10}, ist), 0, "This chapter hasn't been written yet."},
+	}
+	for _, tt := range tests {
+		if got := l.DigestNarrative(tt.st, tt.p, now, tt.streak); got != tt.want {
+			t.Errorf("%s:\n got %q\nwant %q", tt.name, got, tt.want)
+		}
+	}
+}
+
+func TestProgressSummary(t *testing.T) {
+	tests := []struct {
+		e    *Entry
+		want string
+	}{
+		{&Entry{Type: Series, Fields: Fields{TotalEpisodes: 12}, Sessions: []Session{{Episodes: 10}}}, "10 episodes in · 83% through"},
+		{&Entry{Type: Book, Sessions: []Session{{ToPage: 120}}}, "120 pages in"},
+		{&Entry{Type: Book, Fields: Fields{TotalPages: 300}}, "0 pages in · 0% through"},
+		{&Entry{Type: Film}, ""},
+	}
+	for _, tt := range tests {
+		if got := tt.e.ProgressSummary(); got != tt.want {
+			t.Errorf("%v: %q, want %q", tt.e.Type, got, tt.want)
+		}
+	}
+}

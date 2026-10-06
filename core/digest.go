@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"sort"
 	"time"
 )
@@ -208,4 +209,85 @@ func PeakIndex(v []float64) int {
 // YearHasData reports whether a year has anything for the Year in Review card.
 func (st DigestStats) YearHasData() bool {
 	return st.Minutes > 0 || len(st.New) > 0 || len(st.Finished) > 0
+}
+
+// DigestNarrative is the sentence in the Digest hero (SPEC §5 "Digest";
+// the prototype's wording). streak is the current day streak.
+func (l *Library) DigestNarrative(st DigestStats, p Period, now time.Time, streak int) string {
+	if p.Start.After(now) {
+		return "This chapter hasn't been written yet."
+	}
+	spent := func(fallback string) string {
+		if s := FormatDuration(st.Minutes); s != "" {
+			return s
+		}
+		return fallback
+	}
+	cat := l.CategoryName(st.TopCategory)
+	switch p.Kind {
+	case WeekPeriod:
+		if len(st.New) == 0 && st.Sessions == 0 {
+			return "A quiet week. Sometimes stillness is its own kind of nourishment."
+		}
+		line := "You spent " + spent("a little time") + " in other worlds this week."
+		if cat != "" {
+			line += " Mostly in " + cat + "."
+		}
+		if streak > 1 {
+			line += fmt.Sprintf(" %d days in a row now.", streak)
+		}
+		return line
+	case MonthPeriod:
+		if len(st.New) == 0 && st.Minutes == 0 {
+			return "A quiet month in the library. Your next story is out there, waiting."
+		}
+		noun := "entries"
+		if len(st.New) == 1 {
+			noun = "entry"
+		}
+		line := fmt.Sprintf("%d new %s, %s spent living inside them.", len(st.New), noun, spent("a little time"))
+		if cat != "" {
+			line += " Most of it in " + cat + "."
+		}
+		if st.TopTag != "" {
+			line += " The feeling that kept returning: " + st.TopTag + "."
+		}
+		return line
+	}
+	if len(st.New) == 0 && st.Minutes == 0 {
+		return fmt.Sprintf("%d hasn't started yet, or nothing was logged. Either way, the page is blank and waiting.", p.Year)
+	}
+	line := fmt.Sprintf("You gave %s to other worlds in %d.", spent("some time"), p.Year)
+	if n := len(st.Finished); n > 0 {
+		noun := "stories"
+		if n == 1 {
+			noun = "story"
+		}
+		line += fmt.Sprintf(" You finished %d %s.", n, noun)
+	}
+	if cat != "" {
+		line += " More than anywhere else, you lived in " + cat + "."
+	}
+	if st.TopTag != "" {
+		line += " And the feeling you returned to most: " + st.TopTag + "."
+	}
+	return line
+}
+
+// ProgressSummary is the Digest's "Still going" line: "10 episodes in ·
+// 83% through", or just "120 pages in" without a total.
+func (e *Entry) ProgressSummary() string {
+	done, total, ok := e.Progress()
+	if !ok {
+		return ""
+	}
+	unit := "episodes"
+	if e.Type.Progress() == PageProgress {
+		unit = "pages"
+	}
+	s := fmt.Sprintf("%d %s in", done, unit)
+	if total > 0 {
+		s += fmt.Sprintf(" · %d%% through", e.ProgressPercent())
+	}
+	return s
 }

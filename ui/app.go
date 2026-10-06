@@ -97,7 +97,7 @@ func NewApp(th *Theme, lib *core.Library, db *store.DB) *App {
 		TabLibrary:   &libraryRoot{},
 		TabNew:       newEntryPage(),
 		TabFavorites: &favoritesPage{},
-		TabDigest:    &placeholder{eyebrow: "Digest", title: "Your story so far", step: 6},
+		TabDigest:    newDigestPage(),
 	}
 	return a
 }

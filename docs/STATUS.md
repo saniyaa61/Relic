@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 5 (Favorites with Top 5).
+Last updated: 2026-10-06, after Phase 3 step 6 (Digest and Mood Trends).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 5 (Favorites with Top 5).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Steps 1–5 done (shell, Library, entry form/page, Home, Favorites). Next: step 6 (Digest and Mood Trends). |
+| 3 Screens | **In progress.** Steps 1–6 done (shell, Library, entry form/page, Home, Favorites, Digest). Next: step 7 (Consumed). |
 
 ## What exists
 
@@ -28,6 +28,8 @@ Last updated: 2026-10-06, after Phase 3 step 5 (Favorites with Top 5).
 - `ui/` step 4: `home.go` (greeting with the name in italic accent, streak pill, stat-chip ribbon, "Log something new", memory card "One year ago", Still with you / Recently finished rows, the empty state; `posterPage` for the three "see all" pages — Still with you, Recently finished, All entries — each with scoped search). Chips: Total → All entries, Finished → Recently finished, Ongoing → Still with you, Consumed → a "coming in step 7" page. `postercard.go` (ongoing card with progress ring and the "✓ Finished?" badge that asks before finishing; finished card). `emoji.go` draws bundled colour-emoji PNGs (`assets/emoji`, Noto Color Emoji, OFL) for 🔥 and 🎨. `cmd/snapshot -now` fixes the clock.
 - `ui/` step 5: `favorites.go` (category tabs that glide the picked one into view, "All-Time Top 5 · Category" row of Top 5 cards with ‹ › ✕ and a glide when they reorder, "Favourites · Category" rows of four with the "+" that ranks one, empty states, "No categories yet"; the "Rank it among your all-time favourites?" sheet the entry page offers 380 ms after favouriting). Favourite / Top 5 changes go through `toggleFavourite`, `addTopFive`, `removeTopFive`, which save and show the prototype's toasts. Tabs list every category, as the prototype does.
 - Fixed while comparing in step 5: the entry page's Top 5 pill read "#2" for first place; the title sat 6dp low and the first divider ~10dp low (the browser merges the meta line's margin with the rule's); the type badge and Top 5 pill are now the prototype badge's 19dp. The symbols font is also registered as italic, so "Rank it ✦" shows its ✦.
+- `ui/` step 6: `digest.go` (Week / Month / Year toggle, ‹ › within `DigestBounds`, hero with `Library.DigestNarrative`, stat grid with the 🔥 day streak, Best this period, Year's month bars and Top rated, Still going (`Entry.ProgressSummary`), sessions, "Share your year" (a stand-in page until step 8), Mood trends link, closing note, empty state) and `moods.go` (Mood Trends: What stands out, Feelings over time, Month by month). `MoodData.MonthTop` now returns counts (`TagCount`).
+- Differences from the prototype that are on purpose: "Finished this year" counts the imported finished entries (the importer gives them a finish date, SPEC §9; the prototype shows "—"); a month's top feelings break ties by overall frequency (core rule) rather than A–Z.
 - `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
@@ -53,6 +55,7 @@ Decided 2026-10-06 (first cloud session):
 - **"Mark as finished" uses the theme's accent colour**, not the prototype's red.
 - **Date fields: the month calendar dialog is approved.**
 - **Streak pill keeps the colour 🔥** (option A, a bundled Noto Color Emoji image); 🎨 in Settings will use the same approach. Options B (line flame) and C (words only) remain in `home.go` behind `homeStreak` for snapshots.
+- **Journey notes keep the writer's paragraph breaks** (the prototype ran them together).
 - **Category and folder pages keep the bottom bar**, as in the prototype (overrides SPEC §5's "sub-pages hide the bottom bar" for these two pages).
 
 The two new form fields (Episodes rewatched, Length (mins)) are not in the prototype. The owner approved them from these sketches, so build them like this, styled like neighbouring fields:
@@ -69,7 +72,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **Line breaks in journey notes.** The prototype runs a note's paragraphs together (HTML ignores line breaks); the Go app keeps the writer's blank lines. Ask the owner which they want (not yet asked).
+1. **Year digest month bars.** The prototype fills bars with a gradient. Built three, switched by `yearBars` in `digest.go`: A gradient (prototype), **B flat accent2 with the busiest month in accent (current default, matches Mood Trends)**, C flat accent. Waiting for the owner's pick (sheet `s6-3-bar-options.png`).
 
 ## The owner's real data
 
@@ -99,6 +102,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 6: Digest (week / month / year, SPEC §4.12 and §5 "Digest", prototype `renderDigest`) and Mood Trends (§4.13). The core already has `Library.Digest`, `DigestBounds`, `MoodTrends`. Replace the Digest placeholder in `app.go`; the month chart's bars use a gradient in the prototype (`.dmonth-bar.has-data`): show the owner options before building (no gradients rule). Sub-pages go through `App.Push`, dialogs `App.ShowDialog`, sheets `App.ShowSheet`, saves `App.save`; time comes from `App.timeIndex()`.
+2. Next is step 7: Consumed and its folder pages (SPEC §5 "Consumed", prototype `renderConsumed`). The Home Consumed chip opens a `comingSoon` page now; replace it. Core has `TimeIndex.Weekly` (sparkline), `ConsumedByCategory`, `ShareBar`, `Perspective`. Poster cards with time: `finishedCard.Layout(..., showTime=true)`. Watch for CSS margin collapsing (see CLAUDE.md) and borders: a card with a CSS border needs `card()` inset = the CSS padding; one without needs padding − 1.
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

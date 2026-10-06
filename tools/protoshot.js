@@ -2,7 +2,7 @@
 // for side-by-side checks against cmd/snapshot. Uses the bundled fonts
 // (Google Fonts may be unreachable) and the pre-installed Chromium.
 //
-//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites]
+//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest]
 //
 // HEIGHT=1900 for a taller window (long forms). NOW=2026-09-29T09:00:00Z fixes the clock. MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
@@ -70,6 +70,14 @@ const shots = {
     ['fav-podcasts', () => setFavCategory(sections[3].name)],
     ['fav-rank', () => { const e = entries.find(x => !x.favorite && x.section === sections[0].name); e.favorite = true; showDetail(e.id); openRankPrompt(e.id); }],
     ['fav-nocats', () => { closeRankPrompt(); sections = []; nav('favorites'); }],
+  ],
+  digest: [
+    ['digest', () => nav('digest')],
+    ['digest-prev', () => shiftDigestMonth(-1)],
+    ['digest-week', () => setDigestPeriod('week')],
+    ['digest-year', () => setDigestPeriod('year')],
+    ['moods', () => openMoods()],
+    ['digest-empty', () => { entries = []; nav('digest'); }],
   ],
   library: [
     ['lib-root', () => nav('library')],

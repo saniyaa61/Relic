@@ -15,6 +15,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"lib-folder", "lib-folder-search", "lib-folder-empty",
 	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
 	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
+	"digest-prev", "digest-week", "digest-year", "digest-year-gradient", "digest-year-flat", "moods", "digest-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
@@ -39,8 +40,25 @@ func (a *App) ShowForSnapshot(screen string) error {
 		a.Go(TabNew)
 	case "favorites", "fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats":
 		return a.favoritesForSnapshot(screen)
-	case "digest":
+	case "digest", "digest-prev", "digest-week", "digest-year", "digest-year-gradient", "digest-year-flat", "digest-empty":
+		if screen == "digest-empty" {
+			a.Lib.Entries = nil
+		}
 		a.Go(TabDigest)
+		p := a.roots[TabDigest].(*digestPage)
+		switch screen {
+		case "digest-prev":
+			b := a.Lib.DigestBounds(t0, a.Loc)
+			p.month = b.StepMonth(b.Ceiling, -1)
+		case "digest-week":
+			p.kind = core.WeekPeriod
+		case "digest-year", "digest-year-gradient", "digest-year-flat":
+			p.kind = core.YearPeriod
+			yearBars = map[string]yearBarStyle{"digest-year": barsPeak, "digest-year-gradient": barsGradient, "digest-year-flat": barsFlat}[screen]
+		}
+	case "moods":
+		a.Go(TabDigest)
+		a.Push(&moodsPage{})
 	case "subpage", "search":
 		p := &themePreview{}
 		a.Push(p)

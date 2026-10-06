@@ -100,25 +100,26 @@ func (d MoodData) MaxCount() int {
 	return m
 }
 
-// MonthTop returns month i's top n feelings, most frequent that month
-// first; ties go to the more frequent feeling overall.
-func (d MoodData) MonthTop(i, n int) []string {
-	type tc struct {
-		tag string
-		n   int
-	}
-	var list []tc
+// TagCount is a feeling and how often it was tagged in one month.
+type TagCount struct {
+	Tag   string
+	Count int
+}
+
+// MonthTop returns month i's top n feelings with their counts, most
+// frequent that month first; ties go to the more frequent feeling overall.
+func (d MoodData) MonthTop(i, n int) []TagCount {
+	var list []TagCount
 	for _, t := range d.Tags {
 		if c := t.Counts[i]; c > 0 {
-			list = append(list, tc{t.Tag, c})
+			list = append(list, TagCount{t.Tag, c})
 		}
 	}
-	sort.SliceStable(list, func(a, b int) bool { return list[a].n > list[b].n })
-	var out []string
-	for j := 0; j < len(list) && j < n; j++ {
-		out = append(out, list[j].tag)
+	sort.SliceStable(list, func(a, b int) bool { return list[a].Count > list[b].Count })
+	if len(list) > n {
+		list = list[:n]
 	}
-	return out
+	return list
 }
 
 // Insight is one "What stands out" line. The tag is shown in italics between
