@@ -327,27 +327,36 @@ func liftOnPress(gtx layout.Context, th *Theme, c *widget.Clickable, radius unit
 
 // The prototype's .prog-ring asks for 28px, but the general `.oc-ph svg`
 // rule wins and draws it at 26px and 70% opacity. That rule also outlines
-// the white label in the muted colour, thick enough to cover the white,
-// so it reads as bold brown. The owner likes that, so we draw it solid
-// muted with the same 1.3-unit outline.
+// the white label in the muted colour, so it reads as bold brown, but
+// it's hard to make out; the owner asked for it bold, in the accent
+// colour and readable (see progressRing).
 const ringSize unit.Dp = 26
 
 // progressRing draws the white ring with the percentage in the middle.
 func progressRing(gtx layout.Context, th *Theme, pct int) layout.Dimensions {
-	defer paint.PushOpacity(gtx.Ops, 0.7).Pop()
+	ring := paint.PushOpacity(gtx.Ops, 0.7)
 	size := gtx.Dp(ringSize)
 	px := float32(size) / 28 // the ring is designed in a 28-unit box
 	centre := f32.Pt(14*px, 14*px)
 	white := color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
 	strokeArc(gtx, centre, 11*px, 3*px, 0, 2*math.Pi, withAlpha(white, 0.25))
 	strokeArc(gtx, centre, 11*px, 3*px, 0, 2*math.Pi*float32(min(pct, 100))/100, withAlpha(white, 0.85))
+	ring.Pop()
 
 	// Centre the label in the ring.
 	rec := op.Record(gtx.Ops)
 	lgtx := gtx
 	lgtx.Constraints = layout.Constraints{Max: image.Pt(size, size)}
-	d := outlinedText(lgtx, th, font.Font{Typeface: Sans, Weight: font.Medium}, unit.Sp(7*float32(ringSize)/28), fmt.Sprintf("%d%%", pct),
-		th.Muted, th.Muted, 1.3*px)
+	// The label: bold accent, at full strength (the ring itself is at
+	// 70%), a little larger than the prototype's so it can be read
+	// (owner's request); "100%" steps down to fit inside the ring.
+	label := fmt.Sprintf("%d%%", pct)
+	sz := float32(8)
+	if len(label) > 3 {
+		sz = 6.5
+	}
+	d := outlinedText(lgtx, th, font.Font{Typeface: Sans, Weight: font.Medium}, unit.Sp(sz*float32(ringSize)/28), label,
+		th.Accent, th.Accent, 0.45*px)
 	call := rec.Stop()
 	st := op.Offset(image.Pt((size-d.Size.X)/2, (size-d.Size.Y)/2)).Push(gtx.Ops)
 	call.Add(gtx.Ops)

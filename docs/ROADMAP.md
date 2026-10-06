@@ -65,14 +65,14 @@ Build in this order, checking each against the prototype side by side:
 5. Favorites with Top 5. (Built.)
 6. Digest (week / month / year), Mood Trends. (Built.)
 7. Consumed and its folder pages. (Built.)
-8. Year in Review image + share sheet. (Built: image, preview, Save image. Share waits on the owner's choice.)
+8. Year in Review image + share sheet. (Built: image, preview, Save image. Share moves to Phase 4, owner's choice.)
 9. Settings, export / import, onboarding.
 
 **Done when:** every screen in SPEC §5 works on Android with imported real data, in at least Linen light and one dark theme.
 
 ## Phase 4 — iOS
 
-Build and run on iOS (Mac + Xcode), fix platform differences (share sheet, photo picker, safe areas, fonts).
+Build and run on iOS (Mac + Xcode), fix platform differences (share sheet, photo picker, safe areas, fonts). Add the Year card's **Share** button with native code on iOS and Android (owner's decision: Save image only until then).
 
 **Done when:** the same checklist as Phase 3 passes on an iPhone or the iOS simulator.
 

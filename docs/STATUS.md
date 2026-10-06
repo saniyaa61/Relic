@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 8 (Year in Review image).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Steps 1–7 done; step 8 (Year in Review) built except Share, which waits on the owner's choice. Next: step 9 (Settings, export / import, onboarding). |
+| 3 Screens | **In progress.** Steps 1–8 done (Year card: Save image now, Share in Phase 4). Next: step 9 (Settings, export / import, onboarding). |
 
 ## What exists
 
@@ -59,7 +59,8 @@ Decided 2026-10-06 (first cloud session):
 - **Date fields: the month calendar dialog is approved.**
 - **Streak pill keeps the colour 🔥** (option A, a bundled Noto Color Emoji image); 🎨 in Settings will use the same approach. Options B (line flame) and C (words only) remain in `home.go` behind `homeStreak` for snapshots.
 - **Year digest month bars use the prototype's gradient** (option A), an agreed exception to "no gradients". B and C stay in `digest.go` behind `yearBars` for snapshots.
-- **Bold like the prototype:** the prototype's weight-600 DM Sans / Lora text (times on Consumed and poster cards, Mood Trends totals, "+X this month", "One year ago today") is the browser thickening the Medium font. The owner likes it; `Text.FakeBold` draws it the same way (Skia's ratio). The progress ring's % label is solid muted brown with the same outline the prototype's CSS gave it (owner's request).
+- **Bold like the prototype:** the prototype's weight-600 DM Sans / Lora text (times on Consumed and poster cards, Mood Trends totals, "+X this month", "One year ago today") is the browser thickening the Medium font. The owner likes it; `Text.FakeBold` draws it the same way (Skia's ratio). The progress ring's % label is bold in the accent colour at full strength and 8px (6.5px for "100%"), so it can be read (owner's request).
+- **Year card: Save image only for now** (option A); Share comes in Phase 4 with native code and device testing.
 - **Keep "51 hrs"** (no trailing ".0").
 - **Journey notes keep the writer's paragraph breaks** (the prototype ran them together).
 - **Category and folder pages keep the bottom bar**, as in the prototype (overrides SPEC §5's "sub-pages hide the bottom bar" for these two pages).
@@ -78,7 +79,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **Share on the Year card.** Gio has no share sheet. Options put to the owner on 2026-10-06: A) Save image only now, Share in Phase 4 with native code and device testing (recommended); B) Android Share now through a small Java helper that first saves the picture into the phone's Pictures (it stays there even if sharing is cancelled); C) Android Share through a private file, which needs a custom step in the APK build (gogio can't add the manifest entry). Waiting for the answer.
+None right now.
 
 ## The owner's real data
 
