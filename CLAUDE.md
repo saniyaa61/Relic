@@ -4,6 +4,7 @@ Relic ("your stories, preserved") is a personal archive for films, dramas, books
 
 ## Key files
 
+- **`docs/STATUS.md` — read first.** Where the work stands, decisions the owner made in conversation, open questions, real-data notes, CI notes and how to start the next phase. Update it in the same commit as each finished piece of work.
 - `docs/SPEC.md` is the source of truth for data model, rules and screens. Read the relevant section before working on a feature. If the spec and the prototype disagree, the spec wins.
 - `docs/ROADMAP.md` lists the phases and their "Done when" checks. Work in phase order.
 - `docs/design-tokens.json` holds all theme colours (6 themes × light/dark, plus custom-palette formulas) and fonts.

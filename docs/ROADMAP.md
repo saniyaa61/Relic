@@ -5,11 +5,11 @@ Native Go app for Android and iOS, built offline-first. Each phase ends with a *
 ## Before you start
 
 - [x] Export your data from the prototype (Settings → Export) and keep `relic-archive.json` safe. It's your only backup and the import test data for Phase 4.
-- [ ] Install Go, Git, Claude Code.
+- [x] Install Go, Git, Claude Code.
 - [ ] Android: SDK + NDK command-line tools and JDK 17. With no phone, or too little RAM for an emulator, the GitHub Actions workflow runs the app on a cloud emulator.
 - [ ] iOS (later phases): a Mac with Xcode. iOS builds are not possible without one.
 
-## Phase 0 — Decisions and spike (short)
+## Phase 0 — Decisions and spike (short) — ✅ done
 
 Decide by building, not debating:
 
@@ -29,7 +29,7 @@ Decide by building, not debating:
 
 **Done when:** toolkit and storage are chosen and written into CLAUDE.md "Decisions"; the spike runs on the Android emulator (locally or in the GitHub Actions run).
 
-## Phase 1 — Core library
+## Phase 1 — Core library — ✅ done
 
 Port every rule in SPEC §4 into `core/` with table-driven tests. Suggested order: model & ids → status/finishedAt → sessions & start session → progress & reached-end → time events & totals → duration formatting & perspective → Your words → journey labels & start verbs → search & scopes → streak → local-date bucketing → digest periods & floor → mood trends → favourites/Top 5 → one-year-ago.
 
@@ -46,7 +46,7 @@ Include tests for the cases that broke in the prototype:
 
 **Done when:** `go test ./core/...` passes; coverage of every SPEC §4 subsection.
 
-## Phase 2 — Storage and import
+## Phase 2 — Storage and import — ✅ done
 
 - `store/` implements save/load for the full model behind an interface the UI uses.
 - `importer/` converts `relic-archive.json` (SPEC §9), resizing posters to files.
@@ -54,7 +54,7 @@ Include tests for the cases that broke in the prototype:
 
 **Done when:** importing the real archive and reading it back reproduces the same counts, time totals and Top 5 as the prototype shows.
 
-## Phase 3 — Screens (Windows build day to day, Android emulator via GitHub Actions)
+## Phase 3 — Screens (Windows build day to day, Android emulator via GitHub Actions) — ⏭ next
 
 Build in this order, checking each against the prototype side by side:
 
