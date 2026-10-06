@@ -17,15 +17,29 @@ const (
 	Display font.Typeface = "Playfair Display" // headings, numbers, titles
 	Serif   font.Typeface = "Lora"             // italic sub-lines and prose
 	Sans    font.Typeface = "DM Sans"          // UI labels
+	// Symbols fills in ★ ☆ ♥ ✓ ✕ ✦ ✧, which the three fonts above lack.
+	// Browsers borrow these from a system font; we bundle a small subset
+	// of Noto Sans Symbols 2 instead, and the shaper falls back to it.
+	Symbols font.Typeface = "Noto Sans Symbols 2"
 )
+
+// normalLineHeight is CSS "line-height: normal" for each typeface: the
+// font's ascent + descent + line gap, as a multiple of the font size.
+// fonts_test.go checks these against the font files.
+var normalLineHeight = map[font.Typeface]float32{
+	Display: 1.333,
+	Serif:   1.280,
+	Sans:    1.302,
+}
 
 // Bundled font files are named Family-WeightStyle.ttf. We set the family,
 // weight and style from the filename rather than trusting each file's
 // internal names, which differ between static font builds.
 var fontFamilies = map[string]font.Typeface{
-	"PlayfairDisplay": Display,
-	"Lora":            Serif,
-	"DMSans":          Sans,
+	"PlayfairDisplay":  Display,
+	"Lora":             Serif,
+	"DMSans":           Sans,
+	"NotoSansSymbols2": Symbols,
 }
 
 var fontWeights = map[string]font.Weight{
