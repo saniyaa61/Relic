@@ -42,7 +42,7 @@ Update this section when a decision is made.
 ## Design guardrails (from the owner's feedback)
 
 - Flat, quiet design: thin borders, rounded cards, serif headings, small letter-spaced eyebrows.
-- **No gradients, no busy hero sections.** Heroes stay slim and simple.
+- **No gradients, no busy hero sections.** Heroes stay slim and simple. (One agreed exception: the entry page's poster hero keeps the prototype's blurred backdrop and fade.)
 - Match the prototype's spacing and card sizes. Don't resize poster cards or change layouts unasked.
 - Bundle the fonts: Playfair Display, Lora and DM Sans (all OFL licensed).
 - When unsure about a visual choice, show options before building one.

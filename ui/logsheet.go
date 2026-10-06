@@ -307,9 +307,9 @@ func reachedEndDialog(a *App, id string) {
 	a.ShowDialog(d)
 }
 
-// markFinishedRed: the prototype draws "Mark as finished" in the Delete
-// dialog's red. Open question for the owner (STATUS).
-var markFinishedRed = true
+// markFinishedRed: the prototype drew "Mark as finished" in the Delete
+// dialog's red; the owner chose the theme's accent colour (2026-10-06).
+var markFinishedRed = false
 
 // confirmDeleteJourneyItem asks before removing a session or rewatch.
 func confirmDeleteJourneyItem(a *App, entryID, itemID string) {

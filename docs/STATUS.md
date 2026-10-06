@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 3 (entry form, entry page, logging)
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Step 1 (app shell) done. Steps 1–2 done. Step 3 (New/Edit entry form, entry page, logging) built and pushed; waiting for the owner's Windows check and three answers (below). Step 4 (Home) is next. |
+| 3 Screens | **In progress.** Step 1 (app shell) done. Steps 1–3 done. Step 4 (Home and the three "see all" pages) in progress. |
 
 ## What exists
 
@@ -46,6 +46,9 @@ Decided 2026-10-06 (first cloud session):
 - **Middle tab says "New"** (SPEC §5), not the prototype's "Add".
 - **Symbols from Noto Sans Symbols 2 approved** (★ ♥ ✓ ✕ ✦ as bundled).
 - **"What lives here" is the dropdown (option A)**, as built.
+- **Entry page hero: the prototype's look** (blurred poster backdrop and a fade into the page), an agreed exception to "no gradients".
+- **"Mark as finished" uses the theme's accent colour**, not the prototype's red.
+- **Date fields: the month calendar dialog is approved.**
 - **Category and folder pages keep the bottom bar**, as in the prototype (overrides SPEC §5's "sub-pages hide the bottom bar" for these two pages).
 
 The two new form fields (Episodes rewatched, Length (mins)) are not in the prototype. The owner approved them from these sketches, so build them like this, styled like neighbouring fields:
@@ -62,10 +65,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **(Asked 2026-10-06, awaiting answer)** Entry page hero: A the prototype's (blurred poster behind, fade into the page) or B flat (built; keeps "no gradients"). Switch: `detailHero` in `ui/entrydetail.go`.
-2. **(Asked 2026-10-06, awaiting answer)** "Mark as finished" button: red as the prototype (built) or the accent colour. Switch: `markFinishedRed` in `ui/logsheet.go`.
-3. **(Asked 2026-10-06, awaiting answer)** Date fields open a month calendar in a dialog (the prototype used the browser's date picker). Fine as is?
-4. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+1. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
 
 ## The owner's real data
 

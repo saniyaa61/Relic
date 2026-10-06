@@ -19,9 +19,10 @@ import (
 	"github.com/saniyaa61/relic/core"
 )
 
-// heroStyle picks the poster hero's look while the owner decides: the
-// prototype's (a blurred copy of the poster behind it and a fade into the
-// page) or a flat band, which keeps to "no gradients".
+// heroStyle is the poster hero's look. The owner chose the prototype's (a
+// blurred copy of the poster behind it and a fade into the page) on
+// 2026-10-06, an agreed exception to "no gradients"; the flat band stays
+// for snapshots comparing the two.
 type heroStyle int
 
 const (
@@ -29,7 +30,7 @@ const (
 	heroPrototype
 )
 
-var detailHero = heroFlat
+var detailHero = heroPrototype
 
 type entryDetail struct {
 	id       string
