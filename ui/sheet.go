@@ -103,6 +103,9 @@ func (s *Sheet) layoutBox(gtx layout.Context, a *App, bottom int) layout.Dimensi
 					return layout.Dimensions{Size: image.Pt(sz.X, sz.Y+gtx.Dp(16))}
 				}),
 				layout.Rigid(fillWidth(func(gtx layout.Context) layout.Dimensions {
+					if s.Title == "" {
+						return layout.Dimensions{}
+					}
 					return layout.Inset{Bottom: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return Paragraph{Font: font.Font{Typeface: Display, Weight: font.Medium}, Size: 17, Color: th.Text}.Layout(gtx, th, s.Title)
 					})

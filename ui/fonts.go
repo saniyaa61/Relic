@@ -71,6 +71,13 @@ func LoadFonts() ([]font.FontFace, error) {
 			return nil, fmt.Errorf("parse %s: %w", name, err)
 		}
 		faces = append(faces, font.FontFace{Font: f, Face: face})
+		if f.Typeface == Symbols {
+			// Also offer it as italic, or italic text ("Rank it ✦") finds
+			// no fallback for the symbols.
+			it := f
+			it.Style = font.Italic
+			faces = append(faces, font.FontFace{Font: it, Face: face})
+		}
 	}
 	return faces, nil
 }

@@ -120,16 +120,24 @@ func tagChip(gtx layout.Context, th *Theme, s string) layout.Dimensions {
 // emptyState is the prototype's .empty: a faint 40px line icon over an
 // italic note, centred.
 func emptyState(gtx layout.Context, th *Theme, ic *Icon, note string) layout.Dimensions {
-	return layout.Inset{Top: 28, Bottom: 28, Left: gutter, Right: gutter}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	var icon layout.Widget
+	if ic != nil {
+		icon = func(gtx layout.Context) layout.Dimensions { return ic.Layout(gtx, 40, 1, withAlpha(th.Border, 0.7)) }
+	}
+	return emptyStyled(gtx, th, layout.Inset{Top: 28, Bottom: 28, Left: gutter, Right: gutter}, icon, note)
+}
+
+// emptyStyled is an .empty with its own padding and icon (some pages
+// restyle the icon inline).
+func emptyStyled(gtx layout.Context, th *Theme, pad layout.Inset, icon layout.Widget, note string) layout.Dimensions {
+	return pad.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				if ic == nil {
+				if icon == nil {
 					return layout.Dimensions{}
 				}
-				return layout.Inset{Bottom: 9}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return ic.Layout(gtx, 40, 1, withAlpha(th.Border, 0.7))
-				})
+				return layout.Inset{Bottom: 9}.Layout(gtx, icon)
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = min(gtx.Constraints.Max.X, gtx.Dp(200))

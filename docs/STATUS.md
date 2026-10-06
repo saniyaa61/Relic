@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 4 (Home and the "see all" pages).
+Last updated: 2026-10-06, after Phase 3 step 5 (Favorites with Top 5).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 4 (Home and the "see all" pages).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Steps 1–4 done (shell, Library, entry form/page, Home). Next: step 5 (Favorites with Top 5). |
+| 3 Screens | **In progress.** Steps 1–5 done (shell, Library, entry form/page, Home, Favorites). Next: step 6 (Digest and Mood Trends). |
 
 ## What exists
 
@@ -26,6 +26,8 @@ Last updated: 2026-10-06, after Phase 3 step 4 (Home and the "see all" pages).
 - `ui/` Library (step 2), `library.go`: categories grid with the fanned poster stack, ☰ menus (Rename / Delete), dashed "+ New category" tile, category page (folder grid, "+ New folder", Uncategorised rows), folder page, scoped search on all three, card drop-in animation. Dialogs use the prototype's wording; changes save through `App.save` (reloads from the store if a save fails). Entry rows open a placeholder until step 3. Shared pieces: `entryrow.go` (entry rows, stars, tag chips, empty state, `searchResults`), `libparts.go` (`addTile`, `cardMenu`, `cardDrop`, dashed borders), `typepicker.go` ("What lives here"), `images.go` (posters read from `App.PosterDir`, resized once and cached). `core` gained `SetCategoryType` and `CoverEntries`.
 - `ui/` step 3: `entryform.go` (New / Edit form; `formfields.go` holds each type's fields, incl. podcast "Ep. length" and music "Length"), `entrydetail.go` (hero, badges + Top 5 pill, meta chips with total time, progress, Your words, tags, cast, journey timeline, favourite, two-tap delete), `logsheet.go` + `sheet.go` (bottom sheet to log / edit sessions and rewatches, partial rewatch "Episodes rewatched", the reached-the-end prompt, deleting journey items). Controls: `dropdown` (category, folder, type), `dateField` + month calendar dialog, multi-line `Input`, `starInput` (half stars), `tagPicker`, `uploadBox` (system file picker via gioui.org/x/explorer, `App.ChooseImage`; pictures resized by `store.ResizePoster`). `App.timeIndex()` builds time events once per frame.
 - `ui/` step 4: `home.go` (greeting with the name in italic accent, streak pill, stat-chip ribbon, "Log something new", memory card "One year ago", Still with you / Recently finished rows, the empty state; `posterPage` for the three "see all" pages — Still with you, Recently finished, All entries — each with scoped search). Chips: Total → All entries, Finished → Recently finished, Ongoing → Still with you, Consumed → a "coming in step 7" page. `postercard.go` (ongoing card with progress ring and the "✓ Finished?" badge that asks before finishing; finished card). `emoji.go` draws bundled colour-emoji PNGs (`assets/emoji`, Noto Color Emoji, OFL) for 🔥 and 🎨. `cmd/snapshot -now` fixes the clock.
+- `ui/` step 5: `favorites.go` (category tabs that glide the picked one into view, "All-Time Top 5 · Category" row of Top 5 cards with ‹ › ✕ and a glide when they reorder, "Favourites · Category" rows of four with the "+" that ranks one, empty states, "No categories yet"; the "Rank it among your all-time favourites?" sheet the entry page offers 380 ms after favouriting). Favourite / Top 5 changes go through `toggleFavourite`, `addTopFive`, `removeTopFive`, which save and show the prototype's toasts. Tabs list every category, as the prototype does.
+- Fixed while comparing in step 5: the entry page's Top 5 pill read "#2" for first place; the title sat 6dp low and the first divider ~10dp low (the browser merges the meta line's margin with the rule's); the type badge and Top 5 pill are now the prototype badge's 19dp. The symbols font is also registered as italic, so "Rank it ✦" shows its ✦.
 - `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
@@ -50,6 +52,7 @@ Decided 2026-10-06 (first cloud session):
 - **Entry page hero: the prototype's look** (blurred poster backdrop and a fade into the page), an agreed exception to "no gradients".
 - **"Mark as finished" uses the theme's accent colour**, not the prototype's red.
 - **Date fields: the month calendar dialog is approved.**
+- **Streak pill keeps the colour 🔥** (option A, a bundled Noto Color Emoji image); 🎨 in Settings will use the same approach. Options B (line flame) and C (words only) remain in `home.go` behind `homeStreak` for snapshots.
 - **Category and folder pages keep the bottom bar**, as in the prototype (overrides SPEC §5's "sub-pages hide the bottom bar" for these two pages).
 
 The two new form fields (Episodes rewatched, Length (mins)) are not in the prototype. The owner approved them from these sketches, so build them like this, styled like neighbouring fields:
@@ -66,7 +69,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **Streak pill (🔥).** Gio can't draw colour emoji. Built three options, switched by `homeStreak` in `home.go`: **A** bundled Noto colour-emoji image (current default, looks like the prototype), **B** a line flame icon in the accent colour, **C** words only. Waiting for the owner's pick. The same choice will apply to 🎨 in Settings (step 9).
+1. **Line breaks in journey notes.** The prototype runs a note's paragraphs together (HTML ignores line breaks); the Go app keeps the writer's blank lines. Ask the owner which they want (not yet asked).
 
 ## The owner's real data
 
@@ -96,6 +99,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 5: Favorites with Top 5 (SPEC §6, prototype `renderFavorites`). Replace the Favorites placeholder in `app.go`. Reuse `posterPage`/`gridRow`/`ongoingCard`/`finishedCard` where the prototype uses the same cards. Entry pages open with `newEntryDetail(id)`; time comes from `App.timeIndex()`. Sub-pages go through `App.Push`, dialogs `App.ShowDialog`, sheets `App.ShowSheet`, saves `App.save`.
+2. Next is step 6: Digest (week / month / year, SPEC §4.12 and §5 "Digest", prototype `renderDigest`) and Mood Trends (§4.13). The core already has `Library.Digest`, `DigestBounds`, `MoodTrends`. Replace the Digest placeholder in `app.go`; the month chart's bars use a gradient in the prototype (`.dmonth-bar.has-data`): show the owner options before building (no gradients rule). Sub-pages go through `App.Push`, dialogs `App.ShowDialog`, sheets `App.ShowSheet`, saves `App.save`; time comes from `App.timeIndex()`.
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

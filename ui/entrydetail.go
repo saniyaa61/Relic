@@ -42,6 +42,7 @@ type entryDetail struct {
 	logBtn   widget.Clickable
 	del      widget.Clickable
 	delArmed time.Time // "Tap again to confirm deletion" until 3s after
+	rankAt   time.Time // when to offer the Top 5 after favouriting
 	items    map[string]*journeyButtons
 }
 
@@ -57,6 +58,15 @@ func (p *entryDetail) Layout(gtx layout.Context, a *App) layout.Dimensions {
 	}
 	catName := a.Lib.CategoryName(e.CategoryID)
 	p.handle(gtx, a, e)
+	if !p.rankAt.IsZero() {
+		// The prototype offers the Top 5 a moment after the heart turns.
+		if a.Now().Before(p.rankAt) {
+			gtx.Execute(op.InvalidateCmd{At: p.rankAt})
+		} else {
+			p.rankAt = time.Time{}
+			openRankPrompt(a, e.ID)
+		}
+	}
 
 	size := gtx.Constraints.Max
 	heroH := gtx.Dp(280)
@@ -80,21 +90,17 @@ func (p *entryDetail) handle(gtx layout.Context, a *App, e *core.Entry) {
 		a.Push(editEntryPage(a, e))
 	}
 	if p.fav.Clicked(gtx) {
-		if _, err := a.Lib.ToggleFavorite(e.ID); err == nil {
-			a.save(false, []*core.Entry{e}, true)
+		if toggleFavourite(a, e) {
+			p.rankAt = a.Now().Add(380 * time.Millisecond)
+		} else {
+			p.rankAt = time.Time{}
 		}
 	}
 	if p.topFive.Clicked(gtx) {
-		var err error
 		if _, ok := a.Lib.TopFiveRank(e.ID); ok {
-			err = a.Lib.RemoveTopFive(e.ID)
+			removeTopFive(a, e.ID)
 		} else {
-			err = a.Lib.AddTopFive(e.ID)
-		}
-		if err != nil {
-			a.ToastError(err.Error())
-		} else {
-			a.save(false, nil, true)
+			addTopFive(a, e.ID)
 		}
 	}
 	if p.del.Clicked(gtx) {
@@ -248,11 +254,20 @@ func (p *entryDetail) body(a *App, e *core.Entry, catName string) []layout.Widge
 			return layout.Inset{Left: gutter, Right: gutter}.Layout(gtx, w)
 		}
 	}
-	divider := pad(func(gtx layout.Context) layout.Dimensions {
-		h := gtx.Dp(29)
-		fillRect(gtx, image.Rect(0, gtx.Dp(14), gtx.Constraints.Max.X, gtx.Dp(15)), th.Border)
-		return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, h)}
-	})
+	// The rule (hr.det-div) has 14px above and below. The browser merges
+	// its top margin with the bottom margin of what comes before (11px
+	// under the meta line, 4px under the progress line), so the space
+	// above is the larger of the two, not their sum.
+	lead := 11
+	divider := func() layout.Widget {
+		top := 14 - lead
+		lead = 0
+		return pad(func(gtx layout.Context) layout.Dimensions {
+			y := gtx.Dp(unitDp(float32(top)))
+			fillRect(gtx, image.Rect(0, y, gtx.Constraints.Max.X, y+gtx.Dp(1)), th.Border)
+			return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, y+gtx.Dp(15))}
+		})
+	}
 	label := func(s string) layout.Widget {
 		return pad(func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -264,24 +279,25 @@ func (p *entryDetail) body(a *App, e *core.Entry, catName string) []layout.Widge
 		layout.Spacer{Height: 12}.Layout,
 		pad(func(gtx layout.Context) layout.Dimensions { return p.badges(gtx, a, e) }),
 		pad(func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 6, Bottom: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Bottom: 7}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return Paragraph{Font: font.Font{Typeface: Display, Weight: font.SemiBold}, Size: 24, LineHeight: 1.2, Color: th.Text}.Layout(gtx, th, e.Title)
 			})
 		}),
 		pad(func(gtx layout.Context) layout.Dimensions { return p.metas(gtx, a, e) }),
 	}
 	if done, total, ok := e.Progress(); ok && total > 0 {
+		lead = 4
 		rows = append(rows, pad(func(gtx layout.Context) layout.Dimensions {
 			return p.progress(gtx, th, e, done, total)
 		}))
 	}
 	if q, ok := e.YourWords(); ok {
-		rows = append(rows, divider, label("Your words"), pad(func(gtx layout.Context) layout.Dimensions {
+		rows = append(rows, divider(), label("Your words"), pad(func(gtx layout.Context) layout.Dimensions {
 			return yourWords(gtx, th, q.Label(a.Loc), q.Text)
 		}))
 	}
 	if len(e.Tags) > 0 {
-		rows = append(rows, divider, label("How it felt"), pad(func(gtx layout.Context) layout.Dimensions {
+		rows = append(rows, divider(), label("How it felt"), pad(func(gtx layout.Context) layout.Dimensions {
 			chips := make([]layout.Widget, len(e.Tags))
 			for i, t := range e.Tags {
 				chips[i] = func(gtx layout.Context) layout.Dimensions {
@@ -294,7 +310,7 @@ func (p *entryDetail) body(a *App, e *core.Entry, catName string) []layout.Widge
 		}))
 	}
 	if e.Fields.Cast != "" {
-		rows = append(rows, divider, label("Cast"), pad(func(gtx layout.Context) layout.Dimensions {
+		rows = append(rows, divider(), label("Cast"), pad(func(gtx layout.Context) layout.Dimensions {
 			return Paragraph{Font: font.Font{Typeface: Sans}, Size: 13, Color: th.Muted}.Layout(gtx, th, e.Fields.Cast)
 		}))
 	}
@@ -303,14 +319,15 @@ func (p *entryDetail) body(a *App, e *core.Entry, catName string) []layout.Widge
 	if len(e.Sessions) > 0 || len(e.Rewatches) > 0 {
 		title = "Your journey"
 	}
-	rows = append(rows, divider, label(title), pad(func(gtx layout.Context) layout.Dimensions {
+	rows = append(rows, divider(), label(title), pad(func(gtx layout.Context) layout.Dimensions {
 		return layout.Inset{Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return p.logButton(gtx, th, e)
 		})
 	}))
 	if len(journey) == 0 {
 		rows = append(rows, pad(func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			// 10px above, merged with the button's 8px below it.
+			return layout.Inset{Top: 2}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return Paragraph{Font: font.Font{Typeface: Serif, Style: font.Italic}, Size: 13, LineHeight: 1.6, Color: th.Muted}.Layout(gtx, th,
 					"Your sessions and rewatches will appear here as a timeline.")
 			})
@@ -332,7 +349,7 @@ func (p *entryDetail) body(a *App, e *core.Entry, catName string) []layout.Widge
 			}))
 		}
 	}
-	rows = append(rows, divider, pad(func(gtx layout.Context) layout.Dimensions {
+	rows = append(rows, divider(), pad(func(gtx layout.Context) layout.Dimensions {
 		armed := a.Now().Sub(p.delArmed) <= 3*time.Second
 		if armed {
 			gtx.Execute(op.InvalidateCmd{At: p.delArmed.Add(3 * time.Second)})
@@ -346,17 +363,19 @@ func (p *entryDetail) body(a *App, e *core.Entry, catName string) []layout.Widge
 func (p *entryDetail) badges(gtx layout.Context, a *App, e *core.Entry) layout.Dimensions {
 	th := a.Theme
 	children := []layout.Widget{func(gtx layout.Context) layout.Dimensions {
-		return card(gtx, th.Tag, th.Tag, 20, layout.Inset{Top: 3, Bottom: 3, Left: 9, Right: 9}, 0, func(gtx layout.Context) layout.Dimensions {
+		// card's 1dp border is part of the prototype's 3px 9px padding.
+		return card(gtx, th.Tag, th.Tag, 20, layout.Inset{Top: 2, Bottom: 2, Left: 8, Right: 8}, 0, func(gtx layout.Context) layout.Dimensions {
 			return Text{Font: font.Font{Typeface: Sans}, Size: 10, Tracking: 0.06, Upper: true, Color: th.Muted}.Layout(gtx, th, typeBadge(e.Type))
 		})
 	}}
 	if e.Favorite {
 		children = append(children, func(gtx layout.Context) layout.Dimensions {
 			return p.topFive.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				pad := layout.Inset{Top: 3, Bottom: 3, Left: 9, Right: 9}
+				// The same size as the type badge (SPEC §5).
+				pad := layout.Inset{Top: 2, Bottom: 2, Left: 8, Right: 8}
 				if rank, ok := a.Lib.TopFiveRank(e.ID); ok {
 					return card(gtx, th.Accent, th.Accent, 20, pad, 0, func(gtx layout.Context) layout.Dimensions {
-						return Text{Font: font.Font{Typeface: Display, Weight: font.SemiBold}, Size: 10, Color: th.BtnText}.Layout(gtx, th, fmt.Sprintf("#%d All-Time ✕", rank+1))
+						return Text{Font: font.Font{Typeface: Display, Weight: font.SemiBold}, Size: 10, Color: th.BtnText}.Layout(gtx, th, fmt.Sprintf("#%d All-Time ✕", rank))
 					})
 				}
 				bg, fg := th.Bg, th.Accent

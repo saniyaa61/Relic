@@ -159,6 +159,10 @@ func confirmMarkFinished(a *App, id string) {
 // type, title, stars and, on Consumed, the entry's time.
 type finishedCard struct {
 	click widget.Clickable
+	// withPlus adds the Favourites "+" (add to Top 5) at the poster's
+	// top right; the caller handles plus.Clicked.
+	withPlus bool
+	plus     widget.Clickable
 }
 
 func (c *finishedCard) Layout(gtx layout.Context, a *App, e *core.Entry, showTime bool) layout.Dimensions {
@@ -190,6 +194,12 @@ func (c *finishedCard) Layout(gtx layout.Context, a *App, e *core.Entry, showTim
 					call := rec.Stop()
 					st := op.Offset(image.Pt((size.X-d.Size.X)/2, (size.Y-d.Size.Y)/2)).Push(gtx.Ops)
 					call.Add(gtx.Ops)
+					st.Pop()
+				}
+				if c.withPlus {
+					b := gtx.Dp(22)
+					st := op.Offset(image.Pt(size.X-gtx.Dp(6)-b, gtx.Dp(6))).Push(gtx.Ops)
+					plusBadge(gtx, th, &c.plus, b)
 					st.Pop()
 				}
 				return layout.Dimensions{Size: size}
@@ -230,6 +240,24 @@ func (c *finishedCard) Layout(gtx layout.Context, a *App, e *core.Entry, showTim
 		}
 		call.Add(gtx.Ops)
 		return d
+	})
+}
+
+// plusBadge is the Favourites card's round "+" (.fav-card-plus): dark
+// glass over the poster, accent while pressed.
+func plusBadge(gtx layout.Context, th *Theme, c *widget.Clickable, size int) layout.Dimensions {
+	gtx.Constraints = layout.Exact(image.Pt(size, size))
+	return c.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		bg := shade(0.45, th.Tag)
+		if c.Pressed() {
+			bg = th.Accent
+		}
+		rrect(gtx, image.Pt(size, size), size/2, bg)
+		ic := gtx.Dp(11)
+		st := op.Offset(image.Pt((size-ic)/2, (size-ic)/2)).Push(gtx.Ops)
+		IconPlus.Layout(gtx, 11, 1.8, rgb(0xFFFFFF))
+		st.Pop()
+		return layout.Dimensions{Size: image.Pt(size, size)}
 	})
 }
 

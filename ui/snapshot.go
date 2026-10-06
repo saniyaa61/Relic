@@ -15,6 +15,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"lib-folder", "lib-folder-search", "lib-folder-empty",
 	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
 	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
+	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
 
@@ -36,8 +37,8 @@ func (a *App) ShowForSnapshot(screen string) error {
 		a.Go(TabLibrary)
 	case "new":
 		a.Go(TabNew)
-	case "favorites":
-		a.Go(TabFavorites)
+	case "favorites", "fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats":
+		return a.favoritesForSnapshot(screen)
 	case "digest":
 		a.Go(TabDigest)
 	case "subpage", "search":
@@ -238,6 +239,46 @@ func (a *App) detailForSnapshot(screen string) error {
 	case "reached-end", "reached-end-accent":
 		markFinishedRed = screen == "reached-end"
 		reachedEndDialog(a, e.ID)
+	}
+	return nil
+}
+
+// favoritesForSnapshot shows the Favorites tab in the prototype
+// screenshots' states: a category's tab, a fuller Top 5, an empty one,
+// the "Rank it" prompt and no categories at all.
+func (a *App) favoritesForSnapshot(screen string) error {
+	lib := a.Lib
+	if screen == "fav-nocats" {
+		lib.Categories, lib.Entries = nil, nil
+	}
+	a.Go(TabFavorites)
+	p := a.roots[TabFavorites].(*favoritesPage)
+	pick := func(i int) {
+		if i < len(lib.Categories) {
+			p.catID = lib.Categories[i].ID
+		}
+	}
+	switch screen {
+	case "fav-series":
+		pick(1)
+	case "fav-top3":
+		pick(1)
+		for _, e := range lib.Entries { // in archive order, as the prototype shot does
+			if e.Favorite && e.CategoryID == p.catID && len(lib.TopFive(p.catID)) < 3 {
+				lib.AddTopFive(e.ID)
+			}
+		}
+	case "fav-podcasts":
+		pick(3)
+	case "fav-rank":
+		for _, e := range lib.Entries {
+			if len(lib.Categories) > 0 && !e.Favorite && e.CategoryID == lib.Categories[0].ID {
+				lib.ToggleFavorite(e.ID)
+				a.Push(newEntryDetail(e.ID))
+				openRankPrompt(a, e.ID)
+				break
+			}
+		}
 	}
 	return nil
 }

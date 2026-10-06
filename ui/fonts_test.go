@@ -38,6 +38,7 @@ func TestBundledFonts(t *testing.T) {
 		{Typeface: Sans, Weight: font.Normal},
 		{Typeface: Sans, Weight: font.Medium},
 		{Typeface: Symbols, Weight: font.Normal},
+		{Typeface: Symbols, Weight: font.Normal, Style: font.Italic}, // same file, for italic text
 	}
 	for _, f := range want {
 		if !have[f] {

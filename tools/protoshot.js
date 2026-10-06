@@ -2,7 +2,7 @@
 // for side-by-side checks against cmd/snapshot. Uses the bundled fonts
 // (Google Fonts may be unreachable) and the pre-installed Chromium.
 //
-//   node tools/protoshot.js <repo> <out-dir> [shell|library]
+//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites]
 //
 // HEIGHT=1900 for a taller window (long forms). NOW=2026-09-29T09:00:00Z fixes the clock. MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
@@ -62,6 +62,14 @@ const shots = {
     ['rf', () => openRecentFinished()],
     ['ae', () => openAllEntries()],
     ['swy-search', () => { openStillWithYou(); swySearchOpen = true; swySearchQuery = 'entry 1'; renderStillWithYou(); }],
+  ],
+  favorites: [
+    ['fav', () => nav('favorites')],
+    ['fav-series', () => setFavCategory(sections[1].name)],
+    ['fav-top3', () => { const s = sections[1].name; const ids = entries.filter(e => e.section === s && e.favorite).map(e => e.id); topFavorites[s] = [...new Set([...(topFavorites[s] || []), ...ids])].slice(0, 3); renderFavorites(); }],
+    ['fav-podcasts', () => setFavCategory(sections[3].name)],
+    ['fav-rank', () => { const e = entries.find(x => !x.favorite && x.section === sections[0].name); e.favorite = true; showDetail(e.id); openRankPrompt(e.id); }],
+    ['fav-nocats', () => { closeRankPrompt(); sections = []; nav('favorites'); }],
   ],
   library: [
     ['lib-root', () => nav('library')],
