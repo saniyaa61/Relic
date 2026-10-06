@@ -2,9 +2,11 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"image/color"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,6 +16,7 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/x/explorer"
 
 	"github.com/saniyaa61/relic/importer"
 	"github.com/saniyaa61/relic/store"
@@ -111,12 +114,23 @@ func run(w *app.Window) error {
 	}
 	a := ui.NewApp(th, lib, db)
 	a.PosterDir = posters
+	expl := explorer.NewExplorer(w)
+	a.ChooseImage = func() (io.ReadCloser, error) {
+		rc, err := expl.ChooseFile(".jpg", ".jpeg", ".png", ".webp", ".gif")
+		if errors.Is(err, explorer.ErrUserDecline) {
+			return nil, ui.ErrNoPicture
+		}
+		return rc, err
+	}
+	a.Invalidate = w.Invalidate
 	a.OnWindowColors = func(status, navigation color.NRGBA) {
 		w.Option(app.StatusColor(status), app.NavigationColor(navigation))
 	}
 	var ops op.Ops
 	for {
-		switch e := w.Event().(type) {
+		e := w.Event()
+		expl.ListenEvents(e)
+		switch e := e.(type) {
 		case app.DestroyEvent:
 			return e.Err
 		case app.FrameEvent:

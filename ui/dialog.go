@@ -34,6 +34,11 @@ type Dialog struct {
 	// OnConfirm gets the trimmed field text. A prompt with an empty field
 	// doesn't confirm; it puts the cursor back in the field instead.
 	OnConfirm func(a *App, value string)
+	// OnCancel, if set, runs when the Cancel button (not the scrim) is
+	// tapped; the calendar uses it for "Clear".
+	OnCancel func(a *App)
+	// Body, if set, is drawn under the title and sub-line (the calendar).
+	Body func(gtx layout.Context, a *App) layout.Dimensions
 
 	input      Input
 	cancel, ok Button
@@ -121,7 +126,13 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 	}
 
 	if !d.closing() {
-		if d.scrim.Clicked(gtx) || d.cancel.Click.Clicked(gtx) {
+		if d.cancel.Click.Clicked(gtx) {
+			d.close(a)
+			if d.OnCancel != nil {
+				d.OnCancel(a)
+			}
+		}
+		if d.scrim.Clicked(gtx) {
 			d.close(a)
 		}
 		if d.ok.Click.Clicked(gtx) {
@@ -210,6 +221,13 @@ func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
 					})
 				}),
 			)
+		}
+		if d.Body != nil {
+			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return layout.Inset{Top: 14}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return d.Body(gtx, a)
+				})
+			}))
 		}
 		if d.Type != nil {
 			rows = append(rows,

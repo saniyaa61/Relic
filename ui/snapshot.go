@@ -12,7 +12,8 @@ import (
 var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", "subpage", "search", "prompt", "confirm", "toast", "toast-error",
 	"lib-menu", "lib-new-category", "lib-picker", "lib-rename", "lib-delete", "lib-search",
 	"lib-category", "lib-category-films", "lib-category-empty", "lib-new-folder", "lib-delete-folder",
-	"lib-folder", "lib-folder-search", "lib-folder-empty"}
+	"lib-folder", "lib-folder-search", "lib-folder-empty",
+	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar"}
 
 // ShowForSnapshot puts the app into one of SnapshotScreens with every
 // animation finished, for rendering to a PNG.
@@ -55,6 +56,9 @@ func (a *App) ShowForSnapshot(screen string) error {
 	case "toast-error":
 		a.ToastError("You already have that category")
 	default:
+		if strings.HasPrefix(screen, "form-") {
+			return a.formForSnapshot(screen)
+		}
 		if strings.HasPrefix(screen, "lib-") {
 			return a.libraryForSnapshot(screen)
 		}
@@ -117,6 +121,31 @@ func (a *App) libraryForSnapshot(screen string) error {
 	case "lib-folder-empty":
 		openCat(series)
 		a.Push(&folderPage{catID: series.ID, folder: series.Folders[1]})
+	default:
+		return fmt.Errorf("unknown screen %q", screen)
+	}
+	return nil
+}
+
+// formForSnapshot sets up the entry form states.
+func (a *App) formForSnapshot(screen string) error {
+	cats := a.Lib.Categories
+	if len(cats) < 4 || len(a.Lib.Entries) == 0 {
+		return fmt.Errorf("%s needs a library (use -archive)", screen)
+	}
+	a.Go(TabNew)
+	f := a.roots[TabNew].(*entryForm)
+	switch screen {
+	case "form-new":
+	case "form-series":
+		f.catID = cats[1].ID
+	case "form-podcast":
+		f.catID = cats[3].ID
+	case "form-edit":
+		a.Go(TabHome)
+		a.Push(editEntryPage(a, a.Lib.Entries[0]))
+	case "form-calendar":
+		openCalendar(a, "Date watched", core.Date{Year: 2026, Month: 6, Day: 16}, func(core.Date) {})
 	default:
 		return fmt.Errorf("unknown screen %q", screen)
 	}

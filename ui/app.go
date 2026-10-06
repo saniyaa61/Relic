@@ -1,9 +1,12 @@
 package ui
 
 import (
+	"errors"
 	"image"
 	"image/color"
+	"io"
 	"log"
+	"sync"
 	"time"
 
 	"gioui.org/io/key"
@@ -55,6 +58,11 @@ type App struct {
 	// snapshots and tests.
 	Now func() time.Time
 	Loc *time.Location
+	// ChooseImage, if set, asks the system for a picture file (the
+	// platform's file picker; it blocks until the user chooses or
+	// cancels). Invalidate asks for a new frame from another goroutine.
+	ChooseImage func() (io.ReadCloser, error)
+	Invalidate  func()
 	// PosterDir is the folder of poster JPEGs beside the database; ""
 	// means posters aren't shown.
 	PosterDir string
@@ -72,6 +80,9 @@ type App struct {
 
 	lastStatus, lastNav color.NRGBA
 	posters             posterCache
+
+	asyncMu sync.Mutex
+	async   []func(*App)
 }
 
 // NewApp starts on Home with the theme the profile asks for.
@@ -213,6 +224,74 @@ func (a *App) removeUnusedPosters() {
 	}
 }
 
+// background runs work off the UI goroutine (a file picker, say), then
+// runs the function it returns on the next frame.
+func (a *App) background(work func() func(*App)) {
+	go func() {
+		done := work()
+		if done == nil {
+			return
+		}
+		a.asyncMu.Lock()
+		a.async = append(a.async, done)
+		a.asyncMu.Unlock()
+		if a.Invalidate != nil {
+			a.Invalidate()
+		}
+	}()
+}
+
+// runAsync runs results delivered by background, on the UI goroutine.
+func (a *App) runAsync() {
+	a.asyncMu.Lock()
+	jobs := a.async
+	a.async = nil
+	a.asyncMu.Unlock()
+	for _, j := range jobs {
+		j(a)
+	}
+}
+
+// ErrNoPicture is what ChooseImage returns when the user cancels.
+var ErrNoPicture = errors.New("no picture chosen")
+
+// pickPoster lets the user choose a picture, resizes it to a stored
+// poster file and calls done with its file name.
+func (a *App) pickPoster(done func(name string)) {
+	if a.ChooseImage == nil || a.PosterDir == "" {
+		a.ToastError("Choosing a picture isn't available here yet.")
+		return
+	}
+	dir := a.PosterDir
+	a.background(func() func(*App) {
+		rc, err := a.ChooseImage()
+		if errors.Is(err, ErrNoPicture) {
+			return nil
+		}
+		fail := func(err error) func(*App) {
+			log.Printf("relic: poster: %v", err)
+			return func(a *App) { a.ToastError("That picture couldn't be opened.") }
+		}
+		if err != nil {
+			return fail(err)
+		}
+		defer rc.Close()
+		raw, err := io.ReadAll(io.LimitReader(rc, 40<<20))
+		if err != nil {
+			return fail(err)
+		}
+		jpg, err := store.ResizePoster(raw)
+		if err != nil {
+			return fail(err)
+		}
+		name := core.NewID() + ".jpg"
+		if err := store.WritePosters(dir, map[string][]byte{name: jpg}); err != nil {
+			return fail(err)
+		}
+		return func(a *App) { done(name) }
+	})
+}
+
 // navShown reports whether the bottom bar shows: on the tab pages, and on
 // sub-pages that keep it (the Library's category and folder pages, as in
 // the prototype).
@@ -243,6 +322,7 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	if a.shownAt.IsZero() {
 		a.shownAt = a.Now()
 	}
+	a.runAsync()
 	a.handleBack(gtx)
 	th := a.Theme
 	paint.Fill(gtx.Ops, th.Bg)

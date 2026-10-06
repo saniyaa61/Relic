@@ -123,7 +123,7 @@ func FieldsFor(t EntryType, f Fields) []FieldValue {
 			{"totalPages", num(f.TotalPages)}, {"publisher", f.Publisher}}
 	case Podcast:
 		return []FieldValue{{"host", f.Host}, {"platform", f.Platform}, {"totalEpisodes", num(f.TotalEpisodes)},
-			{"language", f.Language}, {"watchedDate", date(f.WatchedDate)}}
+			{"episodeDuration", num(f.EpisodeDuration)}, {"language", f.Language}, {"watchedDate", date(f.WatchedDate)}}
 	case Short:
 		return []FieldValue{{"creator", f.Creator}, {"platform", f.Platform}, {"duration", num(f.Duration)},
 			{"watchedDate", date(f.WatchedDate)}, {"url", f.URL}}

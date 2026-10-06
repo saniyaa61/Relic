@@ -133,8 +133,9 @@ func (b *Button) Layout(gtx layout.Context, th *Theme, style ButtonStyle, label 
 	})
 }
 
-// Input is a one-line text field: the prototype's .rmodal-input and
-// .search-input (card or bg fill, thin border that turns accent on focus).
+// Input is a text field: the prototype's .rmodal-input, .search-input,
+// .finput and (multi-line) .ftarea — a filled box with a thin border that
+// turns accent on focus.
 type Input struct {
 	Editor widget.Editor
 }
@@ -145,24 +146,46 @@ type InputStyle struct {
 	Radius      unit.Dp
 	Pad         layout.Inset
 	Size        unit.Sp
+	Font        font.Font // zero: DM Sans
 	Placeholder string
 	// PlaceholderAlpha is the placeholder's opacity (CSS ::placeholder).
 	PlaceholderAlpha float32
+	// Multiline makes a wrapping text area (.ftarea); MinHeight is its
+	// smallest height and LineHeight its CSS line-height.
+	Multiline  bool
+	MinHeight  unit.Dp
+	LineHeight float32
 }
 
 func (in *Input) Layout(gtx layout.Context, th *Theme, s InputStyle) layout.Dimensions {
-	in.Editor.SingleLine = true
+	in.Editor.SingleLine = !s.Multiline
+	f := s.Font
+	if f.Typeface == "" {
+		f.Typeface = Sans
+	}
+	if s.LineHeight > 0 {
+		in.Editor.LineHeight = unit.Sp(float32(s.Size) * s.LineHeight)
+		in.Editor.LineHeightScale = 1
+	}
 	border := th.Border
 	if gtx.Focused(&in.Editor) {
 		border = th.Accent
 	}
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
+	if s.MinHeight > 0 {
+		gtx.Constraints.Min.Y = max(gtx.Constraints.Min.Y, gtx.Dp(s.MinHeight))
+	}
 	return card(gtx, s.Bg, border, s.Radius, s.Pad, 0, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
-		f := font.Font{Typeface: Sans}
 		if in.Editor.Len() == 0 && s.Placeholder != "" {
 			rec := op.Record(gtx.Ops)
-			Text{Font: f, Size: s.Size, MaxLines: 1, Color: withAlpha(th.Muted, s.PlaceholderAlpha)}.Layout(gtx, th, s.Placeholder)
+			pgtx := gtx
+			pgtx.Constraints.Min = image.Point{}
+			if s.Multiline {
+				Paragraph{Font: f, Size: s.Size, LineHeight: s.LineHeight, Color: withAlpha(th.Muted, s.PlaceholderAlpha)}.Layout(pgtx, th, s.Placeholder)
+			} else {
+				Text{Font: f, Size: s.Size, MaxLines: 1, Color: withAlpha(th.Muted, s.PlaceholderAlpha)}.Layout(pgtx, th, s.Placeholder)
+			}
 			ph := rec.Stop()
 			defer ph.Add(gtx.Ops)
 		}

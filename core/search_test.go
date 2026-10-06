@@ -87,3 +87,19 @@ func TestResultsHeader(t *testing.T) {
 		t.Errorf("NoResults = %q", got)
 	}
 }
+
+// A podcast's episode length is one of its fields (owner's decision,
+// 2026-10-06), so search finds it like any other field.
+func TestPodcastEpisodeLengthIsAField(t *testing.T) {
+	e := &Entry{Type: Podcast, Title: "x", Fields: Fields{EpisodeDuration: 47}}
+	if !Matches(e, "", "47") {
+		t.Error("podcast episode length not searchable")
+	}
+	found := false
+	for _, f := range FieldsFor(Podcast, e.Fields) {
+		found = found || (f.ID == "episodeDuration" && f.Value == "47")
+	}
+	if !found {
+		t.Error("FieldsFor(Podcast) has no episodeDuration")
+	}
+}

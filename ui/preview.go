@@ -30,11 +30,6 @@ func (p *placeholder) Layout(gtx layout.Context, a *App) layout.Dimensions {
 	})
 }
 
-// newEntryPage returns a fresh New page (step 3 builds the real form).
-func newEntryPage() Screen {
-	return &placeholder{eyebrow: "New entry", title: "Preserve a memory", step: 3}
-}
-
 // homePreview stands in for Home (step 4) with buttons that try each part
 // of the shell: dialogs, toasts and a sub-page.
 type homePreview struct {

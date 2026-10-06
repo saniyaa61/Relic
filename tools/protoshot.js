@@ -4,7 +4,7 @@
 //
 //   node tools/protoshot.js <repo> <out-dir> [shell|library]
 //
-// MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
+// HEIGHT=1900 for a taller window (long forms). MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
 // category. Add shot lists below for other screens.
 const { chromium } = require('/opt/node-tools/node_modules/playwright');
@@ -37,6 +37,12 @@ const shots = {
     ['toast', () => { closeModal(); nav('home'); showToast('Session logged ✦'); }],
     ['toast-error', () => showToast('You already have that category', true)],
   ],
+  form: [
+    ['form-new', () => startNewEntry()],
+    ['form-series', () => { formState.section = sections[1].name; renderNew(); }],
+    ['form-podcast', () => { formState.section = sections[3].name; renderNew(); }],
+    ['form-edit', () => { showDetail(entries[0].id); openEditEntry(entries[0].id); }],
+  ],
   library: [
     ['lib-root', () => nav('library')],
     ['lib-new-category', () => goAddCategory()],
@@ -57,7 +63,7 @@ const shots = {
 
 (async () => {
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(() => chromium.launch());
-  const page = await browser.newPage({ viewport: { width: 400, height: 800 }, deviceScaleFactor: 2 });
+  const page = await browser.newPage({ viewport: { width: 400, height: Number(process.env.HEIGHT || 800) }, deviceScaleFactor: 2 });
   await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
   const url = 'file://' + path.join(repo, 'reference/relic.html');
   await page.goto(url);

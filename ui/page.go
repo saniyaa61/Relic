@@ -2,9 +2,11 @@ package ui
 
 import (
 	"image"
+	"image/color"
 	"strconv"
 
 	"gioui.org/font"
+	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
@@ -141,3 +143,10 @@ func fillWidth(w layout.Widget) layout.Widget {
 		return d
 	}
 }
+
+type colorNRGBA = color.NRGBA
+
+const keyHintNumeric = key.HintNumeric
+
+// gtxSize is the full available width at height h.
+func gtxSize(gtx layout.Context, h int) image.Point { return image.Pt(gtx.Constraints.Max.X, h) }
