@@ -2,10 +2,12 @@
 package main
 
 import (
+	"image/color"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -18,12 +20,7 @@ import (
 func main() {
 	go func() {
 		w := new(app.Window)
-		w.Option(
-			app.Title("Relic"),
-			app.Size(400, 800),
-			app.StatusColor(ui.LinenLight.Bg),
-			app.NavigationColor(ui.LinenLight.Bg),
-		)
+		w.Option(app.Title("Relic"), app.Size(400, 800))
 		if err := run(w); err != nil {
 			log.Fatal(err)
 		}
@@ -69,9 +66,24 @@ func run(w *app.Window) error {
 		return err
 	}
 	defer db.Close()
+	lib, err := db.Load()
+	if err != nil {
+		return err
+	}
+	// The archive starts on first launch (SPEC §2 firstUsedAt).
+	if lib.Profile.FirstUsedAt.IsZero() {
+		lib.Profile.FirstUsedAt = time.Now().UTC()
+		if err := db.Update(func(w store.Writer) error { return w.SaveProfile(lib.Profile) }); err != nil {
+			return err
+		}
+	}
 	th, err := ui.NewTheme(ui.LinenLight)
 	if err != nil {
 		return err
+	}
+	a := ui.NewApp(th, lib, db)
+	a.OnWindowColors = func(status, navigation color.NRGBA) {
+		w.Option(app.StatusColor(status), app.NavigationColor(navigation))
 	}
 	var ops op.Ops
 	for {
@@ -81,7 +93,7 @@ func run(w *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 			safe := layout.Inset{Top: e.Insets.Top, Bottom: e.Insets.Bottom, Left: e.Insets.Left, Right: e.Insets.Right}
-			ui.Spike(gtx, th, safe)
+			a.Layout(gtx, safe)
 			e.Frame(gtx.Ops)
 		}
 	}

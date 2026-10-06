@@ -58,7 +58,7 @@ Include tests for the cases that broke in the prototype:
 
 Build in this order, checking each against the prototype side by side:
 
-1. App shell: theme tokens, fonts, bottom navigation, back behaviour, dialogs, toasts.
+1. App shell: theme tokens, fonts, bottom navigation, back behaviour, dialogs, toasts. (Built; in review.)
 2. Library: categories → category → folder, create / rename / delete, poster fan, search.
 3. New / Edit entry form; Entry detail with journey, logging, editing, finished prompt.
 4. Home with stat chips, Still with you, Recently finished, memory card; the three "see all" pages.

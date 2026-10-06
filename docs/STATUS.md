@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 2 and the readiness audit (Setup section, `.env` ignored).
+Last updated: 2026-10-06, after Phase 3 step 1 (app shell), in review as a pull request.
 
 ## Where we are
 
@@ -14,14 +14,16 @@ Last updated: 2026-10-06, after Phase 2 and the readiness audit (Setup section, 
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **Next.** Start with step 1 (app shell). Nothing of the real UI exists yet; `ui/` only has the Phase 0 spike (stat chip + poster card + theme tokens). |
+| 3 Screens | **In progress.** Step 1 (app shell) built and waiting for the owner's review in a pull request; **don't start step 2 until it's approved.** |
 
 ## What exists
 
 - `core/` — model and all rules. `core/doc.go` maps each SPEC §4 subsection to its file. Entry points the UI will use: `Library` (categories, folders, entries, favourites, scopes such as `StillWithYou`, `RecentlyFinished`, `InCategory`, `InFolder`), `Entry` (`LogSession`, `EditSession`, `LogRewatch`, `SetStatus`, `Journey`, `YourWords`, `Progress`, `ShouldPromptFinished`), `NewTimeIndex` (build once per render; totals, monthly, weekly, `ConsumedByCategory`, `ShareBar`), `Library.Digest` / `DigestBounds` / `MoodTrends` / `OneYearAgo` / `Search`, formatting (`FormatDuration`, `Perspective`, `FormatDate`, `Greeting`, `ResultsHeader`). Day/month bucketing functions take a `*time.Location`.
 - `store/` — SQLite (migration 2 = library schema). `store.Store`: `Load`, `ReplaceAll`, `Update(func(Writer) error)` for single-transaction saves (`SaveProfile`, `SaveCategories`, `SaveEntry`, `DeleteEntry`, `SaveFavourites`). Posters are files in `posters/` beside the database (`WritePosters`, `RemoveUnusedPosters`); `Entry.Poster` is just the file name.
 - `importer/` — `importer.Read` turns `relic-archive.json` into a `core.Library` plus resized JPEG posters and a `Report` of repairs (SPEC §9). `importer.Summarize` prints counts/time/Top 5.
-- `cmd/import` (archive → database + summary), `cmd/scrub` (makes a de-personalised test copy), `cmd/snapshot` (screen → PNG), `cmd/relic` (the app; currently the spike plus a store launch counter that CI checks).
+- `cmd/import` (archive → database + summary), `cmd/scrub` (makes a de-personalised test copy), `cmd/snapshot` (any shell state → PNG, in any theme), `cmd/relic` (the app: loads the library, runs the shell, logs a store launch counter that CI checks).
+- `ui/` app shell (Phase 3 step 1): `App` (tabs, sub-page stack, back order, dialog, toast, `SetTheme` saving the profile), all 6 themes × light/dark + custom palette (`PaletteFor`, `CustomPalette`, tested against the tokens and the prototype's own JS), bottom nav, logo top bar, sub-page bar with search (`Search`), `PromptDialog` / `ConfirmDialog`, toasts, `IconSVG` (prototype SVG icons), `Paragraph` (CSS line-height), `shade()` (browser-matching translucent black). Tabs other than Home are placeholders; Home is a temporary "shell preview" with buttons for dialogs, toasts and a theme picker sub-page. `preview.go` and `snapshot.go` hold the temporary bits.
+- `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
 
 ## Decisions the owner made in conversation
@@ -32,6 +34,12 @@ These are already reflected in SPEC.md / CLAUDE.md; listed here so they aren't r
 - **Music counts time**: new **"Length (mins)"** field on music entries, counted like a film (once when logged, again per relisten). Blank length → tracks × 3.5 min. (SPEC §3, §4.5, §11 #1)
 - **"Other" duration stays free text** and counts no time; only session minutes count. (SPEC §11 #2)
 - Accepted from the Phase 1 report without objection: a logged "0 minutes" on a book means zero (blank = estimate 1.5 min/page; the importer maps the prototype's `mins: 0` to blank); totals of 0 mean "not given"; editing an entry doesn't change the start session's "logged as finished" flag; the edit form's "Watched so far" / "Pages read so far" edit only the **start session's** amount (`Entry.StartEpisodes` / `StartPages`), not the running total.
+
+Decided 2026-10-06 (first cloud session):
+
+- **Podcasts get "Ep. length (mins)"**, same as series. The core already counts podcast time from `EpisodeDuration`; the field goes on the podcast form in step 3. (SPEC §3)
+- **Rewatch ratings never change the entry rating**; they are kept as separate history. (SPEC §2, §11 #8)
+- **The app remembers the last light/dark mode, including after import.** The importer leaves the mode empty and `importer.Result.KeepMode` copies the app's current mode in; `cmd/import` does this, and the Settings import (step 9) must too. (SPEC §2, §8)
 
 The two new form fields (Episodes rewatched, Length (mins)) are not in the prototype. The owner approved them from these sketches, so build them like this, styled like neighbouring fields:
 
@@ -45,11 +53,11 @@ Artist      [ ...... ]
 Tracks      [ 11 ]  Length (mins) [ 44 ]
 ```
 
-## Open questions to raise with the owner (not yet asked)
+## Open questions to raise with the owner
 
-1. **Podcasts count no time.** The prototype's podcast form has no episode-length field, so podcast time is always 0 (the real archive's podcast shows 0 min). Suggest adding "Ep. length (mins)" to podcasts as series have; the core already uses `EpisodeDuration` for podcasts.
-2. SPEC §11 #8: should a rewatch rating ever update the entry rating? (Currently never.)
-3. The prototype export has no light/dark mode; imports default to light. Fine, or remember last mode?
+1. **(Asked in the app shell PR)** Middle tab label: "Add" (prototype, built) or "New" (the word SPEC §5 uses).
+2. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+3. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
 
 ## The owner's real data
 
@@ -72,9 +80,9 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 - There's no display in the cloud, so `go run ./cmd/relic` won't open a window. Check screens with `cmd/snapshot` PNGs (needs `EGL_PLATFORM=surfaceless`; see CLAUDE.md "Setup" for the cloud setup script and variables) and the CI emulator screenshots, and ask the owner to try the Windows build (`go run ./cmd/relic`).
 - Commit and push after each finished piece (CLAUDE.md). Commit messages end with the Co-Authored-By line given by the harness.
 
-## Phase 3 — how to start
+## Phase 3 — how to continue
 
-1. Read SPEC §5 and §6, `docs/design-tokens.json`, and the matching parts of `reference/relic.html` (its CSS is at the top; the render functions are named per screen, e.g. `renderHome`, `renderLibrary`, `renderDetail`).
-2. Build in ROADMAP order, starting with the app shell: theme tokens (6 themes × light/dark + custom-palette formulas), bundled fonts, bottom navigation, back behaviour (back closes an open search first, SPEC §4.9), dialogs, toasts.
-3. The app should open the SQLite store at startup, `Load` the library, build one `core.TimeIndex` per render, and save through `Store.Update`. The first-launch flow is onboarding (SPEC §5); importing the archive belongs to Settings (step 9). For testing earlier, it's fine to add a temporary dev-only import path that uses `importer.Read`.
+1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
+2. Next is step 2, Library. Replace the `placeholder` for `TabLibrary` in `NewApp` with the real screen; sub-pages go through `App.Push`, dialogs through `App.ShowDialog`, saves through `App.Update`. Build the one shared search implementation then (`Search` is only the bar). Remove the shell preview pieces from `preview.go` as real screens replace them (Home in step 4, theme picker in step 9).
+3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.
