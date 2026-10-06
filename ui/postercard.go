@@ -48,7 +48,7 @@ func (p PosterCard) layoutPoster(gtx layout.Context, th *Theme) layout.Dimension
 
 	icon := gtx.Dp(26)
 	st := op.Offset(image.Pt((size.X-icon)/2, (size.Y-icon)/2)).Push(gtx.Ops)
-	strokeIcon(gtx, 26, 1.3, withAlpha(th.Muted, 0.7), bookIcon)
+	IconBook.Layout(gtx, 26, 1.3, withAlpha(th.Muted, 0.7))
 	st.Pop()
 
 	if p.Percent > 0 {

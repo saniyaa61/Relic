@@ -109,3 +109,47 @@ func (t Text) layoutTracked(gtx layout.Context, th *Theme, s string, material op
 	st.Pop()
 	return layout.Dimensions{Size: image.Pt(width, ascent+descent), Baseline: descent}
 }
+
+// Paragraph is wrapped prose, mirroring a CSS block with a line-height:
+// lines sit LineHeight × Size apart and, as in CSS, half the extra space
+// goes above the first line and half below the last.
+type Paragraph struct {
+	Font       font.Font
+	Size       unit.Sp
+	Color      color.NRGBA
+	LineHeight float32 // multiple of Size; 0 means CSS "normal" for the font
+	Alignment  text.Alignment
+	MaxLines   int
+}
+
+func (p Paragraph) Layout(gtx layout.Context, th *Theme, s string) layout.Dimensions {
+	gtx.Constraints.Min = image.Point{}
+	factor := p.LineHeight
+	if factor == 0 {
+		factor = normalLineHeight[p.Font.Typeface]
+	}
+	lh := unit.Sp(float32(p.Size) * factor)
+	// One line's natural height (ascent + descent) tells us the leading.
+	rec := op.Record(gtx.Ops)
+	one := widget.Label{MaxLines: 1}.Layout(gtx, th.Shaper, p.Font, p.Size, "Ag", op.CallOp{})
+	rec.Stop()
+	half := (gtx.Sp(lh) - one.Size.Y) / 2
+
+	rec = op.Record(gtx.Ops)
+	l := widget.Label{Alignment: p.Alignment, MaxLines: p.MaxLines, LineHeight: lh, LineHeightScale: 1}
+	d := l.Layout(gtx, th.Shaper, p.Font, p.Size, s, colorOp(gtx, p.Color))
+	call := rec.Stop()
+	st := op.Offset(image.Pt(0, half)).Push(gtx.Ops)
+	call.Add(gtx.Ops)
+	st.Pop()
+	d.Size.Y += 2 * half
+	d.Baseline += half
+	return d
+}
+
+// colorOp records a paint colour, the material Gio's text widgets take.
+func colorOp(gtx layout.Context, c color.NRGBA) op.CallOp {
+	rec := op.Record(gtx.Ops)
+	paint.ColorOp{Color: c}.Add(gtx.Ops)
+	return rec.Stop()
+}

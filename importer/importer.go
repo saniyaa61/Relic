@@ -23,6 +23,13 @@ type Result struct {
 	Report  Report
 }
 
+// KeepMode gives the imported library the app's current light/dark mode,
+// so importing an archive never switches the mode (owner's decision,
+// 2026-10-06). Call it before saving the import.
+func (r *Result) KeepMode(current core.Profile) {
+	r.Library.Profile.Mode = current.Mode
+}
+
 // Report says what the import found and what it had to repair.
 type Report struct {
 	Categories, Entries, Sessions, Rewatches, Posters int
@@ -101,8 +108,10 @@ func (im *importer) profile(a archive) {
 		}
 		p.Theme = "linen"
 	}
-	// The prototype didn't export light/dark.
-	p.Mode = "light"
+	// The prototype didn't export light/dark, and the owner wants the app
+	// to keep its current mode across an import anyway: Mode stays empty
+	// here and the caller fills it in with KeepMode.
+	p.Mode = ""
 	p.CustomBase, p.CustomAccent = a.CustomBase, a.CustomAccent
 	if p.Theme == "custom" && (p.CustomBase == "" || p.CustomAccent == "") {
 		im.warn("Custom theme without both colours; using Linen.")

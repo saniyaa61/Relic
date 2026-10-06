@@ -1,7 +1,7 @@
 // Command snapshot renders a Relic screen to a PNG without opening a window,
 // for comparing against the prototype side by side.
 //
-//	go run ./cmd/snapshot -o spike.png -scale 2
+//	go run ./cmd/snapshot -o build/home.png -screen home -theme linen -dark
 package main
 
 import (
@@ -10,12 +10,14 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"strings"
 
 	"gioui.org/gpu/headless"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
 
+	"github.com/saniyaa61/relic/core"
 	"github.com/saniyaa61/relic/ui"
 )
 
@@ -23,16 +25,27 @@ func main() {
 	out := flag.String("o", "snapshot.png", "output PNG file")
 	scale := flag.Float64("scale", 2, "pixels per dp")
 	w := flag.Int("w", 400, "width in dp")
-	h := flag.Int("h", 420, "height in dp")
-	dark := flag.Bool("dark", false, "use Linen dark")
+	h := flag.Int("h", 800, "height in dp")
+	screen := flag.String("screen", "home", "what to show: "+strings.Join(ui.SnapshotScreens, ", "))
+	theme := flag.String("theme", "linen", "theme: "+strings.Join(ui.ThemeNames, ", ")+", custom")
+	dark := flag.Bool("dark", false, "dark mode")
+	base := flag.String("base", "#7A5C3A", "custom theme base colour")
+	accent := flag.String("accent", "#C4956A", "custom theme accent colour")
+	top := flag.Float64("top", 0, "status bar height in dp, to check the safe area")
+	bottom := flag.Float64("bottom", 0, "system navigation bar height in dp")
 	flag.Parse()
 
-	p := ui.LinenLight
+	mode := "light"
 	if *dark {
-		p = ui.LinenDark
+		mode = "dark"
 	}
-	th, err := ui.NewTheme(p)
+	lib := &core.Library{Profile: core.Profile{Theme: *theme, Mode: mode, CustomBase: *base, CustomAccent: *accent}}
+	th, err := ui.NewTheme(ui.LinenLight)
 	if err != nil {
+		log.Fatal(err)
+	}
+	a := ui.NewApp(th, lib, nil)
+	if err := a.ShowForSnapshot(*screen); err != nil {
 		log.Fatal(err)
 	}
 
@@ -48,7 +61,7 @@ func main() {
 		Metric:      unit.Metric{PxPerDp: s, PxPerSp: s},
 		Constraints: layout.Exact(size),
 	}
-	ui.Spike(gtx, th, layout.Inset{})
+	a.Layout(gtx, layout.Inset{Top: unit.Dp(*top), Bottom: unit.Dp(*bottom)})
 	if err := win.Frame(&ops); err != nil {
 		log.Fatal(err)
 	}

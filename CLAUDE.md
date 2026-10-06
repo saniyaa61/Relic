@@ -18,6 +18,9 @@ Relic ("your stories, preserved") is a personal archive for films, dramas, books
 - Architecture: pure `core/` package for every rule in SPEC §4. UI and storage depend on core, never the other way round.
 - Offline-first: the app works fully without a network. Sync comes in Phase 5.
 - Storage (Phase 2): tables per record type, times as fixed-width UTC text, type-specific fields and lists as JSON. UI writes through `store.Store` (`Load`, `ReplaceAll`, `Update` for one transaction). Posters are JPEG files (long edge ≤ 600 px) in a `posters/` folder beside the database; entries hold the file name. Imported entries and categories keep their prototype ids.
+- App shell (Phase 3 step 1): `ui.App` owns the window: tab, sub-page stack, dialog, toast. Screens implement `ui.Screen`; a page with its own search implements `ui.BackHandler`. Back order: dialog → page search → sub-page → Home → system (Android leaves the app); Escape does the same on Windows. Theme changes go through `App.SetTheme`, which saves the profile. Icons are the prototype's SVG markup, parsed by `ui.IconSVG`.
+- Symbols (★ ☆ ♥ ✓ ✕ ✦ ✧) come from a bundled 3 KB subset of Noto Sans Symbols 2 (OFL), with its line spacing reduced so it never makes a line taller. Colour emoji (🔥, 🎨) aren't drawable in Gio yet; decide per screen (open question in STATUS).
+- Gio blends colours in linear light, browsers in sRGB: translucent black (scrims, shadows) goes through `shade()` so it darkens like the prototype's `rgba(0,0,0,a)`.
 - Core model (Phase 1): ids are random 128-bit hex. Entries reference categories by id, so renaming a category touches nothing else. A session's minutes are optional (`nil` = not logged, so books estimate 1.5 min/page; an explicit 0 counts as 0); the importer must map the prototype's `mins: 0` to "not logged". Partial rewatches store "episodes rewatched"; music counts album length (or tracks × 3.5 min). Totals (episodes, pages) of 0 mean "not given" and never count as reached. Editing an entry doesn't rewrite the start session's "logged as finished" flag.
 
 Update this section when a decision is made.
@@ -72,8 +75,9 @@ Update this section when a decision is made.
 
 - Checks: `go vet ./...` and `go test ./...`
 - Run on Windows: `go run ./cmd/relic`
-- Screen to PNG: `go run ./cmd/snapshot -o build/spike.png -scale 2`
+- Screen to PNG: `go run ./cmd/snapshot -screen home -o build/home.png` (add `-theme midnight -dark`; `-screen` takes home, library, new, favorites, digest, subpage, search, prompt, confirm, toast, toast-error)
 - Import the prototype archive into a database and print counts, time and Top 5: `go run ./cmd/import -in ../relic-archive.json -db build/relic.db` (posters go to `build/posters/`).
+- Prototype screenshots to compare with (cloud sessions; uses the pre-installed Chromium): `MODE=light node tools/protoshot.js $PWD build/proto relic_v3`
 - Compare an import with the prototype's own formulas: `go test ./importer -run Prototype -v` (scrubbed copy); add `RELIC_ARCHIVE=C:/Users/saniy/Downloads/relic-archive.json` to also check the real archive.
 - Refresh the scrubbed test copy after a new export: `go run ./cmd/scrub -in ../relic-archive.json -out importer/testdata/scrubbed-archive.json`. Never commit the real archive.
 - Android APK locally (needs `ANDROID_HOME`, the NDK, and JDK 17's `bin` on PATH for `keytool`): `gogio -target android -arch arm64,amd64 -minsdk 24 -appid com.saniyaa61.relic -name Relic -o build/relic.apk ./cmd/relic`
