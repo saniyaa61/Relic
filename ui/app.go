@@ -62,7 +62,10 @@ type App struct {
 	// platform's file picker; it blocks until the user chooses or
 	// cancels). Invalidate asks for a new frame from another goroutine.
 	ChooseImage func() (io.ReadCloser, error)
-	Invalidate  func()
+	// CreateFile, if set, asks where to save a new file called name (the
+	// platform's save dialog; it blocks). Cancelling returns ErrNoFile.
+	CreateFile func(name string) (io.WriteCloser, error)
+	Invalidate func()
 	// PosterDir is the folder of poster JPEGs beside the database; ""
 	// means posters aren't shown.
 	PosterDir string
@@ -261,6 +264,9 @@ func (a *App) runAsync() {
 
 // ErrNoPicture is what ChooseImage returns when the user cancels.
 var ErrNoPicture = errors.New("no picture chosen")
+
+// ErrNoFile is what CreateFile returns when the user cancels.
+var ErrNoFile = errors.New("no file chosen")
 
 // pickPoster lets the user choose a picture, resizes it to a stored
 // poster file and calls done with its file name.

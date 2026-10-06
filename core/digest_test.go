@@ -183,3 +183,26 @@ func TestProgressSummary(t *testing.T) {
 		}
 	}
 }
+
+func TestYearCard(t *testing.T) {
+	l := newLib(t)
+	films := mustCat(t, l, "Films", Film)
+	books := mustCat(t, l, "Books", Book)
+	mustEntry(t, l, films, EntryInput{Title: "old", Fields: Fields{Duration: 300}}, at(ist, 2025, 12, 31, 23, 0))
+	mustEntry(t, l, films, EntryInput{Title: "a", Fields: Fields{Duration: 100}, Tags: []string{"Quiet"}, Rating: 4}, at(ist, 2026, 3, 1, 10, 0))
+	mustEntry(t, l, books, EntryInput{Title: "b", StartPages: 200}, at(ist, 2026, 5, 1, 10, 0)) // 300 min
+	x := NewTimeIndex(l.Entries)
+	yc := l.YearCard(x, 2026, ist)
+	if yc.Minutes != 400 || len(yc.New) != 2 || yc.TopTag != "Quiet" || len(yc.TopRated) != 1 {
+		t.Fatalf("stats: %v min, %d new, tag %q, %d rated", yc.Minutes, len(yc.New), yc.TopTag, len(yc.TopRated))
+	}
+	if len(yc.Categories) != 2 || yc.Categories[0].Category != books || yc.Categories[1].Minutes != 100 {
+		t.Errorf("categories: %+v", yc.Categories)
+	}
+	if yc.Monthly[2] != 100 || yc.Monthly[4] != 300 {
+		t.Errorf("monthly: %v", yc.Monthly)
+	}
+	if !yc.YearHasData() || l.YearCard(x, 2024, ist).YearHasData() {
+		t.Error("YearHasData")
+	}
+}

@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 7 (Consumed).
+Last updated: 2026-10-06, after Phase 3 step 8 (Year in Review image).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 7 (Consumed).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Steps 1–7 done (shell, Library, entry form/page, Home, Favorites, Digest, Consumed). Next: step 8 (Year in Review image + share sheet). |
+| 3 Screens | **In progress.** Steps 1–7 done; step 8 (Year in Review) built except Share, which waits on the owner's choice. Next: step 9 (Settings, export / import, onboarding). |
 
 ## What exists
 
@@ -32,6 +32,7 @@ Last updated: 2026-10-06, after Phase 3 step 7 (Consumed).
 - Differences from the prototype that are on purpose: "Finished this year" counts the imported finished entries (the importer gives them a finish date, SPEC §9; the prototype shows "—"); a month's top feelings break ties by overall frequency (core rule) rather than A–Z.
 - `ui/` step 7: `consumed.go` (Consumed, from Home's chip: the "All time, all worlds" hero with the total, "+X this month", the perspective line, the last-8-weeks sparkline and the category share bar; each category with its time, each folder with its time, "See all" and a row of up to 4 cards showing time; search across the library; the folder page "Category · Time spent" with all its entries and its own search). `core.Library.ConsumedFolder` lists a folder group; folders now group by the category's own spelling (case-insensitive). Durations round like the prototype's toFixed (exact halves up: 6.25 hrs → "6.3 hrs"; 61.65 → "61.6").
 - Durations drop a trailing ".0" ("51 hrs", not the prototype's "51.0 hrs"): the owner chose to keep this.
+- Step 8: `yearcard/` draws the 1080 × 1350 Year in Review PNG in plain Go (x/image: opentype text with the bundled fonts and the symbols fallback, vector shapes), laid out exactly as the prototype's `renderYearCardCanvas`; `core.Library.YearCard` gathers its data. `ui/yearcard.go`: "Share your year" → "Making your card…" → preview dialog (`Dialog.Wide`, `KeepOpen`) with Close / Save image; Save uses `App.CreateFile` (gioui.org/x/explorer's save dialog on Windows, Android and iOS); a cancelled save does nothing. `go test ./yearcard` with `YEARCARD_OUT=build/card.png` writes the card from the test archive; `tools/protoshot.js … yearcard` saves the prototype's canvas for comparison.
 - `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
@@ -77,7 +78,7 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-None right now.
+1. **Share on the Year card.** Gio has no share sheet. Options put to the owner on 2026-10-06: A) Save image only now, Share in Phase 4 with native code and device testing (recommended); B) Android Share now through a small Java helper that first saves the picture into the phone's Pictures (it stays there even if sharing is cancelled); C) Android Share through a private file, which needs a custom step in the APK build (gogio can't add the manifest entry). Waiting for the answer.
 
 ## The owner's real data
 
@@ -107,6 +108,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 8: Year in Review image + share sheet (SPEC §7, prototype `openYearCard`): a 1080 × 1350 PNG in the theme's colours, then save / share. The Year digest's "Share your year" card opens a `comingSoon` page now; replace it. Saving a file on Windows can use gioui.org/x/explorer (already used for the poster picker); Android/iOS sharing needs checking (show the owner options if a native share sheet isn't reachable from Gio).
+2. Next is step 9: Settings (SPEC §5 "Settings", §8 archive), export / import, onboarding (prototype `renderSettings`, `renderOnboarding`). Replace `themePreview` in `preview.go` (Home gear) and remove the temporary `cmd/relic -import` flag once import is in Settings. Export writes `relic-archive.json` with posters (use `App.CreateFile`); import reads one (`App.ChooseImage`'s picker pattern with `.json`). 🎨 in Settings uses `ui.Emoji` (same as the streak flame).
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

@@ -467,22 +467,6 @@ func (p *posterPage) cardRows(a *App, es []*core.Entry) []layout.Widget {
 	return out
 }
 
-// comingSoon stands in for a page built in a later step.
-type comingSoon struct {
-	eyebrow, title string
-	step           int
-	back           IconButton
-	list           widget.List
-}
-
-func (p *comingSoon) Layout(gtx layout.Context, a *App) layout.Dimensions {
-	return scrollPage(gtx, &p.list, []layout.Widget{
-		func(gtx layout.Context) layout.Dimensions { return subBar(gtx, a, &p.back, nil) },
-	}, []layout.Widget{func(gtx layout.Context) layout.Dimensions {
-		return pageHead(gtx, a.Theme, p.eyebrow, p.title, "This page arrives in step "+itoa(p.step)+" of Phase 3.")
-	}})
-}
-
 // textRun is one styled piece of a richLine.
 type textRun struct {
 	s     string

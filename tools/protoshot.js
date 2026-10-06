@@ -2,7 +2,7 @@
 // for side-by-side checks against cmd/snapshot. Uses the bundled fonts
 // (Google Fonts may be unreachable) and the pre-installed Chromium.
 //
-//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest|consumed]
+//   node tools/protoshot.js <repo> <out-dir> [shell|library|form|detail|home|favorites|digest|consumed|yearcard]
 //
 // HEIGHT=1900 for a taller window (long forms). NOW=2026-09-29T09:00:00Z fixes the clock. MODE=dark for dark mode, THEME=midnight etc. (default linen). ARCHIVE=<prototype export JSON> loads that data
 // (e.g. importer/testdata/scrubbed-archive.json); otherwise one empty
@@ -85,6 +85,12 @@ const shots = {
     ['consumed-folder', () => { crSearchOpen = false; crSearchQuery = ''; const cb = buildConsumedCatBlocks()[0]; openConsumedFolder(cb.sec.id, cb.cards[0].name); }],
     ['consumed-empty', () => { entries = []; openConsumed(); }],
   ],
+  // These return the canvas as a data URL, saved as the PNG itself.
+  yearcard: [
+    ['yearcard', async () => (await renderYearCardCanvas(2026)).canvas.toDataURL('image/png')],
+    ['yearcard-preview', async () => { nav('digest'); setDigestPeriod('year'); await openYearCard(); }],
+    ['yearcard-dark', async () => { document.body.className = document.body.className.replace('-light', '-dark'); return (await renderYearCardCanvas(2026)).canvas.toDataURL('image/png'); }],
+  ],
   library: [
     ['lib-root', () => nav('library')],
     ['lib-new-category', () => goAddCategory()],
@@ -121,7 +127,11 @@ const shots = {
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(3500); // let the splash screen finish
   for (const [name, fn] of shots[set]) {
-    await page.evaluate(fn);
+    const out = await page.evaluate(fn);
+    if (typeof out === 'string' && out.startsWith('data:image/png')) {
+      fs.writeFileSync(path.join(outDir, name + '.png'), Buffer.from(out.split(',')[1], 'base64'));
+      continue;
+    }
     await page.waitForTimeout(700);
     await page.screenshot({ path: path.join(outDir, name + '.png') });
   }

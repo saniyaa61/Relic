@@ -115,7 +115,7 @@ func (p *digestPage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 		a.Push(&moodsPage{})
 	}
 	if p.share.Clicked(gtx) {
-		a.Push(&comingSoon{eyebrow: "Digest", title: "Share your " + strconv.Itoa(per.Year), step: 8})
+		openYearCard(a, per.Year)
 	}
 
 	x := a.timeIndex()

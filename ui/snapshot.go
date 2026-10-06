@@ -2,10 +2,12 @@ package ui
 
 import (
 	"fmt"
+	"image"
 	"strings"
 	"time"
 
 	"github.com/saniyaa61/relic/core"
+	"github.com/saniyaa61/relic/yearcard"
 )
 
 // SnapshotScreens lists the states cmd/snapshot can render.
@@ -16,7 +18,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"form-new", "form-series", "form-podcast", "form-edit", "form-calendar",
 	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
 	"digest-prev", "digest-week", "digest-year", "digest-year-peak", "digest-year-flat", "moods", "digest-empty",
-	"consumed", "consumed-search", "consumed-folder", "consumed-empty",
+	"yearcard", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
@@ -73,6 +75,18 @@ func (a *App) ShowForSnapshot(screen string) error {
 			return fmt.Errorf("%s needs a library with time (use -archive)", screen)
 		}
 		a.Push(&consumedFolderPage{key: folderKey{cats[0].Category.ID, cats[0].Folders[0].Name}})
+	case "yearcard":
+		// The preview dialog over the Year digest, drawn without waiting.
+		a.Go(TabDigest)
+		a.roots[TabDigest].(*digestPage).kind = core.YearPeriod
+		yc := a.Lib.YearCard(a.timeIndex(), t0.In(a.Loc).Year(), a.Loc)
+		posters := make([]image.Image, len(yc.TopRated))
+		for i, e := range yc.TopRated {
+			if img, ok := a.posterImage(e.Poster); ok {
+				posters[i] = img
+			}
+		}
+		showYearCard(a, yc.Year, yearcard.Render(yc, cardColors(a.Theme), posters))
 	case "moods":
 		a.Go(TabDigest)
 		a.Push(&moodsPage{})

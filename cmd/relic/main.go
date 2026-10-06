@@ -122,6 +122,13 @@ func run(w *app.Window) error {
 		}
 		return rc, err
 	}
+	a.CreateFile = func(name string) (io.WriteCloser, error) {
+		wc, err := expl.CreateFile(name)
+		if errors.Is(err, explorer.ErrUserDecline) {
+			return nil, ui.ErrNoFile
+		}
+		return wc, err
+	}
 	a.Invalidate = w.Invalidate
 	a.OnWindowColors = func(status, navigation color.NRGBA) {
 		w.Option(app.StatusColor(status), app.NavigationColor(navigation))

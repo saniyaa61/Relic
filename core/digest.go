@@ -291,3 +291,31 @@ func (e *Entry) ProgressSummary() string {
 	}
 	return s
 }
+
+// YearCard is what the Year in Review image shows (SPEC §7).
+type YearCard struct {
+	Year int
+	DigestStats
+	Categories []CategoryTime // minutes in the year, most first (no folders)
+	Monthly    [12]float64
+}
+
+// YearCard gathers a year's card: the Year digest's stats, where the time
+// went that year, and month by month.
+func (l *Library) YearCard(x *TimeIndex, year int, loc *time.Location) YearCard {
+	p := YearOfDigest(year, loc)
+	yc := YearCard{Year: year, DigestStats: l.Digest(x, p), Monthly: x.Monthly(l.Entries, year, loc)}
+	for _, c := range l.Categories {
+		var m float64
+		for _, e := range l.Entries {
+			if e.CategoryID == c.ID {
+				m += x.InRange(e.ID, p.Start, p.End)
+			}
+		}
+		if m > 0 {
+			yc.Categories = append(yc.Categories, CategoryTime{Category: c, Minutes: m})
+		}
+	}
+	sort.SliceStable(yc.Categories, func(i, j int) bool { return yc.Categories[i].Minutes > yc.Categories[j].Minutes })
+	return yc
+}

@@ -39,6 +39,13 @@ type Dialog struct {
 	OnCancel func(a *App)
 	// Body, if set, is drawn under the title and sub-line (the calendar).
 	Body func(gtx layout.Context, a *App) layout.Dimensions
+	// KeepOpen leaves the dialog up after Confirm (the Year card's "Save
+	// image"); Cancel and the scrim still close it.
+	KeepOpen bool
+	// Wide is the Year card preview's box: min(380px, 100% − 28px) with
+	// 16px padding and the buttons 14px below, instead of the usual
+	// min(342px, 100% − 40px), 21px and 19px.
+	Wide bool
 
 	input      Input
 	cancel, ok Button
@@ -96,7 +103,9 @@ func (d *Dialog) submit(gtx layout.Context, a *App) {
 		d.input.Focus(gtx)
 		return
 	}
-	d.close(a)
+	if !d.KeepOpen {
+		d.close(a)
+	}
 	if d.OnConfirm != nil {
 		d.OnConfirm(a, v)
 	}
@@ -165,6 +174,9 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 
 	// The card: min(342px, 100% - 40px) wide, centred.
 	w := min(gtx.Dp(342), size.X-gtx.Dp(40))
+	if d.Wide {
+		w = min(gtx.Dp(380), size.X-gtx.Dp(28))
+	}
 	cgtx := gtx
 	cgtx.Constraints = layout.Constraints{Min: image.Pt(w, 0), Max: image.Pt(w, size.Y)}
 	rec := op.Record(gtx.Ops)
@@ -192,12 +204,18 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 
 func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
 	th := a.Theme
-	return card(gtx, th.Surface, th.Border, 19, layout.UniformInset(21), 0, func(gtx layout.Context) layout.Dimensions {
+	pad, actsTop := unitDp(21), unitDp(19)
+	if d.Wide {
+		pad, actsTop = 16, 14
+	}
+	return card(gtx, th.Surface, th.Border, 19, layout.UniformInset(pad), 0, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		var rows []layout.FlexChild
-		rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return Text{Font: font.Font{Typeface: Display, Weight: font.Medium}, Size: 19, Color: th.Text}.Layout(gtx, th, d.Title)
-		}))
+		if d.Title != "" {
+			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return Text{Font: font.Font{Typeface: Display, Weight: font.Medium}, Size: 19, Color: th.Text}.Layout(gtx, th, d.Title)
+			}))
+		}
 		if d.Sub != "" {
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Top: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -223,8 +241,12 @@ func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
 			)
 		}
 		if d.Body != nil {
+			top := unitDp(14)
+			if len(rows) == 0 {
+				top = 0
+			}
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return layout.Inset{Top: 14}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Inset{Top: top}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return d.Body(gtx, a)
 				})
 			}))
@@ -245,7 +267,7 @@ func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
 			)
 		}
 		rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 19}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Top: actsTop}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				style := ButtonAccent
 				if d.Danger {
 					style = ButtonDanger
