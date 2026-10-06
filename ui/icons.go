@@ -1,5 +1,7 @@
 package ui
 
+import "github.com/saniyaa61/relic/core"
+
 // Icons copied from the prototype's inline SVGs (reference/relic.html).
 var (
 	// Bottom navigation.
@@ -23,3 +25,38 @@ var (
 	IconClock = IconSVG(`<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`)
 	IconBook  = IconSVG(`<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>`)
 )
+
+// Library: card menus, folders and the category type icons (TYPE_ICONS).
+var (
+	IconMenu        = IconSVG(`<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>`)
+	IconPen         = IconSVG(`<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>`)
+	IconTrash       = IconSVG(`<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>`)
+	IconFolder      = IconSVG(`<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>`)
+	IconChevronDown = IconSVG(`<polyline points="6 9 12 15 18 9"/>`)
+
+	typeIcons = map[core.EntryType]*Icon{
+		core.Film:    IconSVG(`<rect x="2" y="3" width="20" height="18" rx="2"/><line x1="7" y1="3" x2="7" y2="21"/><line x1="17" y1="3" x2="17" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/>`),
+		core.Series:  IconSVG(`<rect x="2" y="7" width="20" height="14" rx="2"/><polyline points="17 2 12 7 7 2"/>`),
+		core.Book:    IconBook,
+		core.Podcast: IconSVG(`<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>`),
+		core.Short:   IconSVG(`<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>`),
+		core.Music:   IconSVG(`<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>`),
+		core.Other:   IconLibrary,
+	}
+
+	// rowIcons stand in for a missing poster on entry rows (prototype
+	// rowIcon); other types show an empty tile, as there.
+	rowIcons = map[core.EntryType]*Icon{
+		core.Film:   IconSVG(`<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>`),
+		core.Series: IconSVG(`<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>`),
+		core.Book:   IconBook,
+	}
+)
+
+// typeIcon is the category icon for t (Other for unknown types).
+func typeIcon(t core.EntryType) *Icon {
+	if ic, ok := typeIcons[t]; ok {
+		return ic
+	}
+	return typeIcons[core.Other]
+}

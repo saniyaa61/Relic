@@ -142,3 +142,10 @@ func (s *Search) Bar(gtx layout.Context, a *App, placeholder string) layout.Dime
 	call.Add(gtx.Ops)
 	return layout.Dimensions{Size: image.Pt(d.Size.X, h)}
 }
+
+// closeNow closes the search without animating, as when leaving the page.
+func (s *Search) closeNow() {
+	s.open = false
+	s.changedAt = time.Time{}
+	s.input.Editor.SetText("")
+}

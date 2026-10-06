@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 1 (app shell) was merged.
+Last updated: 2026-10-06, after Phase 3 step 2 (Library).
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 1 (app shell) was merged.
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Step 1 (app shell) done. Step 2 (Library) in progress. |
+| 3 Screens | **In progress.** Step 1 (app shell) done. Step 2 (Library) built and pushed; waiting for the owner's Windows check and two answers (below). Step 3 (New/Edit entry, entry detail) is next. |
 
 ## What exists
 
@@ -23,6 +23,8 @@ Last updated: 2026-10-06, after Phase 3 step 1 (app shell) was merged.
 - `importer/` — `importer.Read` turns `relic-archive.json` into a `core.Library` plus resized JPEG posters and a `Report` of repairs (SPEC §9). `importer.Summarize` prints counts/time/Top 5.
 - `cmd/import` (archive → database + summary), `cmd/scrub` (makes a de-personalised test copy), `cmd/snapshot` (any shell state → PNG, in any theme), `cmd/relic` (the app: loads the library, runs the shell, logs a store launch counter that CI checks).
 - `ui/` app shell (Phase 3 step 1): `App` (tabs, sub-page stack, back order, dialog, toast, `SetTheme` saving the profile), all 6 themes × light/dark + custom palette (`PaletteFor`, `CustomPalette`, tested against the tokens and the prototype's own JS), bottom nav, logo top bar, sub-page bar with search (`Search`), `PromptDialog` / `ConfirmDialog`, toasts, `IconSVG` (prototype SVG icons), `Paragraph` (CSS line-height), `shade()` (browser-matching translucent black). Tabs other than Home are placeholders; Home is a temporary "shell preview" with buttons for dialogs, toasts and a theme picker sub-page. `preview.go` and `snapshot.go` hold the temporary bits.
+- `ui/` Library (step 2), `library.go`: categories grid with the fanned poster stack, ☰ menus (Rename / Delete), dashed "+ New category" tile, category page (folder grid, "+ New folder", Uncategorised rows), folder page, scoped search on all three, card drop-in animation. Dialogs use the prototype's wording; changes save through `App.save` (reloads from the store if a save fails). Entry rows open a placeholder until step 3. Shared pieces: `entryrow.go` (entry rows, stars, tag chips, empty state, `searchResults`), `libparts.go` (`addTile`, `cardMenu`, `cardDrop`, dashed borders), `typepicker.go` ("What lives here"), `images.go` (posters read from `App.PosterDir`, resized once and cached). `core` gained `SetCategoryType` and `CoverEntries`.
+- `cmd/relic -import <archive>`: temporary desktop-only way to load the prototype archive (replaces all data, keeps light/dark mode) until Settings has Import (step 9). Remove it then.
 - `tools/protoshot.js` screenshots the prototype in the pre-installed Chromium for side-by-side checks (see CLAUDE.md Commands).
 - `importer/testdata/scrubbed-archive.json` — scrubbed copy of the owner's real archive (same structure, dates, numbers, ids; words and posters replaced). Use it as the realistic test fixture.
 
@@ -57,8 +59,10 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
-2. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
+1. **(Asked 2026-10-06, awaiting answer)** "What lives here" picker: A dropdown list (built) or B chips all visible. Swapping is small: `typePicker` in `ui/typepicker.go`.
+2. **(Asked 2026-10-06, awaiting answer)** The category and folder pages keep the bottom bar, as the prototype does, although SPEC §5 says sub-pages hide it. Kept the prototype's way unless the owner says otherwise (`ShowsNav` on the page).
+3. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+4. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
 
 ## The owner's real data
 
@@ -88,6 +92,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Next is step 2, Library. Replace the `placeholder` for `TabLibrary` in `NewApp` with the real screen; sub-pages go through `App.Push`, dialogs through `App.ShowDialog`, saves through `App.Update`. Build the one shared search implementation then (`Search` is only the bar). Remove the shell preview pieces from `preview.go` as real screens replace them (Home in step 4, theme picker in step 9).
+2. Next is step 3: New / Edit entry form and the entry detail page. Replace `newEntryPage()` and `entryPlaceholder` (opened from entry rows). Sub-pages go through `App.Push`, dialogs through `App.ShowDialog`, saves through `App.save`. Search results reuse `searchResults` (core does the matching). Remove the shell preview pieces from `preview.go` as real screens replace them (Home in step 4, theme picker in step 9).
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

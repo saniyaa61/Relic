@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"gioui.org/f32"
+
+	"github.com/saniyaa61/relic/core"
 )
 
 // Icons must stay inside their 24×24 box (with a little room for curves).
@@ -13,6 +15,18 @@ func TestIconsInBox(t *testing.T) {
 		"home": IconHome, "library": IconLibrary, "add": IconAdd, "favorites": IconFavorites,
 		"digest": IconDigest, "back": IconBack, "search": IconSearch, "settings": IconSettings,
 		"check": IconCheck, "x-circle": IconXCircle, "plus": IconPlus, "clock": IconClock, "book": IconBook,
+		"menu": IconMenu, "pen": IconPen, "trash": IconTrash, "folder": IconFolder, "chevron": IconChevronDown,
+	}
+	for t, ic := range typeIcons {
+		icons["type "+string(t)] = ic
+	}
+	for t, ic := range rowIcons {
+		icons["row "+string(t)] = ic
+	}
+	for _, et := range core.EntryTypes {
+		if typeIcons[et] == nil {
+			t.Errorf("no category icon for %s", et)
+		}
 	}
 	for name, ic := range icons {
 		if len(ic.segs) == 0 {

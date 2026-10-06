@@ -2,10 +2,13 @@ package ui
 
 import (
 	"image"
+	"strconv"
 
 	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/text"
+	"gioui.org/unit"
 	"gioui.org/widget"
 )
 
@@ -120,4 +123,21 @@ func flow(gtx layout.Context, gap int, children []layout.Widget) layout.Dimensio
 // eyebrow is a small letter-spaced label (the prototype's .edit-label).
 func eyebrow(gtx layout.Context, th *Theme, s string) layout.Dimensions {
 	return Text{Font: font.Font{Typeface: Sans}, Size: 10, Tracking: 0.07, Upper: true, Color: th.Muted}.Layout(gtx, th, s)
+}
+
+func unitSp(v float32) unit.Sp { return unit.Sp(v) }
+func unitDp(v float32) unit.Dp { return unit.Dp(v) }
+func itoa(n int) string        { return strconv.Itoa(n) }
+
+const textMiddle = text.Middle
+
+// fillWidth lays out w and reports the full available width, so a
+// Flexed child pushes the next child to the far edge even when w (text,
+// say) is narrower.
+func fillWidth(w layout.Widget) layout.Widget {
+	return func(gtx layout.Context) layout.Dimensions {
+		d := w(gtx)
+		d.Size.X = max(d.Size.X, gtx.Constraints.Max.X)
+		return d
+	}
 }

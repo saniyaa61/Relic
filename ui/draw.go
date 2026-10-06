@@ -27,7 +27,12 @@ func card(gtx layout.Context, bg, border color.NRGBA, radius unit.Dp, pad layout
 	// stretched by its parent can centre or fill its content.
 	cgtx := gtx
 	cgtx.Constraints.Max = cgtx.Constraints.Max.Sub(image.Pt(2*b, 2*b))
-	cgtx.Constraints.Min = image.Pt(max(cgtx.Constraints.Min.X-2*b, 0), max(cgtx.Constraints.Min.Y-2*b, 0))
+	// layout.Inset only shrinks the maximum, so take the padding off the
+	// minimum here, or a card asked to be 110dp tall would grow by its
+	// padding.
+	padX := gtx.Dp(pad.Left) + gtx.Dp(pad.Right)
+	padY := gtx.Dp(pad.Top) + gtx.Dp(pad.Bottom)
+	cgtx.Constraints.Min = image.Pt(max(cgtx.Constraints.Min.X-2*b-padX, 0), max(cgtx.Constraints.Min.Y-2*b-padY, 0))
 	rec := op.Record(gtx.Ops)
 	cd := pad.Layout(cgtx, content)
 	call := rec.Stop()

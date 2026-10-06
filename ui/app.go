@@ -55,6 +55,9 @@ type App struct {
 	// snapshots and tests.
 	Now func() time.Time
 	Loc *time.Location
+	// PosterDir is the folder of poster JPEGs beside the database; ""
+	// means posters aren't shown.
+	PosterDir string
 	// OnWindowColors, if set, is called when the system bar colours should
 	// change (theme switch, or the bottom bar shown or hidden).
 	OnWindowColors func(status, navigation color.NRGBA)
@@ -68,6 +71,7 @@ type App struct {
 	toast   toast
 
 	lastStatus, lastNav color.NRGBA
+	posters             posterCache
 }
 
 // NewApp starts on Home with the theme the profile asks for.
@@ -76,7 +80,7 @@ func NewApp(th *Theme, lib *core.Library, db *store.DB) *App {
 	th.Palette = PaletteFor(lib.Profile)
 	a.roots = [tabCount]Screen{
 		TabHome:      &homePreview{},
-		TabLibrary:   &placeholder{eyebrow: "Library", title: "Categories", step: 2},
+		TabLibrary:   &libraryRoot{},
 		TabNew:       newEntryPage(),
 		TabFavorites: &placeholder{eyebrow: "Favorites", title: "The ones you love", step: 5},
 		TabDigest:    &placeholder{eyebrow: "Digest", title: "Your story so far", step: 6},
@@ -170,6 +174,56 @@ func (a *App) Update(fn func(w store.Writer) error) bool {
 	return true
 }
 
+// save stores the given parts of the library in one transaction:
+// categories (which also deletes entries of removed categories), the
+// listed entries, and favourites. If saving fails, the library is read
+// back from the store so the screen never shows unsaved changes.
+func (a *App) save(categories bool, entries []*core.Entry, favourites bool) bool {
+	ok := a.Update(func(w store.Writer) error {
+		if categories {
+			if err := w.SaveCategories(a.Lib.Categories); err != nil {
+				return err
+			}
+		}
+		for _, e := range entries {
+			if err := w.SaveEntry(e); err != nil {
+				return err
+			}
+		}
+		if favourites {
+			return w.SaveFavourites(a.Lib.Favourites)
+		}
+		return nil
+	})
+	if !ok && a.DB != nil {
+		if lib, err := a.DB.Load(); err == nil {
+			a.Lib = lib
+		}
+	}
+	return ok
+}
+
+// removeUnusedPosters deletes poster files no entry uses any more.
+func (a *App) removeUnusedPosters() {
+	if a.PosterDir == "" || a.DB == nil {
+		return
+	}
+	if err := store.RemoveUnusedPosters(a.PosterDir, a.Lib); err != nil {
+		log.Printf("relic: tidying posters: %v", err)
+	}
+}
+
+// navShown reports whether the bottom bar shows: on the tab pages, and on
+// sub-pages that keep it (the Library's category and folder pages, as in
+// the prototype).
+func (a *App) navShown() bool {
+	if len(a.stack) == 0 {
+		return true
+	}
+	s, ok := a.top().(interface{ ShowsNav() bool })
+	return ok && s.ShowsNav()
+}
+
 // SetTheme switches theme and light/dark mode, saving them to the profile
 // so they're remembered next launch. base and accent are only used for the
 // custom theme.
@@ -193,7 +247,7 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	th := a.Theme
 	paint.Fill(gtx.Ops, th.Bg)
 	size := gtx.Constraints.Max
-	showNav := len(a.stack) == 0
+	showNav := a.navShown()
 
 	// The bottom bar takes its height from the bottom of the window; the
 	// page gets the rest.
@@ -268,6 +322,9 @@ func (a *App) handleBack(gtx layout.Context) {
 // ShowDialog opens d over the current page.
 func (a *App) ShowDialog(d *Dialog) {
 	d.openedAt = a.Now()
+	if d.Type != nil {
+		d.picker.value = *d.Type
+	}
 	a.dialog = d
 }
 

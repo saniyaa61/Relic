@@ -14,6 +14,8 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/widget"
+
+	"github.com/saniyaa61/relic/core"
 )
 
 // Dialog is the prototype's in-page modal (.rmodal): a centred card over a
@@ -26,6 +28,9 @@ type Dialog struct {
 	Label, Placeholder string
 	Cancel, Confirm    string
 	Danger             bool
+	// Type, if set, adds the "What lives here" picker (category dialogs);
+	// OnConfirm reads the choice with Dialog.ChosenType.
+	Type *core.EntryType
 	// OnConfirm gets the trimmed field text. A prompt with an empty field
 	// doesn't confirm; it puts the cursor back in the field instead.
 	OnConfirm func(a *App, value string)
@@ -37,7 +42,11 @@ type Dialog struct {
 	closedAt   time.Time
 	focusField bool
 	cardTag    int
+	picker     typePicker
 }
+
+// ChosenType is the type picked in a dialog with a Type picker.
+func (d *Dialog) ChosenType() core.EntryType { return d.picker.value }
 
 // PromptDialog asks for a name (prototype openPromptModal). label defaults
 // to "Name" and confirm to "Save".
@@ -148,7 +157,7 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 	cgtx := gtx
 	cgtx.Constraints = layout.Constraints{Min: image.Pt(w, 0), Max: image.Pt(w, size.Y)}
 	rec := op.Record(gtx.Ops)
-	cd := d.layoutCard(cgtx, th)
+	cd := d.layoutCard(cgtx, a)
 	call := rec.Stop()
 	rise := roundi(float32(cd.Size.Y) * 0.04 * (1 - tRise))
 	pos := image.Pt((size.X-cd.Size.X)/2, (size.Y-cd.Size.Y)/2+rise)
@@ -170,7 +179,8 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 	return false
 }
 
-func (d *Dialog) layoutCard(gtx layout.Context, th *Theme) layout.Dimensions {
+func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
+	th := a.Theme
 	return card(gtx, th.Surface, th.Border, 19, layout.UniformInset(21), 0, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		var rows []layout.FlexChild
@@ -197,6 +207,21 @@ func (d *Dialog) layoutCard(gtx layout.Context, th *Theme) layout.Dimensions {
 						Pad:              layout.Inset{Top: 11, Bottom: 11, Left: 13, Right: 13},
 						Placeholder:      d.Placeholder,
 						PlaceholderAlpha: 1,
+					})
+				}),
+			)
+		}
+		if d.Type != nil {
+			rows = append(rows,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return layout.Inset{Top: 14, Bottom: 5}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return Text{Font: font.Font{Typeface: Sans}, Size: 10, Tracking: 0.07, Upper: true, Color: th.Muted}.Layout(gtx, th, "What lives here")
+					})
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions { return d.picker.Layout(gtx, a) }),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return Paragraph{Font: font.Font{Typeface: Serif, Style: font.Italic}, Size: 11.5, LineHeight: 1.6, Color: th.Muted}.Layout(gtx, th, "This only decides which fields appear when you log an entry here.")
 					})
 				}),
 			)
