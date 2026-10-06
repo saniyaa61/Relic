@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 func TestCategories(t *testing.T) {
@@ -129,5 +130,59 @@ func TestFieldsFor(t *testing.T) {
 	}
 	if Other.Label() != "Other" || EntryType("x").Valid() {
 		t.Error("labels/valid")
+	}
+}
+
+func TestSetCategoryType(t *testing.T) {
+	l := newLib(t)
+	c := mustCat(t, l, "Watching", Film)
+	e := mustEntry(t, l, c, EntryInput{Title: "a"}, t0)
+	if err := l.SetCategoryType(c.ID, Series); err != nil {
+		t.Fatal(err)
+	}
+	if c.Type != Series || e.Type != Film {
+		t.Errorf("category %s, entry %s; want the category to change and the entry to keep Film", c.Type, e.Type)
+	}
+	if err := l.SetCategoryType(c.ID, "game"); !errors.Is(err, ErrBadType) {
+		t.Errorf("bad type: %v", err)
+	}
+	if err := l.SetCategoryType("nope", Book); !errors.Is(err, ErrNotFound) {
+		t.Errorf("missing category: %v", err)
+	}
+}
+
+func TestCoverEntries(t *testing.T) {
+	l := newLib(t)
+	c := mustCat(t, l, "Movies", Film)
+	other := mustCat(t, l, "Books", Book)
+	var withPoster []*Entry
+	for i := range 5 {
+		e := mustEntry(t, l, c, EntryInput{Title: "e"}, t0.Add(time.Duration(i)*time.Hour))
+		if i != 3 { // entry 3 has no poster
+			e.Poster = "p.jpg"
+			withPoster = append(withPoster, e)
+		}
+	}
+	o := mustEntry(t, l, other, EntryInput{Title: "o"}, t0.Add(10*time.Hour))
+	o.Poster = "o.jpg"
+	// An older entry moved to the top of the list must not jump the queue:
+	// order is by createdAt, not list position.
+	l.Entries[0], l.Entries[len(l.Entries)-1] = l.Entries[len(l.Entries)-1], l.Entries[0]
+
+	got := l.CoverEntries(c.ID, 3)
+	want := []*Entry{withPoster[3], withPoster[2], withPoster[1]} // created at +4h, +2h, +1h
+	if len(got) != 3 {
+		t.Fatalf("got %d covers, want 3", len(got))
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("cover %d created %v, want %v", i, got[i].CreatedAt, want[i].CreatedAt)
+		}
+	}
+	if n := len(l.CoverEntries(other.ID, 3)); n != 1 {
+		t.Errorf("Books covers = %d, want 1", n)
+	}
+	if n := len(l.CoverEntries("nope", 3)); n != 0 {
+		t.Errorf("unknown category has %d covers", n)
 	}
 }

@@ -91,6 +91,21 @@ func (l *Library) RenameCategory(id, name string) error {
 	return nil
 }
 
+// SetCategoryType changes what lives in a category: the fields new entries
+// get. Existing entries keep their own type (SPEC §2: an entry's type is
+// copied at creation and only changes if it moves category).
+func (l *Library) SetCategoryType(id string, t EntryType) error {
+	if !t.Valid() {
+		return ErrBadType
+	}
+	c := l.Category(id)
+	if c == nil {
+		return ErrNotFound
+	}
+	c.Type = t
+	return nil
+}
+
 // DeleteCategory removes a category with all its entries and their Top 5 and
 // favourite order (SPEC §4.16).
 func (l *Library) DeleteCategory(id string) error {
@@ -246,6 +261,18 @@ func (l *Library) InCategory(categoryID string) []*Entry {
 // InFolder returns a folder's entries; folder "" is Uncategorised.
 func (l *Library) InFolder(categoryID, folder string) []*Entry {
 	return l.filter(func(e *Entry) bool { return e.CategoryID == categoryID && e.Folder == folder })
+}
+
+// CoverEntries returns up to n of the category's entries that have a
+// poster, most recently created first: the fanned stack on a Library
+// category box (SPEC §5).
+func (l *Library) CoverEntries(categoryID string, n int) []*Entry {
+	out := l.filter(func(e *Entry) bool { return e.CategoryID == categoryID && e.Poster != "" })
+	sort.SliceStable(out, func(i, j int) bool { return out[i].CreatedAt.After(out[j].CreatedAt) })
+	if len(out) > n {
+		out = out[:n]
+	}
+	return out
 }
 
 // StillWithYou returns ongoing entries, newest first.
