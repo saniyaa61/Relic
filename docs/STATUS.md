@@ -5,7 +5,7 @@ the work stands and what the owner has already decided in conversation, so
 nothing needs re-explaining. **Update it at the end of each piece of work**
 (same commit), keeping it short and current; delete what's no longer true.
 
-Last updated: 2026-10-06, after Phase 3 step 1 (app shell), in review as a pull request.
+Last updated: 2026-10-06, after Phase 3 step 1 (app shell) was merged.
 
 ## Where we are
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-06, after Phase 3 step 1 (app shell), in review as a pull 
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **In progress.** Step 1 (app shell) built and waiting for the owner's review in a pull request; **don't start step 2 until it's approved.** |
+| 3 Screens | **In progress.** Step 1 (app shell) merged (PR #2). The owner is trying it on Windows; their two answers below (tab label, symbols) are still open. Step 2 (Library) is next. |
 
 ## What exists
 
@@ -55,9 +55,10 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 
 ## Open questions to raise with the owner
 
-1. **(Asked in the app shell PR)** Middle tab label: "Add" (prototype, built) or "New" (the word SPEC §5 uses).
-2. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
-3. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
+1. **(Asked 2026-10-06, awaiting answer)** Middle tab label: "Add" (prototype, built) or "New" (the word SPEC §5 uses).
+2. **(Asked 2026-10-06, awaiting answer)** Is the bundled Noto Sans Symbols 2 look fine for ★ ♥ ✓ ✕ ✦?
+3. **Colour emoji.** Gio can't draw colour emoji, and the prototype uses 🔥 in the Home streak pill ("🔥 4 days in a row") and 🎨 in Settings. Show options when building Home (step 4): e.g. a small flame line icon in the accent colour, or bundled emoji images.
+4. **"Mark as finished?" button colour.** The prototype opens it with the same confirm dialog as Delete, so "Mark as finished" is red. Ask in step 3 whether to keep red or use the accent colour (`Dialog.Danger` controls it).
 
 ## The owner's real data
 
@@ -72,6 +73,10 @@ Tracks      [ 11 ]  Length (mins) [ 44 ]
 - Jobs: vet+test (Linux, installs Gio's X11/Wayland libs), Android APK, Android emulator run (screenshot + checks the log for `relic: store ok, launch 1/2`), iOS simulator run on an Intel Mac (same check).
 - The latest run (Phase 2, commit 6e240a9) passed every job. The two runs before it failed **only** in the emulator/simulator launch steps, from slow cloud machines: the iOS app started after the fixed `sleep`s had passed, and one Android emulator boot was cancelled at about 15 min. The code built and its tests passed in those runs. **Suggested fix, not yet done:** replace the fixed sleeps with polling loops that wait for the "store ok" log line (up to ~2 min), and give the emulator step a longer boot timeout. Do this if failures recur.
 - Download results from the run's Artifacts section: `relic-apk`, `emulator-screenshots`, `ios-screenshots`.
+
+## How the owner checks each step (Windows)
+
+Work goes straight to `main` (no pull requests). After each finished step, tell the owner: in VS Code's terminal, `git checkout main`, `git pull`, `go run ./cmd/relic`, then a short list of what to try and what should happen. Esc is the back button on Windows. The app's data lives in `C:\Users\saniy\AppData\Roaming\Relic\relic.db` (delete it for a fresh start).
 
 ## Working in a cloud session
 

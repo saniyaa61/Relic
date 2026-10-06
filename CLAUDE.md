@@ -56,7 +56,8 @@ Update this section when a decision is made.
 
 - The owner has **no Android phone** and a **3.8 GB RAM** laptop, so the local Android emulator isn't usable. Day to day, check screens in the Windows build (phone-sized window) and `cmd/snapshot` PNGs. The Android check is the GitHub Actions run (`.github/workflows/build.yml`), which builds the APK, runs it on a cloud emulator and uploads a screenshot.
 - The owner edits in **VS Code**, not Android Studio. Don't give instructions that need the Android Studio app; use command-line tools (`sdkmanager`, `avdmanager`, `emulator`, `adb`, `gogio`) and VS Code.
-- All work is saved to a private GitHub repo (`origin` → github.com/saniyaa61/Relic). **Commit and push after each piece of finished work**, with `go vet ./...` and `go test ./...` passing first.
+- All work is saved to a private GitHub repo (`origin` → github.com/saniyaa61/Relic). **Commit and push after each piece of finished work**, with `go vet ./...` and `go test ./...` passing first. **Push straight to `main`; no pull requests** unless the owner asks for one (owner's decision, 2026-10-06).
+- **After every finished step or phase, give the owner a Windows check:** what to pull (`git checkout main`, `git pull`), what to run (`go run ./cmd/relic`), and a short list of exactly what to try, with what should happen. Wait for their result before moving far ahead on anything it could change.
 - When a step needs something installed, tell the owner what to install and how, step by step, before it's needed.
 - The owner is the product designer and tests on real data. Describe changes in plain language, not code.
 - Ask before changing anything visual that the spec doesn't define.
