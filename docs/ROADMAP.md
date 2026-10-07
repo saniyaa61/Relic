@@ -54,7 +54,7 @@ Include tests for the cases that broke in the prototype:
 
 **Done when:** importing the real archive and reading it back reproduces the same counts, time totals and Top 5 as the prototype shows.
 
-## Phase 3 — Screens (Windows build day to day, Android emulator via GitHub Actions) — ⏭ next
+## Phase 3 — Screens (Windows build day to day, Android emulator via GitHub Actions) — ✅ done
 
 Build in this order, checking each against the prototype side by side:
 
@@ -70,7 +70,9 @@ Build in this order, checking each against the prototype side by side:
 
 **Done when:** every screen in SPEC §5 works on Android with imported real data, in at least Linen light and one dark theme.
 
-## Phase 4 — iOS
+Verified 2026-10-07: CI run 30's emulator tour (43 screenshots, the scrubbed copy of the real archive, Linen light and Midnight dark) reviewed screen by screen; the owner checked the same screens on Windows with the real archive.
+
+## Phase 4 — iOS — ⏭ next
 
 Build and run on iOS (Mac + Xcode), fix platform differences (share sheet, photo picker, safe areas, fonts). Add the Year card's **Share** button with native code on iOS and Android (owner's decision: Save image only until then).
 

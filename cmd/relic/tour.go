@@ -27,7 +27,7 @@ var tourArchive []byte
 var tourLight = []string{
 	"onboarding", "home", "home-memory", "swy", "rf", "ae", "swy-search", "consumed", "consumed-folder",
 	"library", "lib-category", "lib-folder", "lib-menu", "lib-new-category",
-	"detail", "detail-book", "detail-film", "log-session", "log-rewatch", "reached-end",
+	"detail", "detail-book", "detail-film", "log-session", "log-rewatch", "reached-end-accent",
 	"form-new", "form-series", "form-edit", "form-calendar",
 	"favorites", "fav-series", "fav-rank",
 	"digest", "digest-week", "digest-year", "moods", "yearcard",

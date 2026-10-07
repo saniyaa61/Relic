@@ -14,7 +14,8 @@ Last updated: 2026-10-06, after Phase 3 step 9 (Settings, archive, onboarding).
 | 0 Decisions and spike | Done. Gio + SQLite (ncruces) chosen; spike runs on Android and iOS simulator in CI. |
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
-| 3 Screens | **All 9 steps built.** Waiting on the owner's Windows check of step 9; then the Phase 3 "Done when" check on Android (needs CI running again, see CI notes). |
+| 3 Screens | Done. "Done when" verified: every SPEC §5 screen on the Android emulator with imported data (CI run 30's tour screenshots, Linen light and Midnight dark), and on Windows with the real archive (owner, 2026-10-07). |
+| 4 iOS | Next. Needs a Mac (CI's iOS simulator job covers launch only); includes the Year card's Share button. |
 
 ## What exists
 
@@ -96,7 +97,7 @@ None right now.
 - Jobs: vet+test (Linux, installs Gio's X11/Wayland libs), Android APK, Android emulator run (screenshot + checks the log for `relic: store ok, launch 1/2`), iOS simulator run on an Intel Mac (same check).
 - Emulator and simulator launches used fixed pauses and failed now and then on slow cloud machines (most recently the iOS step on 2026-10-06: the simulator took ~3 min to boot). They now wait up to 3 minutes for the app's "store ok" log line instead. If a launch step still fails, read its log before calling it a flake.
 - The owner made the repo **public** on 2026-10-06 (private Actions minutes had run out; public repos get free minutes).
-- **Run 30 (2026-10-06) was green on every job**: vet+test, APK, the emulator (both launches, then all 43 tour screens shown with no errors and no crash) and the iOS simulator. The cloud session couldn't download the screenshot artifact (its network policy blocks the artifact storage host, `*.blob.core.windows.net`), so the screenshots themselves still need a look.
+- **Run 30 (2026-10-06) was green on every job**: vet+test, APK, the emulator (both launches, then all 43 tour screens shown with no errors and no crash) and the iOS simulator. The owner opened the artifact storage host in the environment's network policy; the 43 tour screenshots were reviewed on 2026-10-07 and match the Windows build. The tour's "reached-end" step now uses the accent variant (`reached-end-accent`), the app's real look; plain `reached-end` is the red comparison snapshot. The area under the bottom bar (gesture bar) is the bar's colour, as intended.
 - **Tour build:** the Android job also builds `relic-tour.apk` (`-tags tour`, `cmd/relic/tour.go`, embeds the scrubbed archive copied to `cmd/relic/tour-archive.json`). On the emulator it steps through every screen (`ui.App.Tour`) in Linen light, then a few in Midnight dark, logging `relic: tour n/total screen theme mode`; `tools/emulator-tour.sh` screenshots each into the `emulator-screenshots` artifact (`tour/`) and fails on errors or a crash. `go test ./ui -run TestTour` runs every snapshot screen through the same path. Code checks pass locally (`go vet`, `go test`, Windows build, Android/iOS compile of the pure packages).
 - Download results from the run's Artifacts section: `relic-apk`, `emulator-screenshots`, `ios-screenshots`.
 
@@ -114,6 +115,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Phase 3 is built. Next: the owner's Windows check of Settings / import / onboarding with real data, the two Custom-theme answers, then the "Done when" check (every SPEC §5 screen on Android with real data, Linen light and one dark theme) via CI's emulator screenshots, which needs Actions running again. Then Phase 4 (iOS; the Year card's Share).
+2. Phase 3 is done (owner's Windows check and the Android screenshots both passed). Next is Phase 4 (iOS; the Year card's Share), waiting on the owner's go-ahead.
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.
