@@ -71,6 +71,7 @@ jobs:
     name: Run on Android emulator
     needs: android
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -124,6 +125,8 @@ jobs:
     name: iOS simulator
     # gogio builds simulator apps for Intel only, so use an Intel Mac.
     runs-on: macos-15-intel
+    # A stuck simulator once held the job for the 6-hour maximum.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

@@ -5,8 +5,11 @@
 set -u
 apk=$1 id=$2 out=$3
 mkdir -p "$out"
-adb uninstall "$id" >/dev/null 2>&1 || true
+# Install over the launch-check app (same signing key). Uninstalling first
+# raced: Android's late "package removed" cleanup killed the new tour app.
 adb install -r "$apk"
+adb shell am force-stop "$id"
+sleep 3
 adb logcat -c
 adb shell monkey -p "$id" -c android.intent.category.LAUNCHER 1 >/dev/null
 
@@ -19,10 +22,18 @@ if [ -z "$first" ]; then echo "tour never started"; adb logcat -d > "$out/logcat
 total=$(echo "$first" | sed 's|.*tour 1/\([0-9]*\).*|\1|')
 echo "tour: $total screens"
 
+missing=0
 for n in $(seq 1 "$total"); do
   l=""
   for _ in $(seq 40); do l=$(line "$n"); [ -n "$l" ] && break; sleep 0.5; done
-  [ -z "$l" ] && { echo "screen $n never appeared"; continue; }
+  if [ -z "$l" ]; then
+    echo "screen $n never appeared"
+    missing=$((missing + 1))
+    # Three in a row means the tour has stalled: stop rather than wait out the rest.
+    [ "$missing" -ge 3 ] && break
+    continue
+  fi
+  missing=0
   sleep 1.5
   name=$(echo "$l" | awk '{print $4"-"$5"-"$6}')
   adb exec-out screencap -p > "$out/$(printf %02d "$n")-$name.png"

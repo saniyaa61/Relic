@@ -7,7 +7,6 @@ udid=$1 app=$2 id=$3 out=$4
 mkdir -p "$out"
 log="$out/console.txt"
 xcrun simctl terminate "$udid" "$id" >/dev/null 2>&1 || true
-xcrun simctl uninstall "$udid" "$id" >/dev/null 2>&1 || true
 xcrun simctl install "$udid" "$app"
 xcrun simctl launch --console-pty "$udid" "$id" > "$log" 2>&1 &
 
@@ -20,10 +19,18 @@ if [ -z "$first" ]; then echo "tour never started"; cat "$log"; exit 1; fi
 total=$(echo "$first" | sed 's|.*tour 1/\([0-9]*\).*|\1|')
 echo "tour: $total screens"
 
+missing=0
 for n in $(seq 1 "$total"); do
   l=""
   for _ in $(seq 40); do l=$(line "$n"); [ -n "$l" ] && break; sleep 0.5; done
-  [ -z "$l" ] && { echo "screen $n never appeared"; continue; }
+  if [ -z "$l" ]; then
+    echo "screen $n never appeared"
+    missing=$((missing + 1))
+    # Three in a row means the tour has stalled: stop rather than wait out the rest.
+    [ "$missing" -ge 3 ] && break
+    continue
+  fi
+  missing=0
   sleep 1.5
   name=$(echo "$l" | awk '{print $4"-"$5"-"$6}')
   xcrun simctl io "$udid" screenshot "$out/$(printf %02d "$n")-$name.png" >/dev/null 2>&1
