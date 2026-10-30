@@ -1,5 +1,5 @@
-# Checks, Android build and emulator screenshots (the first launch, then
-# every screen via the tour build) on every push.
+# Checks, Android and iOS builds, and emulator/simulator screenshots (the
+# first launch, then every screen via the tour build) on every push.
 # Download the results from the run's "Artifacts" section on GitHub.
 name: Build
 
@@ -137,6 +137,11 @@ jobs:
         run: |
           gogio -target ios -arch amd64 -minsdk 15 \
             -appid "$APP_ID" -name Relic -o Relic.app ./cmd/relic
+      - name: Build the tour app (steps through every screen)
+        run: |
+          cp importer/testdata/scrubbed-archive.json cmd/relic/tour-archive.json
+          gogio -target ios -arch amd64 -minsdk 15 -tags tour \
+            -appid "$APP_ID" -name Relic -o RelicTour.app ./cmd/relic
       - name: Install, launch twice and screenshot
         run: |
           mkdir -p screenshots
@@ -163,6 +168,9 @@ jobs:
           cat screenshots/run1.txt screenshots/run2.txt
           grep "relic: store ok, launch 1" screenshots/run1.txt
           grep "relic: store ok, launch 2" screenshots/run2.txt
+          echo "$UDID" > udid.txt
+      - name: Tour every screen and screenshot
+        run: bash tools/ios-tour.sh "$(cat udid.txt)" RelicTour.app "$APP_ID" screenshots/tour
       - uses: actions/upload-artifact@v4
         if: always()
         with:

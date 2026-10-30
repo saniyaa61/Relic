@@ -99,6 +99,7 @@ None right now.
 - The owner made the repo **public** on 2026-10-06 (private Actions minutes had run out; public repos get free minutes).
 - **Run 30 (2026-10-06) was green on every job**: vet+test, APK, the emulator (both launches, then all 43 tour screens shown with no errors and no crash) and the iOS simulator. The owner opened the artifact storage host in the environment's network policy; the 43 tour screenshots were reviewed on 2026-10-07 and match the Windows build. The tour's "reached-end" step now uses the accent variant (`reached-end-accent`), the app's real look; plain `reached-end` is the red comparison snapshot. The area under the bottom bar (gesture bar) is the bar's colour, as intended.
 - **Tour build:** the Android job also builds `relic-tour.apk` (`-tags tour`, `cmd/relic/tour.go`, embeds the scrubbed archive copied to `cmd/relic/tour-archive.json`). On the emulator it steps through every screen (`ui.App.Tour`) in Linen light, then a few in Midnight dark, logging `relic: tour n/total screen theme mode`; `tools/emulator-tour.sh` screenshots each into the `emulator-screenshots` artifact (`tour/`) and fails on errors or a crash. `go test ./ui -run TestTour` runs every snapshot screen through the same path. Code checks pass locally (`go vet`, `go test`, Windows build, Android/iOS compile of the pure packages).
+- **iOS tour (2026-10-30):** the iOS job also builds `RelicTour.app` (`-tags tour`) and `tools/ios-tour.sh` screenshots every screen on the simulator into `ios-screenshots` (`tour/`), failing on errors or a crash. This is the Phase 4 route (owner's choice: GitHub, with their Mac VM as a backup).
 - Download results from the run's Artifacts section: `relic-apk`, `emulator-screenshots`, `ios-screenshots`.
 
 ## How the owner checks each step (Windows)
@@ -107,7 +108,7 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 
 ## Working in a cloud session
 
-- The cloud session is Linux. The owner works on Windows 11 in VS Code with a 3.8 GB RAM laptop and no Android phone (so no local emulator). Write instructions for the owner as Windows + VS Code + command-line steps.
+- The cloud session is Linux. The owner works on Windows 11 in VS Code with a 3.8 GB RAM laptop (so no local emulator), plus an Android phone and an iPhone for hand checks, and a macOS VM on their PC as a backup. Write instructions for the owner as Windows + VS Code + command-line steps.
 - `go test ./...` on Linux needs Gio's system libraries for the `ui` package (the apt list is in the workflow's "Install Gio's Linux libraries" step). If they can't be installed, run `go test ./core/... ./store/... ./importer/...` and say so.
 - There's no display in the cloud, so `go run ./cmd/relic` won't open a window. Check screens with `cmd/snapshot` PNGs (needs `EGL_PLATFORM=surfaceless`; see CLAUDE.md "Setup" for the cloud setup script and variables) and the CI emulator screenshots, and ask the owner to try the Windows build (`go run ./cmd/relic`).
 - Commit and push after each finished piece (CLAUDE.md). Commit messages end with the Co-Authored-By line given by the harness.
