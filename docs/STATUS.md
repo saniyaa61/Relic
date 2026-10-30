@@ -15,7 +15,7 @@ Last updated: 2026-10-06, after Phase 3 step 9 (Settings, archive, onboarding).
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
 | 3 Screens | Done. "Done when" verified: every SPEC §5 screen on the Android emulator with imported data (CI run 30's tour screenshots, Linen light and Midnight dark), and on Windows with the real archive (owner, 2026-10-07). |
-| 4 iOS | In progress. iOS goes the GitHub route (simulator tour screenshots every screen, like Android). Done: the iOS tour, the fixed Android signing key, the Year card's Share button (built, waiting on CI and the owner's phone check). |
+| 4 iOS | In progress. iOS goes the GitHub route (simulator tour screenshots every screen, like Android). Done: the iOS tour, the fixed Android signing key (owner added the secrets 2026-10-30; run 41083120870 signed with it), the Year card's Share button (run 41083120870: both tours end on the system share sheet showing the card: Android's "Sharing image" chooser, iOS's sheet with relic-2026-in-review.png). Waiting on the owner's Android phone check. |
 
 ## What exists
 
