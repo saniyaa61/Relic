@@ -160,12 +160,12 @@ jobs:
         run: go install gioui.org/cmd/gogio@v0.10.0
       - name: Build for the iOS simulator
         run: |
-          gogio -target ios -arch amd64 -minsdk 15 \
+          gogio -target ios -arch amd64 -minsdk 15 -icon cmd/relic/appicon-ios.png \
             -appid "$APP_ID" -name Relic -o Relic.app ./cmd/relic
       - name: Build the tour app (steps through every screen)
         run: |
           cp importer/testdata/scrubbed-archive.json cmd/relic/tour-archive.json
-          gogio -target ios -arch amd64 -minsdk 15 -tags tour \
+          gogio -target ios -arch amd64 -minsdk 15 -tags tour -icon cmd/relic/appicon-ios.png \
             -appid "$APP_ID" -name Relic -o RelicTour.app ./cmd/relic
       - name: Install, launch twice and screenshot
         run: |

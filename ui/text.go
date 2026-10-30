@@ -162,7 +162,11 @@ func (p Paragraph) Layout(gtx layout.Context, th *Theme, s string) layout.Dimens
 	half := (gtx.Sp(lh) - one.Size.Y) / 2
 
 	rec = op.Record(gtx.Ops)
-	l := widget.Label{Alignment: p.Alignment, MaxLines: p.MaxLines, LineHeight: lh, LineHeightScale: 1}
+	// Lines break only between words, as in the browser: a word too long
+	// for its line runs on past the edge (into the padding the prototype
+	// leaves for it) rather than splitting ("Movi / es").
+	l := widget.Label{Alignment: p.Alignment, MaxLines: p.MaxLines, LineHeight: lh, LineHeightScale: 1,
+		WrapPolicy: text.WrapWords}
 	d := l.Layout(gtx, th.Shaper, p.Font, p.Size, s, colorOp(gtx, p.Color))
 	call := rec.Stop()
 	st := op.Offset(image.Pt(0, half)).Push(gtx.Ops)

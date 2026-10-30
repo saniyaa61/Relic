@@ -6,6 +6,7 @@ import (
 	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/unit"
 	"gioui.org/widget"
 )
 
@@ -30,7 +31,10 @@ type navBar struct {
 }
 
 // Layout draws the bar across the full width; bottomInset (px) is the
-// system navigation area, added below the prototype's own padding.
+// system navigation area, which the bar's surface runs under. The
+// prototype's 14px bottom padding was room for a phone's home indicator;
+// on a phone the system area itself gives that room, so the bar keeps
+// only 4dp there (owner: the bar sat too high above Android's buttons).
 func (n *navBar) Layout(gtx layout.Context, a *App, bottomInset int) layout.Dimensions {
 	th := a.Theme
 	for i := range n.items {
@@ -40,7 +44,11 @@ func (n *navBar) Layout(gtx layout.Context, a *App, bottomInset int) layout.Dime
 	}
 	w := gtx.Constraints.Max.X
 	rec := op.Record(gtx.Ops)
-	d := layout.Inset{Top: 8, Bottom: 14}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	pad := unit.Dp(14)
+	if bottomInset > 0 {
+		pad = 4
+	}
+	d := layout.Inset{Top: 8, Bottom: pad}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = w
 		children := make([]layout.FlexChild, tabCount)
 		for i := range n.items {

@@ -164,9 +164,12 @@ func (p *libraryRoot) categoryBox(gtx layout.Context, a *App, c *core.Category) 
 							return iconChip(gtx, th, typeIcon(c.Type), 36, 10, 17, 1.5)
 						},
 						func(gtx layout.Context) layout.Dimensions {
-							return layout.Inset{Right: 18}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-								return Paragraph{Font: font.Font{Typeface: Display, Weight: font.Medium}, Size: 14, LineHeight: 1.3, MaxLines: 2, Color: th.Text}.Layout(gtx, th, c.Name)
-							})
+							// The prototype wraps the name inside an 18px right
+							// padding, but a word too long for the line shows on
+							// into that padding. Gio clips text to its width, so
+							// the name gets the padding's width too (and still
+							// never breaks inside a word).
+							return Paragraph{Font: font.Font{Typeface: Display, Weight: font.Medium}, Size: 14, LineHeight: 1.3, MaxLines: 2, Color: th.Text}.Layout(gtx, th, c.Name)
 						})
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
