@@ -15,10 +15,12 @@ type TourStep struct {
 	Screen, Theme, Mode string
 }
 
-// Tour shows each step for hold, logging "relic: tour <n>/<total> <screen>
-// <theme> <mode>" as it appears, then "relic: tour done". reload gives a
-// fresh copy of the library for each step, so steps can't affect each other.
-func (a *App) Tour(steps []TourStep, now time.Time, hold time.Duration, reload func() (*core.Library, error)) {
+// Tour shows each step, logging "relic: tour <n>/<total> <screen> <theme>
+// <mode>" as it appears, then "relic: tour done". After showing step n it
+// calls wait(n) off the event loop and moves on when that returns (a fixed
+// pause, or a signal that the screenshot is taken). reload gives a fresh
+// copy of the library for each step, so steps can't affect each other.
+func (a *App) Tour(steps []TourStep, now time.Time, wait func(n int), reload func() (*core.Library, error)) {
 	defaults := [...]any{customTile, yearBars, homeStreak, detailHero, markFinishedRed}
 	var show func(i int)
 	show = func(i int) {
@@ -44,7 +46,7 @@ func (a *App) Tour(steps []TourStep, now time.Time, hold time.Duration, reload f
 		}
 		log.Printf("relic: tour %d/%d %s %s %s", i+1, len(steps), s.Screen, s.Theme, s.Mode)
 		a.background(func() func(*App) {
-			time.Sleep(hold)
+			wait(i + 1)
 			return func(a *App) { show(i + 1) }
 		})
 	}

@@ -22,7 +22,7 @@ func TestTour(t *testing.T) {
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
 	defer log.SetOutput(os.Stderr)
-	a.Tour(steps, time.Date(2026, 9, 29, 9, 0, 0, 0, time.UTC), 0, func() (*core.Library, error) { return reload(), nil })
+	a.Tour(steps, time.Date(2026, 9, 29, 9, 0, 0, 0, time.UTC), func(int) {}, func() (*core.Library, error) { return reload(), nil })
 	for i := 0; i < 10*len(steps) && !strings.Contains(buf.String(), "relic: tour done"); i++ {
 		frame(a)
 		time.Sleep(time.Millisecond)

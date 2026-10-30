@@ -18,8 +18,12 @@ first=$(line 1)
 if [ -z "$first" ]; then echo "tour never started"; cat "$log"; exit 1; fi
 total=$(echo "$first" | sed 's|.*tour 1/\([0-9]*\).*|\1|')
 echo "tour: $total screens"
+# The app holds each screen until told the screenshot is taken: it logs
+# the file to write the step number to (cmd/relic/tour.go, tourWait).
+next=$(grep -ao "relic: tour waits on .*" "$log" | tail -1 | sed 's|relic: tour waits on ||' | tr -d '\r')
+if [ -z "$next" ]; then echo "the app didn't say where to signal"; cat "$log"; exit 1; fi
 
-missing=0 late=0
+missing=0
 for n in $(seq 1 "$total"); do
   l=""
   for _ in $(seq 40); do l=$(line "$n"); [ -n "$l" ] && break; sleep 0.5; done
@@ -35,11 +39,7 @@ for n in $(seq 1 "$total"); do
   name=$(echo "$l" | awk '{print $4"-"$5"-"$6}')
   xcrun simctl io "$udid" screenshot "$out/$(printf %02d "$n")-$name.png" >/dev/null 2>&1
   echo "$l"
-  # The screenshot must land before the next screen replaces this one.
-  if [ "$n" -lt "$total" ] && [ -n "$(line $((n + 1)))" ]; then
-    echo "screenshot $n was too slow: it may show screen $((n + 1))"
-    late=1
-  fi
+  echo "$n" > "$next"
 done
 
 for _ in $(seq 30); do grep -q "relic: tour done" "$log" && break; sleep 1; done
@@ -49,4 +49,3 @@ grep -q "relic: tour done" "$log" || { echo "tour didn't finish"; cat "$log"; ex
 if grep -aE "relic: tour [a-z0-9-]+: |relic: year card share: " "$log"; then exit 1; fi
 xcrun simctl spawn "$udid" launchctl list | grep -q "$id" || { echo "the app crashed"; exit 1; }
 xcrun simctl terminate "$udid" "$id" || true
-[ "$late" = 0 ] || exit 1

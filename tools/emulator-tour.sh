@@ -19,7 +19,7 @@ adb shell monkey -p "$id" -c android.intent.category.LAUNCHER 1 >/dev/null
 line() { adb logcat -d | grep -o "relic: tour $1/[0-9]* [a-z0-9-]* [a-z]* [a-z]*" | tail -1; }
 
 # Wait (up to 4 minutes) for the first screen.
-for _ in $(seq 120); do [ -n "$(line 1)" ] && break; sleep 2; done
+for _ in $(seq 480); do [ -n "$(line 1)" ] && break; sleep 0.5; done
 first=$(line 1)
 if [ -z "$first" ]; then echo "tour never started"; adb logcat -d > "$out/logcat.txt"; exit 1; fi
 total=$(echo "$first" | sed 's|.*tour 1/\([0-9]*\).*|\1|')
@@ -38,14 +38,15 @@ for n in $(seq 1 "$total"); do
   fi
   missing=0
   sleep 1.5
+  # The screen must still be up when the screenshot starts (screencap
+  # itself takes well under a second; each screen stays up 4 s).
+  if [ "$n" -lt "$total" ] && [ -n "$(line $((n + 1)))" ]; then
+    echo "screenshot $n started too late: screen $((n + 1)) was already up"
+    late=1
+  fi
   name=$(echo "$l" | awk '{print $4"-"$5"-"$6}')
   adb exec-out screencap -p > "$out/$(printf %02d "$n")-$name.png"
   echo "$l"
-  # The screenshot must land before the next screen replaces this one.
-  if [ "$n" -lt "$total" ] && [ -n "$(line $((n + 1)))" ]; then
-    echo "screenshot $n was too slow: it may show screen $((n + 1))"
-    late=1
-  fi
 done
 
 for _ in $(seq 30); do adb logcat -d | grep -q "relic: tour done" && break; sleep 1; done

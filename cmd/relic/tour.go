@@ -13,7 +13,11 @@ import (
 	"bytes"
 	_ "embed"
 	"log"
+	"os"
+	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/saniyaa61/relic/archive"
@@ -62,12 +66,30 @@ func init() {
 			steps = append(steps, ui.TourStep{Screen: s, Theme: "midnight", Mode: "dark"})
 		}
 		now := time.Date(2026, 9, 29, 9, 0, 0, 0, time.UTC)
-		// The iOS simulator takes several seconds per screenshot on CI's
-		// Intel Macs, so each screen stays up longer there.
-		hold := 4 * time.Second
-		if runtime.GOOS == "ios" {
-			hold = 10 * time.Second
+		a.Tour(steps, now, tourWait(), func() (*core.Library, error) { return db.Load() })
+	}
+}
+
+// tourWait is how long each screen stays up. On Android, a fixed 4 s
+// (screenshots there take well under a second). The iOS simulator's
+// screenshots take anything from 2 to over 10 s on CI's Intel Macs, so
+// there the tour waits for tools/ios-tour.sh to write the step number to
+// a file (in the app's temporary folder, which the Mac can reach) once
+// it has taken that screenshot, giving up after a minute.
+func tourWait() func(n int) {
+	if runtime.GOOS != "ios" {
+		return func(int) { time.Sleep(4 * time.Second) }
+	}
+	next := filepath.Join(os.TempDir(), "relic-tour-next")
+	os.Remove(next)
+	log.Printf("relic: tour waits on %s", next)
+	return func(n int) {
+		want := strconv.Itoa(n)
+		for t := time.Now(); time.Since(t) < time.Minute; time.Sleep(200 * time.Millisecond) {
+			if b, err := os.ReadFile(next); err == nil && strings.TrimSpace(string(b)) == want {
+				return
+			}
 		}
-		a.Tour(steps, now, hold, func() (*core.Library, error) { return db.Load() })
+		log.Printf("relic: tour step-%d: no screenshot signal", n)
 	}
 }
