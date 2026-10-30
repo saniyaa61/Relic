@@ -45,6 +45,8 @@ for n in $(seq 1 "$total"); do
     late=1
   fi
   name=$(echo "$l" | awk '{print $4"-"$5"-"$6}')
+  # The system share sheet takes a few seconds to slide up.
+  case "$name" in *-sheet-*) sleep 6 ;; esac
   adb exec-out screencap -p > "$out/$(printf %02d "$n")-$name.png"
   echo "$l"
 done
