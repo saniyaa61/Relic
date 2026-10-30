@@ -70,11 +70,15 @@ jobs:
             -version "0.4.0.$GITHUB_RUN_NUMBER" \
             -appid "$APP_ID" -name Relic -o relic.apk ./cmd/relic
       - name: Build the tour APK (steps through every screen, for the emulator)
+        env:
+          GOGIO_SIGNPASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: |
           export ANDROID_SDK_ROOT="$ANDROID_HOME"
           export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
           cp importer/testdata/scrubbed-archive.json cmd/relic/tour-archive.json
-          gogio -target android -arch amd64 -minsdk 24 -tags tour \
+          # Same key and version code as relic.apk, so it installs over it.
+          gogio -target android -arch amd64 -minsdk 24 -tags tour $SIGN \
+            -version "0.4.0.$GITHUB_RUN_NUMBER" \
             -appid "$APP_ID" -name Relic -o relic-tour.apk ./cmd/relic
       - uses: actions/upload-artifact@v4
         with:
