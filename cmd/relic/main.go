@@ -137,7 +137,14 @@ func run(w *app.Window) error {
 		case app.DestroyEvent:
 			return e.Err
 		case app.FrameEvent:
-			gtx := app.NewContext(&ops, e)
+			// The whole window, system bars included: app.NewContext would
+			// already move and shrink the drawing clear of the bars, and
+			// App.Layout keeps clear of them itself (it draws the page and
+			// bottom-bar backgrounds under them), so the bars' space was
+			// counted twice on phones.
+			ops.Reset()
+			gtx := layout.Context{Ops: &ops, Now: e.Now, Source: e.Source, Metric: e.Metric,
+				Constraints: layout.Exact(e.Size)}
 			safe := layout.Inset{Top: e.Insets.Top, Bottom: e.Insets.Bottom, Left: e.Insets.Left, Right: e.Insets.Right}
 			a.Layout(gtx, safe)
 			e.Frame(gtx.Ops)
