@@ -90,5 +90,6 @@ Update this section when a decision is made.
 - Compare an import with the prototype's own formulas: `go test ./importer -run Prototype -v` (scrubbed copy); add `RELIC_ARCHIVE=C:/Users/saniy/Downloads/relic-archive.json` to also check the real archive.
 - Refresh the scrubbed test copy after a new export: `go run ./cmd/scrub -in ../relic-archive.json -out importer/testdata/scrubbed-archive.json`. Never commit the real archive.
 - Android APK locally (needs `ANDROID_HOME`, the NDK, and JDK 17's `bin` on PATH for `keytool`): `gogio -target android -arch arm64,amd64 -minsdk 24 -appid com.saniyaa61.relic -name Relic -o build/relic.apk ./cmd/relic`
+- Android on a phone: download `relic-apk` from the latest green run's Artifacts, unzip, open `relic.apk` on the phone. Signed with the owner's fixed key (repo secrets, see STATUS CI notes), so updates install over the old version and keep the data.
 - Android on an emulator: push to GitHub; the **Build** workflow uploads `relic-apk` and `emulator-screenshots` (first launch, plus `tour/` with every screen in Linen light and Midnight dark from the tour build) as run artifacts. The repo is public (free Actions minutes).
 - iOS: needs a Mac (Phase 4).
