@@ -66,6 +66,9 @@ type App struct {
 	// CreateFile, if set, asks where to save a new file called name (the
 	// platform's save dialog; it blocks). Cancelling returns ErrNoFile.
 	CreateFile func(name string) (io.WriteCloser, error)
+	// ShareImage, if set, opens the system share sheet for a PNG called
+	// name (Android and iOS). It returns once the sheet is on its way.
+	ShareImage func(name, title string, png []byte) error
 	Invalidate func()
 	// PosterDir is the folder of poster JPEGs beside the database; ""
 	// means posters aren't shown.

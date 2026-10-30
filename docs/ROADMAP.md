@@ -74,7 +74,7 @@ Verified 2026-10-07: CI run 30's emulator tour (43 screenshots, the scrubbed cop
 
 ## Phase 4 — iOS — ⏭ next
 
-Build and run on iOS (Mac + Xcode), fix platform differences (share sheet, photo picker, safe areas, fonts). Add the Year card's **Share** button with native code on iOS and Android (owner's decision: Save image only until then).
+Build and run on iOS (Mac + Xcode), fix platform differences (share sheet, photo picker, safe areas, fonts). Add the Year card's **Share** button with native code on iOS and Android (owner's decision: Save image only until then). Built 2026-10-30 (`share/`); the owner checks on the phones.
 
 **Done when:** the same checklist as Phase 3 passes on an iPhone or the iOS simulator.
 

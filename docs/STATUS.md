@@ -15,7 +15,7 @@ Last updated: 2026-10-06, after Phase 3 step 9 (Settings, archive, onboarding).
 | 1 Core library | Done. Every SPEC §4 rule in `core/`, table-driven tests, ~93% coverage. |
 | 2 Storage and import | Done. "Done when" verified: the real archive, imported and read back from SQLite, gives the same counts, time totals and Top 5 as the prototype's own formulas. |
 | 3 Screens | Done. "Done when" verified: every SPEC §5 screen on the Android emulator with imported data (CI run 30's tour screenshots, Linen light and Midnight dark), and on Windows with the real archive (owner, 2026-10-07). |
-| 4 iOS | Next. Needs a Mac (CI's iOS simulator job covers launch only); includes the Year card's Share button. |
+| 4 iOS | In progress. iOS goes the GitHub route (simulator tour screenshots every screen, like Android). Done: the iOS tour, the fixed Android signing key, the Year card's Share button (built, waiting on CI and the owner's phone check). |
 
 ## What exists
 
@@ -62,6 +62,7 @@ Decided 2026-10-06 (first cloud session):
 - **Year digest month bars use the prototype's gradient** (option A), an agreed exception to "no gradients". B and C stay in `digest.go` behind `yearBars` for snapshots.
 - **Bold like the prototype:** the prototype's weight-600 DM Sans / Lora text (times on Consumed and poster cards, Mood Trends totals, "+X this month", "One year ago today") is the browser thickening the Medium font. The owner likes it; `Text.FakeBold` draws it the same way (Skia's ratio). The progress ring's % label is bold in the accent colour at full strength and 8px (6.5px for "100%"), so it can be read (owner's request).
 - **Year card: Save image only for now** (option A); Share comes in Phase 4 with native code and device testing.
+- **Share (Phase 4, 2026-10-30):** the preview has Close | Save image | Share (prototype order) on Android and iOS; Windows has no Share button. On Android, sharing also keeps a copy in Photos (Pictures/Relic), replaced each time: Android gives other apps a picture only through the media store, since gogio's manifest can't declare a file provider. Android 9 and older can't share (a toast says so; Save image still works). The phone tours end by pressing Share (`yearcard-sheet`), so CI's last screenshot shows the system share sheet.
 - **Keep "51 hrs"** (no trailing ".0").
 - **Custom theme tile keeps the prototype's rainbow + 🎨** (option A).
 - **Custom colours use a picker like the browser's** (the prototype's): a shade square, a hue slider and the hex code (`ui/colourpicker.go`); the swatch grid was dropped.
@@ -119,6 +120,6 @@ Work goes straight to `main` (no pull requests). After each finished step, tell 
 ## Phase 3 — how to continue
 
 1. Read SPEC §5 and §6 and the matching parts of `reference/relic.html` (its CSS is at the top; render functions are named per screen, e.g. `renderLibrary`, `renderDetail`). Screenshot the prototype with `tools/protoshot.js` and compare with `cmd/snapshot` PNGs.
-2. Phase 3 is done (owner's Windows check and the Android screenshots both passed). Next is Phase 4 (iOS; the Year card's Share), waiting on the owner's go-ahead.
+2. Phase 3 is done. Phase 4 is in progress (see the table above): next, the owner's phone check of Share, then the rest of ROADMAP Phase 4 (photo picker on iOS, fonts) and its "Done when" check from the iOS tour screenshots.
 3. The app opens the store at startup and loads the library; the first-launch flow is onboarding (step 9). For testing with real data earlier, a temporary dev-only import path using `importer.Read` + `KeepMode` is fine.
 4. Before any visual choice the spec doesn't define, show the owner options first (CLAUDE.md design guardrails). No gradients, slim heroes, keep the prototype's card sizes.

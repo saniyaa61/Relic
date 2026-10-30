@@ -51,7 +51,8 @@ done
 for _ in $(seq 30); do adb logcat -d | grep -q "relic: tour done" && break; sleep 1; done
 adb logcat -d > "$out/logcat.txt"
 grep -q "relic: tour done" "$out/logcat.txt" || { echo "tour didn't finish"; exit 1; }
-# A screen that couldn't be shown logs "relic: tour <screen>: <error>".
-if grep -E "relic: tour [a-z0-9-]+: " "$out/logcat.txt"; then exit 1; fi
+# A screen that couldn't be shown logs "relic: tour <screen>: <error>";
+# the last step's Share button logs "relic: year card share: <error>".
+if grep -E "relic: tour [a-z0-9-]+: |relic: year card share: " "$out/logcat.txt"; then exit 1; fi
 adb shell pidof "$id" >/dev/null || { echo "the app crashed"; exit 1; }
 [ "$late" = 0 ] || exit 1

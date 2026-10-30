@@ -19,7 +19,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"home-empty", "home-memory", "home-streak-icon", "home-streak-plain", "swy", "rf", "ae", "swy-search", "home-finished-badge",
 	"digest-prev", "digest-week", "digest-year", "digest-year-peak", "digest-year-flat", "moods", "digest-empty",
 	"onboarding", "settings", "settings-custom", "settings-custom-own", "settings-custom-plain", "settings-dark", "settings-colour",
-	"settings-import", "settings-clear", "yearcard", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
+	"settings-import", "settings-clear", "yearcard", "yearcard-share", "yearcard-sheet", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
 	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent"}
@@ -76,8 +76,14 @@ func (a *App) ShowForSnapshot(screen string) error {
 			return fmt.Errorf("%s needs a library with time (use -archive)", screen)
 		}
 		a.Push(&consumedFolderPage{key: folderKey{cats[0].Category.ID, cats[0].Folders[0].Name}})
-	case "yearcard":
+	case "yearcard", "yearcard-share", "yearcard-sheet":
 		// The preview dialog over the Year digest, drawn without waiting.
+		// yearcard-share shows the phones' Share button on any system;
+		// yearcard-sheet also presses it (the phone tours' last step, as
+		// the system sheet stays up over the app).
+		if screen == "yearcard-share" && a.ShareImage == nil {
+			a.ShareImage = func(string, string, []byte) error { return nil }
+		}
 		a.Go(TabDigest)
 		a.roots[TabDigest].(*digestPage).kind = core.YearPeriod
 		yc := a.Lib.YearCard(a.timeIndex(), t0.In(a.Loc).Year(), a.Loc)
@@ -87,7 +93,11 @@ func (a *App) ShowForSnapshot(screen string) error {
 				posters[i] = img
 			}
 		}
-		showYearCard(a, yc.Year, yearcard.Render(yc, cardColors(a.Theme), posters))
+		img := yearcard.Render(yc, cardColors(a.Theme), posters)
+		showYearCard(a, yc.Year, img)
+		if screen == "yearcard-sheet" && a.ShareImage != nil {
+			shareYearCard(a, yc.Year, img)
+		}
 	case "settings", "settings-custom", "settings-custom-own", "settings-custom-plain", "settings-dark",
 		"settings-colour", "settings-import", "settings-clear":
 		p := &settingsPage{}

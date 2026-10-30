@@ -42,6 +42,10 @@ type Dialog struct {
 	// KeepOpen leaves the dialog up after Confirm (the Year card's "Save
 	// image"); Cancel and the scrim still close it.
 	KeepOpen bool
+	// Extra, if set, is a second accent button after Confirm (the Year
+	// card's "Share"); OnExtra runs on tap and the dialog stays open.
+	Extra   string
+	OnExtra func(a *App)
 	// Wide is the Year card preview's box: min(380px, 100% − 28px) with
 	// 16px padding and the buttons 14px below, instead of the usual
 	// min(342px, 100% − 40px), 21px and 19px.
@@ -49,6 +53,7 @@ type Dialog struct {
 
 	input      Input
 	cancel, ok Button
+	extra      Button
 	scrim      widget.Clickable
 	openedAt   time.Time
 	closedAt   time.Time
@@ -146,6 +151,9 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 		}
 		if d.ok.Click.Clicked(gtx) {
 			d.submit(gtx, a)
+		}
+		if d.extra.Click.Clicked(gtx) && d.OnExtra != nil {
+			d.OnExtra(a)
 		}
 		for {
 			ev, ok := d.input.Editor.Update(gtx)
@@ -272,7 +280,7 @@ func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
 				if d.Danger {
 					style = ButtonDanger
 				}
-				return layout.Flex{}.Layout(gtx,
+				buttons := []layout.FlexChild{
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return d.cancel.Layout(gtx, th, ButtonQuiet, d.Cancel)
 					}),
@@ -281,7 +289,16 @@ func (d *Dialog) layoutCard(gtx layout.Context, a *App) layout.Dimensions {
 						gtx.Constraints.Min.X = gtx.Constraints.Max.X
 						return d.ok.Layout(gtx, th, style, d.Confirm)
 					}),
-				)
+				}
+				if d.Extra != "" {
+					buttons = append(buttons,
+						layout.Rigid(layout.Spacer{Width: 8}.Layout),
+						layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+							gtx.Constraints.Min.X = gtx.Constraints.Max.X
+							return d.extra.Layout(gtx, th, ButtonAccent, d.Extra)
+						}))
+				}
+				return layout.Flex{}.Layout(gtx, buttons...)
 			})
 		}))
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx, rows...)

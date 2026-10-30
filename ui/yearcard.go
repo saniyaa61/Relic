@@ -1,9 +1,11 @@
 package ui
 
 // The Year in Review image (SPEC §7): made from the Year digest's "Share
-// your year", previewed in a dialog with Close and Save image.
+// your year", previewed in a dialog with Close, Save image and, on phones,
+// Share.
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"image"
@@ -83,6 +85,10 @@ func showYearCard(a *App, year int, img *image.RGBA) {
 	d := &Dialog{Cancel: "Close", Confirm: "Save image", Wide: true, KeepOpen: true,
 		Body:      p.layout,
 		OnConfirm: func(a *App, _ string) { saveYearCard(a, year, img) }}
+	if a.ShareImage != nil {
+		d.Extra = "Share"
+		d.OnExtra = func(a *App) { shareYearCard(a, year, img) }
+	}
 	a.ShowDialog(d)
 }
 
@@ -108,6 +114,23 @@ func saveYearCard(a *App, year int, img *image.RGBA) {
 			return func(a *App) { a.ToastError("The image couldn't be saved.") }
 		}
 		return func(a *App) { a.Toast("Saved ✦") }
+	})
+}
+
+// shareYearCard opens the system share sheet for the card. Cancelling the
+// sheet does nothing (SPEC §7: a cancelled share mustn't save).
+func shareYearCard(a *App, year int, img *image.RGBA) {
+	a.background(func() func(*App) {
+		var buf bytes.Buffer
+		err := yearcard.EncodePNG(&buf, img)
+		if err == nil {
+			err = a.ShareImage(yearcard.FileName(year), fmt.Sprintf("My %d in review", year), buf.Bytes())
+		}
+		if err != nil {
+			log.Printf("relic: year card share: %v", err)
+			return func(a *App) { a.ToastError("Sharing isn't available right now.") }
+		}
+		return nil
 	})
 }
 

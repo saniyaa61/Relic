@@ -35,7 +35,9 @@ var tourLight = []string{
 	"settings", "settings-custom", "settings-colour", "settings-clear",
 }
 
-var tourDark = []string{"home", "library", "detail", "favorites", "digest-year", "consumed", "settings"}
+var tourDark = []string{"home", "library", "detail", "favorites", "digest-year", "consumed", "settings",
+	// Last: presses Share, and the system sheet stays up over the app.
+	"yearcard-sheet"}
 
 func init() {
 	startTour = func(a *ui.App, db *store.DB, posters string) {

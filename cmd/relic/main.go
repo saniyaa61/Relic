@@ -16,6 +16,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/x/explorer"
 
+	"github.com/saniyaa61/relic/share"
 	"github.com/saniyaa61/relic/store"
 	"github.com/saniyaa61/relic/ui"
 )
@@ -116,6 +117,10 @@ func run(w *app.Window) error {
 		}
 		return wc, err
 	}
+	sh := share.New(w)
+	if share.Available() {
+		a.ShareImage = sh.Image
+	}
 	a.Invalidate = w.Invalidate
 	if startTour != nil {
 		startTour(a, db, posters)
@@ -127,6 +132,7 @@ func run(w *app.Window) error {
 	for {
 		e := w.Event()
 		expl.ListenEvents(e)
+		sh.ListenEvents(e)
 		switch e := e.(type) {
 		case app.DestroyEvent:
 			return e.Err

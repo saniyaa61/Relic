@@ -44,8 +44,9 @@ done
 
 for _ in $(seq 30); do grep -q "relic: tour done" "$log" && break; sleep 1; done
 grep -q "relic: tour done" "$log" || { echo "tour didn't finish"; cat "$log"; exit 1; }
-# A screen that couldn't be shown logs "relic: tour <screen>: <error>".
-if grep -aE "relic: tour [a-z0-9-]+: " "$log"; then exit 1; fi
+# A screen that couldn't be shown logs "relic: tour <screen>: <error>";
+# the last step's Share button logs "relic: year card share: <error>".
+if grep -aE "relic: tour [a-z0-9-]+: |relic: year card share: " "$log"; then exit 1; fi
 xcrun simctl spawn "$udid" launchctl list | grep -q "$id" || { echo "the app crashed"; exit 1; }
 xcrun simctl terminate "$udid" "$id" || true
 [ "$late" = 0 ] || exit 1
