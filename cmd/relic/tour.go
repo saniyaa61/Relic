@@ -13,6 +13,7 @@ import (
 	"bytes"
 	_ "embed"
 	"log"
+	"runtime"
 	"time"
 
 	"github.com/saniyaa61/relic/archive"
@@ -59,6 +60,12 @@ func init() {
 			steps = append(steps, ui.TourStep{Screen: s, Theme: "midnight", Mode: "dark"})
 		}
 		now := time.Date(2026, 9, 29, 9, 0, 0, 0, time.UTC)
-		a.Tour(steps, now, 4*time.Second, func() (*core.Library, error) { return db.Load() })
+		// The iOS simulator takes several seconds per screenshot on CI's
+		// Intel Macs, so each screen stays up longer there.
+		hold := 4 * time.Second
+		if runtime.GOOS == "ios" {
+			hold = 10 * time.Second
+		}
+		a.Tour(steps, now, hold, func() (*core.Library, error) { return db.Load() })
 	}
 }
