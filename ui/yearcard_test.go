@@ -2,8 +2,12 @@ package ui
 
 import (
 	"bytes"
+	"image"
+	"image/jpeg"
 	"image/png"
 	"io"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -152,5 +156,49 @@ func TestYearCardShare(t *testing.T) {
 	waitAsync(t, a)
 	if !a.toast.isErr || saved {
 		t.Errorf("a failed share: toast %q (error %v), saved %v", a.toast.msg, a.toast.isErr, saved)
+	}
+}
+
+// On phones a poster comes from the photo library: the picture is shrunk,
+// stored under a new name and handed back; backing out does nothing.
+func TestPickPosterFromPhotos(t *testing.T) {
+	a, _ := libApp(t)
+	a.PosterDir = t.TempDir()
+	src := image.NewRGBA(image.Rect(0, 0, 1200, 1800))
+	var buf bytes.Buffer
+	png.Encode(&buf, src)
+	a.ChooseFile = func(...string) (io.ReadCloser, error) {
+		t.Error("phones shouldn't use the file picker for posters")
+		return nil, ErrNoFile
+	}
+	cancel := true
+	a.PickPhoto = func() ([]byte, error) {
+		if cancel {
+			return nil, ErrNoFile
+		}
+		return buf.Bytes(), nil
+	}
+	var got string
+	a.toast.msg = ""
+	a.pickPoster(func(name string) { got = name })
+	time.Sleep(50 * time.Millisecond)
+	a.runAsync()
+	if got != "" || a.toast.msg != "" {
+		t.Errorf("backing out: got %q, toast %q", got, a.toast.msg)
+	}
+	cancel = false
+	a.pickPoster(func(name string) { got = name })
+	waitAsync(t, a)
+	if got == "" {
+		t.Fatal("no poster stored")
+	}
+	f, err := os.Open(filepath.Join(a.PosterDir, got))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	img, err := jpeg.Decode(f)
+	if err != nil || img.Bounds().Dx() != 400 || img.Bounds().Dy() != 600 {
+		t.Errorf("stored poster: %v, %v", img.Bounds(), err)
 	}
 }

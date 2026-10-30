@@ -66,6 +66,10 @@ type App struct {
 	// CreateFile, if set, asks where to save a new file called name (the
 	// platform's save dialog; it blocks). Cancelling returns ErrNoFile.
 	CreateFile func(name string) (io.WriteCloser, error)
+	// PickPhoto, if set, lets the user choose a picture from the phone's
+	// photo library (posters); ErrNoFile if they back out. Without it,
+	// posters come through ChooseFile.
+	PickPhoto func() ([]byte, error)
 	// ShareImage, if set, opens the system share sheet for a PNG called
 	// name (Android and iOS). It returns once the sheet is on its way.
 	ShareImage func(name, title string, png []byte) error
@@ -277,13 +281,13 @@ var ErrNoFile = errors.New("no file chosen")
 // pickPoster lets the user choose a picture, resizes it to a stored
 // poster file and calls done with its file name.
 func (a *App) pickPoster(done func(name string)) {
-	if a.ChooseFile == nil || a.PosterDir == "" {
+	if (a.PickPhoto == nil && a.ChooseFile == nil) || a.PosterDir == "" {
 		a.ToastError("Choosing a picture isn't available here yet.")
 		return
 	}
 	dir := a.PosterDir
 	a.background(func() func(*App) {
-		rc, err := a.ChooseFile(".jpg", ".jpeg", ".png", ".webp", ".gif")
+		raw, err := a.readPoster()
 		if errors.Is(err, ErrNoFile) {
 			return nil
 		}
@@ -291,11 +295,6 @@ func (a *App) pickPoster(done func(name string)) {
 			log.Printf("relic: poster: %v", err)
 			return func(a *App) { a.ToastError("That picture couldn't be opened.") }
 		}
-		if err != nil {
-			return fail(err)
-		}
-		defer rc.Close()
-		raw, err := io.ReadAll(io.LimitReader(rc, 40<<20))
 		if err != nil {
 			return fail(err)
 		}
@@ -309,6 +308,20 @@ func (a *App) pickPoster(done func(name string)) {
 		}
 		return func(a *App) { done(name) }
 	})
+}
+
+// readPoster asks for a picture: from the photo library on phones, from
+// the file picker elsewhere.
+func (a *App) readPoster() ([]byte, error) {
+	if a.PickPhoto != nil {
+		return a.PickPhoto()
+	}
+	rc, err := a.ChooseFile(".jpg", ".jpeg", ".png", ".webp", ".gif")
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+	return io.ReadAll(io.LimitReader(rc, 40<<20))
 }
 
 // timeIndex is every entry's time events, computed once per frame and

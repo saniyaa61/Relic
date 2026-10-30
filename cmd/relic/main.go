@@ -16,6 +16,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/x/explorer"
 
+	"github.com/saniyaa61/relic/photos"
 	"github.com/saniyaa61/relic/share"
 	"github.com/saniyaa61/relic/store"
 	"github.com/saniyaa61/relic/ui"
@@ -117,6 +118,16 @@ func run(w *app.Window) error {
 		}
 		return wc, err
 	}
+	ph := photos.New(w)
+	if photos.Available() {
+		a.PickPhoto = func() ([]byte, error) {
+			b, err := ph.Pick()
+			if errors.Is(err, photos.ErrCancelled) {
+				return nil, ui.ErrNoFile
+			}
+			return b, err
+		}
+	}
 	sh := share.New(w)
 	if share.Available() {
 		a.ShareImage = sh.Image
@@ -133,6 +144,7 @@ func run(w *app.Window) error {
 		e := w.Event()
 		expl.ListenEvents(e)
 		sh.ListenEvents(e)
+		ph.ListenEvents(e)
 		switch e := e.(type) {
 		case app.DestroyEvent:
 			return e.Err
