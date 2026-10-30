@@ -5,11 +5,14 @@
 set -u
 apk=$1 id=$2 out=$3
 mkdir -p "$out"
-# Install over the launch-check app (same signing key). Uninstalling first
-# raced: Android's late "package removed" cleanup killed the new tour app.
+# The tour APK has its own signing key, so the launch-check app must go
+# first. Android's "package removed" cleanup runs late and once killed the
+# freshly started tour app, so let it finish before installing.
+adb uninstall "$id" >/dev/null 2>&1 || true
+for _ in $(seq 30); do adb shell pm list packages | grep -q "$id" || break; sleep 1; done
+sleep 10
 adb install -r "$apk"
-adb shell am force-stop "$id"
-sleep 3
+sleep 5
 adb logcat -c
 adb shell monkey -p "$id" -c android.intent.category.LAUNCHER 1 >/dev/null
 
