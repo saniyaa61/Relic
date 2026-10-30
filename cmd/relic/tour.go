@@ -75,7 +75,7 @@ func init() {
 // screenshots take anything from 2 to over 10 s on CI's Intel Macs, so
 // there the tour waits for tools/ios-tour.sh to write the step number to
 // a file (in the app's temporary folder, which the Mac can reach) once
-// it has taken that screenshot, giving up after a minute.
+// it has taken that screenshot, giving up after three minutes.
 func tourWait() func(n int) {
 	if runtime.GOOS != "ios" {
 		return func(int) { time.Sleep(4 * time.Second) }
@@ -85,7 +85,7 @@ func tourWait() func(n int) {
 	log.Printf("relic: tour waits on %s", next)
 	return func(n int) {
 		want := strconv.Itoa(n)
-		for t := time.Now(); time.Since(t) < time.Minute; time.Sleep(200 * time.Millisecond) {
+		for t := time.Now(); time.Since(t) < 3*time.Minute; time.Sleep(200 * time.Millisecond) {
 			if b, err := os.ReadFile(next); err == nil && strings.TrimSpace(string(b)) == want {
 				return
 			}

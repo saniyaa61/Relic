@@ -26,7 +26,9 @@ if [ -z "$next" ]; then echo "the app didn't say where to signal"; cat "$log"; e
 missing=0
 for n in $(seq 1 "$total"); do
   l=""
-  for _ in $(seq 40); do l=$(line "$n"); [ -n "$l" ] && break; sleep 0.5; done
+  # Up to 2 minutes: the simulator can stall for half a minute (the first
+  # keyboard, for one).
+  for _ in $(seq 240); do l=$(line "$n"); [ -n "$l" ] && break; sleep 0.5; done
   if [ -z "$l" ]; then
     echo "screen $n never appeared"
     missing=$((missing + 1))
