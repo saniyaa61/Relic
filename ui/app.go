@@ -85,10 +85,12 @@ type App struct {
 	roots   [tabCount]Screen
 	stack   []Screen
 	shownAt time.Time // when the current page appeared, for its fade-in
-	nav     navBar
-	dialog  *Dialog
-	sheet   *Sheet
-	toast   toast
+	// splashAt is when the launch splash appeared (zero once it's gone).
+	splashAt time.Time
+	nav      navBar
+	dialog   *Dialog
+	sheet    *Sheet
+	toast    toast
 
 	lastStatus, lastNav color.NRGBA
 	posters             posterCache
@@ -407,14 +409,18 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 		}
 	}
 	a.toast.Layout(gtx, a, gtx.Dp(safe.Top))
+	a.layoutSplash(gtx)
 
-	navColor := th.Bg
+	statusColor, navColor := th.Bg, th.Bg
 	if showNav {
 		navColor = th.Surface
 	}
-	if a.OnWindowColors != nil && (th.Bg != a.lastStatus || navColor != a.lastNav) {
-		a.lastStatus, a.lastNav = th.Bg, navColor
-		a.OnWindowColors(th.Bg, navColor)
+	if a.splashing() {
+		statusColor, navColor = color.NRGBA{A: 0xFF}, color.NRGBA{A: 0xFF}
+	}
+	if a.OnWindowColors != nil && (statusColor != a.lastStatus || navColor != a.lastNav) {
+		a.lastStatus, a.lastNav = statusColor, navColor
+		a.OnWindowColors(statusColor, navColor)
 	}
 	return layout.Dimensions{Size: size}
 }

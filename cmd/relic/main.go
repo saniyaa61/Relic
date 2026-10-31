@@ -135,6 +135,8 @@ func run(w *app.Window) error {
 	a.Invalidate = w.Invalidate
 	if startTour != nil {
 		startTour(a, db, posters)
+	} else {
+		a.ShowSplash()
 	}
 	a.OnWindowColors = func(status, navigation color.NRGBA) {
 		w.Option(app.StatusColor(status), app.NavigationColor(navigation))
