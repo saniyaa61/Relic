@@ -22,11 +22,21 @@ import (
 // are drawn in. Gio's GPU scaling has no mipmaps, so shrinking a 600px
 // poster to a 76px thumbnail on the fly would look grainy; resizing once
 // on the CPU keeps them crisp.
+//
+// Decoding and resizing take a phone tens of milliseconds a poster, so
+// they run on a background worker: until a poster is ready its box shows a
+// plain tile, and the frame (and the tap that opened the page) never
+// waits. Snapshots and the screen tour set sync to draw them at once.
 type posterCache struct {
 	mu        sync.Mutex
-	src       map[string]image.Image // nil value: failed to load
+	sync      bool
+	gen       int                    // bumped when posters change on disk
+	dims      map[string]image.Point // size from the file header; zero: none
+	src       map[string]image.Image // decoded (as *image.RGBA); nil value: failed
 	resized   map[posterKey]paint.ImageOp
 	backdrops map[backdropKey]paint.ImageOp
+	pending   map[any]bool
+	jobs      chan func()
 }
 
 type posterKey struct {
@@ -34,52 +44,162 @@ type posterKey struct {
 	size image.Point
 }
 
-// poster returns the named poster cropped and scaled to fill size px (CSS
-// object-fit: cover), or false if there is none.
-func (a *App) poster(name string, size image.Point) (paint.ImageOp, bool) {
-	if name == "" || a.PosterDir == "" || size.X <= 0 || size.Y <= 0 {
-		return paint.ImageOp{}, false
+// posterState is what a poster lookup found.
+type posterState int
+
+const (
+	posterNone    posterState = iota // no poster, or it can't be read
+	posterLoading                    // being prepared in the background
+	posterReady
+)
+
+// initLocked makes the maps; c.mu must be held.
+func (c *posterCache) initLocked() {
+	if c.dims == nil {
+		c.dims = map[string]image.Point{}
+		c.src = map[string]image.Image{}
+		c.resized = map[posterKey]paint.ImageOp{}
+		c.backdrops = map[backdropKey]paint.ImageOp{}
+		c.pending = map[any]bool{}
+	}
+}
+
+// posterSize is the poster's pixel size, read from its file header (fast,
+// no decoding), or false if there's no readable poster.
+func (a *App) posterSize(name string) (image.Point, bool) {
+	if name == "" || a.PosterDir == "" {
+		return image.Point{}, false
 	}
 	c := &a.posters
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.src == nil {
-		c.src = map[string]image.Image{}
-		c.resized = map[posterKey]paint.ImageOp{}
+	c.initLocked()
+	if d, ok := c.dims[name]; ok {
+		return d, d != (image.Point{})
 	}
-	k := posterKey{name, size}
-	if op, ok := c.resized[k]; ok {
-		return op, true
-	}
-	src, seen := c.src[name]
-	if !seen {
-		data, err := os.ReadFile(filepath.Join(a.PosterDir, filepath.Base(name)))
-		if err == nil {
-			src, err = jpeg.Decode(bytes.NewReader(data))
-		}
-		if err != nil {
+	var d image.Point
+	if f, err := os.Open(filepath.Join(a.PosterDir, filepath.Base(name))); err == nil {
+		if cfg, err := jpeg.DecodeConfig(f); err == nil && cfg.Width > 0 && cfg.Height > 0 {
+			d = image.Pt(cfg.Width, cfg.Height)
+		} else if err != nil {
 			log.Printf("relic: poster %s: %v", name, err)
 		}
-		c.src[name] = src
+		f.Close()
 	}
-	if src == nil {
-		return paint.ImageOp{}, false
+	c.dims[name] = d
+	return d, d != (image.Point{})
+}
+
+// decodedLocked returns the decoded poster, decoding it if need be; c.mu
+// must be held (decoding happens on the worker, or at once when sync).
+func (a *App) decodedLocked(name string) image.Image {
+	c := &a.posters
+	if img, seen := c.src[name]; seen {
+		return img
 	}
-	op := paint.NewImageOp(coverScale(src, size))
-	c.resized[k] = op
-	return op, true
+	var out image.Image
+	data, err := os.ReadFile(filepath.Join(a.PosterDir, filepath.Base(name)))
+	if err == nil {
+		var img image.Image
+		if img, err = jpeg.Decode(bytes.NewReader(data)); err == nil {
+			// As RGBA, so resizing takes x/image's fast path.
+			rgba := image.NewRGBA(img.Bounds())
+			draw.Draw(rgba, rgba.Bounds(), img, img.Bounds().Min, draw.Src)
+			out = rgba
+		}
+	}
+	if err != nil {
+		log.Printf("relic: poster %s: %v", name, err)
+	}
+	c.src[name] = out
+	return out
+}
+
+// prepare makes the value for key with build (holding c.mu), now when sync,
+// else on the worker, and reports whether it's ready.
+func (a *App) prepare(key any, build func()) posterState {
+	c := &a.posters
+	if c.sync {
+		build()
+		return posterReady
+	}
+	if c.pending[key] {
+		return posterLoading
+	}
+	c.pending[key] = true
+	if c.jobs == nil {
+		c.jobs = make(chan func(), 256)
+		go func() {
+			for job := range c.jobs {
+				job()
+			}
+		}()
+	}
+	gen := c.gen
+	job := func() {
+		c.mu.Lock()
+		if c.gen == gen {
+			build()
+			delete(c.pending, key)
+		}
+		c.mu.Unlock()
+		if a.Invalidate != nil {
+			a.Invalidate()
+		}
+	}
+	select {
+	case c.jobs <- job:
+	default:
+		go func() { c.jobs <- job }()
+	}
+	return posterLoading
+}
+
+// poster returns the named poster cropped and scaled to fill size px (CSS
+// object-fit: cover), or whether it's still loading or missing.
+func (a *App) poster(name string, size image.Point) (paint.ImageOp, posterState) {
+	if size.X <= 0 || size.Y <= 0 {
+		return paint.ImageOp{}, posterNone
+	}
+	if _, ok := a.posterSize(name); !ok {
+		return paint.ImageOp{}, posterNone
+	}
+	c := &a.posters
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.initLocked()
+	k := posterKey{name, size}
+	if op, ok := c.resized[k]; ok {
+		return op, posterReady
+	}
+	st := a.prepare(k, func() {
+		if src := a.decodedLocked(name); src != nil {
+			c.resized[k] = paint.NewImageOp(coverScale(src, size))
+		} else {
+			c.resized[k] = paint.ImageOp{}
+		}
+	})
+	if op, ok := c.resized[k]; ok && st == posterReady {
+		if op == (paint.ImageOp{}) {
+			return op, posterNone
+		}
+		return op, posterReady
+	}
+	return paint.ImageOp{}, posterLoading
 }
 
 // forgetPosters drops cached images, after posters change on disk.
 func (a *App) forgetPosters() {
-	a.posters.mu.Lock()
-	a.posters.src, a.posters.resized, a.posters.backdrops = nil, nil, nil
-	a.posters.mu.Unlock()
+	c := &a.posters
+	c.mu.Lock()
+	c.gen++
+	c.dims, c.src, c.resized, c.backdrops, c.pending = nil, nil, nil, nil, nil
+	c.mu.Unlock()
 }
 
 // coverScale crops src to size's aspect ratio around its centre and
 // scales it to size.
-func coverScale(src image.Image, size image.Point) image.Image {
+func coverScale(src image.Image, size image.Point) *image.RGBA {
 	b := src.Bounds()
 	crop := b
 	if b.Dx()*size.Y > b.Dy()*size.X { // wider than the box: trim the sides
@@ -91,17 +211,23 @@ func coverScale(src image.Image, size image.Point) image.Image {
 		crop.Min.Y = b.Min.Y + (b.Dy()-h)/2
 		crop.Max.Y = crop.Min.Y + h
 	}
-	dst := image.NewNRGBA(image.Rectangle{Max: size})
+	dst := image.NewRGBA(image.Rectangle{Max: size})
 	draw.CatmullRom.Scale(dst, dst.Bounds(), src, crop, draw.Src, nil)
 	return dst
 }
 
 // drawPoster fills a rounded box of size px with the poster, if there is
-// one, and reports whether it drew anything.
+// one, and reports whether it drew anything. A poster still being
+// prepared shows as a plain tile (and counts as drawn, so callers don't
+// flash their no-poster look).
 func (a *App) drawPoster(gtx layout.Context, name string, size image.Point, radius int) bool {
-	img, ok := a.poster(name, size)
-	if !ok {
+	img, st := a.poster(name, size)
+	switch st {
+	case posterNone:
 		return false
+	case posterLoading:
+		rrect(gtx, size, clampRadius(radius, size), a.Theme.Tag)
+		return true
 	}
 	defer clip.UniformRRect(image.Rectangle{Max: size}, clampRadius(radius, size)).Push(gtx.Ops).Pop()
 	img.Add(gtx.Ops)
@@ -109,14 +235,17 @@ func (a *App) drawPoster(gtx layout.Context, name string, size image.Point, radi
 	return true
 }
 
-// posterImage returns the decoded poster, for its size.
+// posterImage returns the decoded poster, decoding it now if need be (for
+// the Year card, which is drawn off the UI goroutine).
 func (a *App) posterImage(name string) (image.Image, bool) {
-	if _, ok := a.poster(name, image.Pt(1, 1)); !ok {
+	if _, ok := a.posterSize(name); !ok {
 		return nil, false
 	}
-	a.posters.mu.Lock()
-	defer a.posters.mu.Unlock()
-	img := a.posters.src[name]
+	c := &a.posters
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.initLocked()
+	img := a.decodedLocked(name)
 	return img, img != nil
 }
 
@@ -151,30 +280,36 @@ type backdropKey struct {
 	bg   color.NRGBA
 }
 
-// backdrop returns the tiny poster mixed 55% over bg, cached.
+// backdrop returns the tiny poster mixed 55% over bg, cached; false while
+// it's being prepared or when there's no poster.
 func (a *App) backdrop(name string, size image.Point, bg color.NRGBA) (paint.ImageOp, bool) {
-	if _, ok := a.poster(name, size); !ok {
+	if _, ok := a.posterSize(name); !ok {
 		return paint.ImageOp{}, false
 	}
 	c := &a.posters
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	c.initLocked()
 	k := backdropKey{name, size, bg}
 	if op, ok := c.backdrops[k]; ok {
-		return op, true
+		return op, op != (paint.ImageOp{})
 	}
-	src := coverScale(c.src[name], size).(*image.NRGBA)
-	mix := func(p, q uint8) uint8 { return uint8(0.55*float32(p) + 0.45*float32(q) + 0.5) }
-	for i := 0; i < len(src.Pix); i += 4 {
-		src.Pix[i] = mix(src.Pix[i], bg.R)
-		src.Pix[i+1] = mix(src.Pix[i+1], bg.G)
-		src.Pix[i+2] = mix(src.Pix[i+2], bg.B)
-		src.Pix[i+3] = 255
-	}
-	if c.backdrops == nil {
-		c.backdrops = map[backdropKey]paint.ImageOp{}
-	}
-	op := paint.NewImageOp(src)
-	c.backdrops[k] = op
-	return op, true
+	a.prepare(k, func() {
+		src := a.decodedLocked(name)
+		if src == nil {
+			c.backdrops[k] = paint.ImageOp{}
+			return
+		}
+		img := coverScale(src, size)
+		mix := func(p, q uint8) uint8 { return uint8(0.55*float32(p) + 0.45*float32(q) + 0.5) }
+		for i := 0; i < len(img.Pix); i += 4 {
+			img.Pix[i] = mix(img.Pix[i], bg.R)
+			img.Pix[i+1] = mix(img.Pix[i+1], bg.G)
+			img.Pix[i+2] = mix(img.Pix[i+2], bg.B)
+			img.Pix[i+3] = 255
+		}
+		c.backdrops[k] = paint.NewImageOp(img)
+	})
+	op, ok := c.backdrops[k]
+	return op, ok && op != (paint.ImageOp{})
 }

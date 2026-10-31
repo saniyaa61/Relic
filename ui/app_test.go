@@ -35,6 +35,7 @@ func testApp(t *testing.T, db *store.DB) (*App, func(time.Duration)) {
 	a := NewApp(th, lib, db)
 	now := time.Date(2026, 10, 6, 9, 0, 0, 0, time.UTC)
 	a.Now = func() time.Time { return now }
+	a.posters.sync = true // tests look at posters on the frame they're drawn
 	return a, func(d time.Duration) { now = now.Add(d) }
 }
 

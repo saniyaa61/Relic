@@ -28,16 +28,14 @@ func openYearCard(a *App, year int) {
 		return
 	}
 	a.Toast("Making your card…")
-	posters := make([]image.Image, len(yc.TopRated))
-	for i, e := range yc.TopRated {
-		if e.Poster != "" {
+	colors := cardColors(a.Theme)
+	a.background(func() func(*App) {
+		posters := make([]image.Image, len(yc.TopRated))
+		for i, e := range yc.TopRated {
 			if img, ok := a.posterImage(e.Poster); ok {
 				posters[i] = img
 			}
 		}
-	}
-	colors := cardColors(a.Theme)
-	a.background(func() func(*App) {
 		img := yearcard.Render(yc, colors, posters)
 		return func(a *App) { showYearCard(a, year, img) }
 	})

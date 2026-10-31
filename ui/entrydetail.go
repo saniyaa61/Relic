@@ -146,7 +146,7 @@ func (p *entryDetail) hero(gtx layout.Context, a *App, e *core.Entry, size image
 	th := a.Theme
 	defer clip.Rect{Max: size}.Push(gtx.Ops).Pop()
 	paint.FillShape(gtx.Ops, th.Tag, clip.Rect{Max: size}.Op())
-	if img, ok := a.posterImage(e.Poster); ok {
+	if dims, ok := a.posterSize(e.Poster); ok {
 		if detailHero == heroPrototype {
 			blurredBackdrop(gtx, a, e.Poster, size, th.Tag)
 		}
@@ -154,7 +154,7 @@ func (p *entryDetail) hero(gtx layout.Context, a *App, e *core.Entry, size image
 		// prototype).
 		p.fade(gtx, th, size)
 		// The poster, full height, at most 65% wide, contained.
-		b := img.Bounds()
+		b := image.Rectangle{Max: dims}
 		h := size.Y
 		w := b.Dx() * h / max(b.Dy(), 1)
 		if maxW := size.X * 65 / 100; w > maxW {

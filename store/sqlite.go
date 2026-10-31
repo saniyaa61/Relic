@@ -95,8 +95,12 @@ type DB struct {
 
 // Open opens (or creates) the database at path and brings its schema up to date.
 func Open(path string) (*DB, error) {
+	// synchronous(NORMAL) with WAL: a crash can't corrupt the database, and
+	// a save doesn't wait for the phone's storage to flush (it did with the
+	// default FULL, which made taps that save feel slow). At worst a power
+	// cut loses the last moment's save.
 	dsn := "file:" + path +
-		"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)"
+		"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=busy_timeout(5000)"
 	s, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		return nil, err
