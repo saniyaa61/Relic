@@ -37,6 +37,7 @@ type homePage struct {
 	chipRow  widget.List
 	add      widget.Clickable
 	setup    widget.Clickable
+	gotIt    widget.Clickable // the welcome card's "Got it"
 	memory   widget.Clickable
 	seeAll   widget.Clickable
 	allLink  widget.Clickable
@@ -95,18 +96,24 @@ func (h *homePage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 		return logoBar(gtx, th, func(gtx layout.Context) layout.Dimensions { return h.settings.Layout(gtx, th, IconSettings) })
 	}}
 
+	welcome := func(gtx layout.Context) layout.Dimensions { return welcomeCard(gtx, a, &h.gotIt) }
 	if len(lib.Categories) == 0 && len(lib.Entries) == 0 {
-		return scrollPage(gtx, &h.list, header, []layout.Widget{
+		rows := []layout.Widget{
 			func(gtx layout.Context) layout.Dimensions {
 				return h.greeting(gtx, a, "Your library is waiting. Every great collection starts with one entry.", false, 18, 12)
 			},
+		}
+		if lib.Profile.ShowWelcome {
+			rows = append(rows, welcome)
+		}
+		return scrollPage(gtx, &h.list, header, append(rows,
 			func(gtx layout.Context) layout.Dimensions { return addButton(gtx, th, &h.add, "Add your first entry") },
 			func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Bottom: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return wideButton(gtx, th, &h.setup, IconLibrary, "Set up your library categories")
 				})
 			},
-		})
+		))
 	}
 
 	ongoing := lib.StillWithYou()
@@ -116,8 +123,11 @@ func (h *homePage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 			return h.greeting(gtx, a, plural(len(lib.Entries), "story", "stories")+" in your archive. Here's where you left off.", true, 18, 4)
 		},
 		func(gtx layout.Context) layout.Dimensions { return h.ribbon(gtx, a, len(ongoing), len(finished)) },
-		func(gtx layout.Context) layout.Dimensions { return addButton(gtx, th, &h.add, "Log something new") },
 	}
+	if lib.Profile.ShowWelcome {
+		rows = append(rows, welcome)
+	}
+	rows = append(rows, func(gtx layout.Context) layout.Dimensions { return addButton(gtx, th, &h.add, "Log something new") })
 	if e := lib.OneYearAgo(a.Now(), a.Loc); e != nil {
 		if h.memory.Clicked(gtx) {
 			a.Push(newEntryDetail(e.ID))

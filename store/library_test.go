@@ -25,7 +25,7 @@ func sample(t *testing.T) *core.Library {
 	loc := time.FixedZone("X", 3*3600)
 	now := time.Date(2026, 9, 1, 10, 0, 0, 123456789, time.UTC)
 	l := &core.Library{Profile: core.Profile{Name: "Haya", FirstUsedAt: now.Add(-time.Hour), Theme: "custom",
-		Mode: "dark", CustomBase: "#bb356f", CustomAccent: "#6f75be"}}
+		Mode: "dark", CustomBase: "#bb356f", CustomAccent: "#6f75be", ShowWelcome: true}}
 	dramas, _ := l.AddCategory("Dramas", core.Series, now)
 	books, _ := l.AddCategory("Books", core.Book, now)
 	l.AddCategory("Empty", core.Music, now)

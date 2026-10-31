@@ -22,7 +22,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"settings-import", "settings-clear", "yearcard", "yearcard-share", "yearcard-sheet", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
-	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent", "splash"}
+	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent", "splash", "home-welcome", "home-welcome-full"}
 
 // ShowForSnapshot puts the app into one of SnapshotScreens with every
 // animation finished, for rendering to a PNG.
@@ -117,6 +117,13 @@ func (a *App) ShowForSnapshot(screen string) error {
 		case "settings-clear":
 			confirmClearAll(a)
 		}
+	case "home-welcome", "home-welcome-full":
+		// Home just after onboarding, with the welcome card: on a fresh
+		// archive, or (to check its place) on a full one.
+		if screen == "home-welcome" {
+			a.Lib.Categories, a.Lib.Entries = nil, nil
+		}
+		a.Lib.Profile.ShowWelcome = true
 	case "splash":
 		// Home under the launch splash, at the top of its pulse (1.1s in,
 		// once the clock is settled 1s on).

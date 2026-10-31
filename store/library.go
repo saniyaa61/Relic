@@ -106,12 +106,12 @@ func boolInt(b bool) int {
 }
 
 func (w writer) SaveProfile(p core.Profile) error {
-	_, err := w.tx.Exec(`INSERT INTO profile (id, name, first_used_at, theme, mode, custom_base, custom_accent)
-		VALUES (1, ?, ?, ?, ?, ?, ?)
+	_, err := w.tx.Exec(`INSERT INTO profile (id, name, first_used_at, theme, mode, custom_base, custom_accent, show_welcome)
+		VALUES (1, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET name = excluded.name, first_used_at = excluded.first_used_at,
 			theme = excluded.theme, mode = excluded.mode, custom_base = excluded.custom_base,
-			custom_accent = excluded.custom_accent`,
-		p.Name, timeText(p.FirstUsedAt), p.Theme, p.Mode, p.CustomBase, p.CustomAccent)
+			custom_accent = excluded.custom_accent, show_welcome = excluded.show_welcome`,
+		p.Name, timeText(p.FirstUsedAt), p.Theme, p.Mode, p.CustomBase, p.CustomAccent, boolInt(p.ShowWelcome))
 	return err
 }
 
@@ -246,8 +246,10 @@ func (db *DB) Load() (*core.Library, error) {
 	lib := &core.Library{Favourites: core.Favourites{TopFive: map[string][]string{}, Order: map[string][]string{}}}
 
 	var first sql.NullString
-	err = tx.QueryRow(`SELECT name, first_used_at, theme, mode, custom_base, custom_accent FROM profile WHERE id = 1`).
-		Scan(&lib.Profile.Name, &first, &lib.Profile.Theme, &lib.Profile.Mode, &lib.Profile.CustomBase, &lib.Profile.CustomAccent)
+	var welcome int
+	err = tx.QueryRow(`SELECT name, first_used_at, theme, mode, custom_base, custom_accent, show_welcome FROM profile WHERE id = 1`).
+		Scan(&lib.Profile.Name, &first, &lib.Profile.Theme, &lib.Profile.Mode, &lib.Profile.CustomBase, &lib.Profile.CustomAccent, &welcome)
+	lib.Profile.ShowWelcome = welcome != 0
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("store: profile: %w", err)
 	}

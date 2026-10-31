@@ -32,6 +32,9 @@ type Profile struct {
 	Mode         string // light | dark
 	CustomBase   string // hex colour, only when Theme is custom
 	CustomAccent string
+	// ShowWelcome puts the welcome card on Home (after onboarding, until
+	// "Got it"). It isn't part of the archive.
+	ShowWelcome bool `json:"-"`
 }
 
 // Category is a user-created top-level shelf (SPEC §1).

@@ -1,8 +1,7 @@
 package ui
 
 // The first launch (SPEC §5 "Onboarding"; prototype showOnboarding):
-// "Welcome to Relic", an optional name, then Home, opening New category
-// when there are none.
+// "Welcome to Relic", an optional name, then Home with the welcome card.
 
 import (
 	"image"
@@ -33,18 +32,17 @@ type onboardingPage struct {
 }
 
 func (p *onboardingPage) complete(a *App) {
+	prof := a.Lib.Profile
 	if v := strings.TrimSpace(p.name.Editor.Text()); v != "" {
-		prof := a.Lib.Profile
 		prof.Name = string([]rune(v)[:min(len([]rune(v)), 30)])
-		a.Lib.Profile = prof
-		a.Update(func(w store.Writer) error { return w.SaveProfile(prof) })
 	}
+	// Home then shows the welcome card (owner's choice, instead of the
+	// prototype's New category pop-up).
+	prof.ShowWelcome = true
+	a.Lib.Profile = prof
+	a.Update(func(w store.Writer) error { return w.SaveProfile(prof) })
 	a.Go(TabHome)
 	a.stack = nil
-	if len(a.Lib.Categories) == 0 {
-		a.Go(TabLibrary)
-		newCategoryDialog(a)
-	}
 }
 
 func (p *onboardingPage) Layout(gtx layout.Context, a *App) layout.Dimensions {

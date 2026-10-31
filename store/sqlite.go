@@ -83,6 +83,9 @@ var migrations = []string{
 		entry_id    TEXT NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
 		PRIMARY KEY (category_id, list, position)
 	)`,
+	// 3: whether Home shows the welcome card (set after onboarding,
+	// cleared by "Got it").
+	`ALTER TABLE profile ADD COLUMN show_welcome INTEGER NOT NULL DEFAULT 0`,
 }
 
 // DB is Relic's local SQLite database.
