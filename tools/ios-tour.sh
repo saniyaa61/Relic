@@ -39,6 +39,9 @@ for n in $(seq 1 "$total"); do
   missing=0
   sleep 1.5
   name=$(echo "$l" | awk '{print $4"-"$5"-"$6}')
+  # The simulator can take a while to bring the app to the front at first
+  # (screenshots once showed the home screen).
+  [ "$n" -le 2 ] && sleep 8
   # The system share sheet takes a few seconds to slide up.
   case "$name" in *-sheet-*) sleep 6 ;; esac
   xcrun simctl io "$udid" screenshot "$out/$(printf %02d "$n")-$name.png" >/dev/null 2>&1
