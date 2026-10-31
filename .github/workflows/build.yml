@@ -166,6 +166,13 @@ jobs:
           GOGIO_NOSIGN=1 "$RUNNER_TEMP/gogio-nosign" -target ios -arch arm64 -minsdk 15 \
             -icon cmd/relic/appicon-ios.png -version "0.4.0.$GITHUB_RUN_NUMBER" \
             -appid "$APP_ID" -name Relic -o Relic.ipa ./cmd/relic
+          # The share sheet's "Save Image" writes to Photos, which iOS only
+          # allows (instead of closing the app) when Info.plist says why.
+          # gogio can't add keys; the .ipa is unsigned, so editing it is fine.
+          mkdir ipa && (cd ipa && unzip -q ../Relic.ipa)
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string So you can keep your Year in Review card in Photos." ipa/Payload/Relic.app/Info.plist
+          plutil -p ipa/Payload/Relic.app/Info.plist
+          rm Relic.ipa && (cd ipa && zip -qr ../Relic.ipa Payload)
           unzip -l Relic.ipa | head -20
       - uses: actions/upload-artifact@v4
         with:
