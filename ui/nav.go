@@ -66,21 +66,67 @@ func (n *navBar) Layout(gtx layout.Context, a *App, bottomInset int) layout.Dime
 	return layout.Dimensions{Size: size}
 }
 
+// navStyle is how the active tab stands out (owner: in Linen the
+// prototype's accent-only colour change is too subtle). Options for the
+// owner to choose from.
+type navStyleKind int
+
+const (
+	navColour navStyleKind = iota // the prototype: accent colour only
+	navPill                       // a soft pill behind the icon
+	navDot                        // a small accent dot under the label
+	navBold                       // heavier icon and label; others faded
+)
+
+var navStyle = navColour
+
 func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.Dimensions {
 	c := th.Muted
-	if active || n.items[t].Pressed() {
+	on := active || n.items[t].Pressed()
+	if on {
 		c = th.Accent
+	}
+	stroke := float32(1.5)
+	label := Text{Font: font.Font{Typeface: Sans}, Size: 10, Tracking: 0.04, Upper: true, Color: c}
+	switch {
+	case navStyle == navBold && on:
+		stroke = 2
+		label.Font.Weight = font.Medium
+		label.FakeBold = true
+	case navStyle == navBold:
+		c = withAlpha(th.Muted, 0.6)
+		label.Color = c
 	}
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	return n.items[t].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Inset{Top: 4, Bottom: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle, Spacing: layout.SpaceSides}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return navItems[t].icon.Layout(gtx, 20, 1.5, c)
+					if navStyle == navPill && on {
+						pw, ph := gtx.Dp(52), gtx.Dp(28)
+						iw := gtx.Dp(20)
+						st := op.Offset(image.Pt((iw-pw)/2, (iw-ph)/2)).Push(gtx.Ops)
+						rrect(gtx, image.Pt(pw, ph), ph/2, mixSRGB(th.Accent, th.Surface, 0.14))
+						st.Pop()
+					}
+					return navItems[t].icon.Layout(gtx, 20, stroke, c)
 				}),
 				layout.Rigid(layout.Spacer{Height: 2}.Layout),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Text{Font: font.Font{Typeface: Sans}, Size: 10, Tracking: 0.04, Upper: true, Color: c}.Layout(gtx, th, navItems[t].label)
+					return label.Layout(gtx, th, navItems[t].label)
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if navStyle != navDot {
+						return layout.Dimensions{}
+					}
+					d := gtx.Dp(4)
+					sz := image.Pt(d, d+gtx.Dp(3))
+					if on {
+						st := op.Offset(image.Pt(0, gtx.Dp(3))).Push(gtx.Ops)
+						rrect(gtx, image.Pt(d, d), d/2, th.Accent)
+						st.Pop()
+					}
+					return layout.Dimensions{Size: sz}
 				}),
 			)
 		})

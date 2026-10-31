@@ -75,11 +75,15 @@ func (p *digestPage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 	lib := a.Lib
 	header := []layout.Widget{func(gtx layout.Context) layout.Dimensions { return logoBar(gtx, th, nil) }}
 	if len(lib.Entries) == 0 {
-		return scrollPage(gtx, &p.list, header, []layout.Widget{func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{Top: 60}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return emptyState(gtx, th, iconDigestEmpty, "Your digest will come alive once you start logging entries. Come back here to see your story.")
-			})
-		}})
+		// Centred in the space under the header (owner, 2026-10-31; the
+		// prototype put it 60px down).
+		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+			layout.Rigid(header[0]),
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+				return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return emptyState(gtx, th, iconDigestEmpty, "Your digest will come alive once you start logging entries. Come back here to see your story.")
+				})
+			}))
 	}
 
 	b := lib.DigestBounds(a.Now(), a.Loc)

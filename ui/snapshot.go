@@ -22,7 +22,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"settings-import", "settings-clear", "yearcard", "yearcard-share", "yearcard-sheet", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
-	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent", "splash", "home-welcome", "home-welcome-full"}
+	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent", "splash", "home-welcome", "home-welcome-full", "nav-colour", "nav-pill", "nav-dot", "nav-bold"}
 
 // ShowForSnapshot puts the app into one of SnapshotScreens with every
 // animation finished, for rendering to a PNG.
@@ -125,6 +125,10 @@ func (a *App) ShowForSnapshot(screen string) error {
 			a.Lib.Categories, a.Lib.Entries = nil, nil
 		}
 		a.Lib.Profile.ShowWelcome = true
+	case "nav-colour", "nav-pill", "nav-dot", "nav-bold":
+		// The bottom bar's active-tab options, on Library.
+		navStyle = map[string]navStyleKind{"nav-colour": navColour, "nav-pill": navPill, "nav-dot": navDot, "nav-bold": navBold}[screen]
+		a.Go(TabLibrary)
 	case "splash":
 		// Home under the launch splash, at the top of its pulse (1.1s in,
 		// once the clock is settled 1s on).

@@ -180,7 +180,9 @@ func (f *entryForm) Layout(gtx layout.Context, a *App) layout.Dimensions {
 	}}
 	c := f.category(a)
 	if c == nil {
-		return scrollPage(gtx, &f.list, header, []layout.Widget{f.pad(func(gtx layout.Context) layout.Dimensions {
+		// 18dp under the header, so the card doesn't sit on it (owner,
+		// 2026-10-31).
+		return scrollPage(gtx, &f.list, header, []layout.Widget{layout.Spacer{Height: 18}.Layout, f.pad(func(gtx layout.Context) layout.Dimensions {
 			return formSection(gtx, th, "", "", func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Top: 6, Bottom: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
