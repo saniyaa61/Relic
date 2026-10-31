@@ -1,7 +1,7 @@
 package ui
 
 // The first launch (SPEC §5 "Onboarding"; prototype showOnboarding):
-// "Welcome to Relic", an optional name, then Home with the welcome card.
+// "Welcome to Relic", an optional name, then Home with the guided tour.
 
 import (
 	"image"
@@ -36,8 +36,9 @@ func (p *onboardingPage) complete(a *App) {
 	if v := strings.TrimSpace(p.name.Editor.Text()); v != "" {
 		prof.Name = string([]rune(v)[:min(len([]rune(v)), 30)])
 	}
-	// Home then shows the welcome card (owner's choice, instead of the
-	// prototype's New category pop-up).
+	// Home then starts the guided tour (owner's choice, instead of the
+	// prototype's New category pop-up); it stays pending until finished
+	// or skipped.
 	prof.ShowWelcome = true
 	a.Lib.Profile = prof
 	a.Update(func(w store.Writer) error { return w.SaveProfile(prof) })

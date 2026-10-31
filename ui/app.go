@@ -95,10 +95,13 @@ type App struct {
 	shownAt time.Time // when the current page appeared, for its fade-in
 	// splashAt is when the launch splash appeared (zero once it's gone).
 	splashAt time.Time
-	nav      navBar
-	dialog   *Dialog
-	sheet    *Sheet
-	toast    toast
+	// guide is the guided tour while it's running.
+	guide      *guide
+	guideRects guideRects
+	nav        navBar
+	dialog     *Dialog
+	sheet      *Sheet
+	toast      toast
 
 	lastStatus, lastNav color.NRGBA
 	posters             posterCache
@@ -172,6 +175,10 @@ func (a *App) top() Screen {
 // from another tab to Home. On Home with nothing open it returns false,
 // and the system handles back (Android leaves the app).
 func (a *App) Back() bool {
+	if a.guide != nil {
+		a.endGuide()
+		return true
+	}
 	if a.dialog != nil && !a.dialog.closing() {
 		a.dialog.close(a)
 		return true
@@ -197,7 +204,7 @@ func (a *App) Back() bool {
 
 // canGoBack reports whether Back would do anything, without doing it.
 func (a *App) canGoBack() bool {
-	if a.dialog != nil || a.sheet != nil || len(a.stack) > 0 || a.tab != TabHome {
+	if a.guide != nil || a.dialog != nil || a.sheet != nil || len(a.stack) > 0 || a.tab != TabHome {
 		return true
 	}
 	b, ok := a.top().(BackHandler)
@@ -401,6 +408,11 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 		nd := a.nav.Layout(ngtx, a, gtx.Dp(safe.Bottom))
 		call := rec.Stop()
 		pageH = size.Y - nd.Size.Y
+		// Where each tab sits, for the guided tour's spotlight.
+		barH := nd.Size.Y - gtx.Dp(safe.Bottom)
+		for i := range a.guideRects.nav {
+			a.guideRects.nav[i] = image.Rect(i*size.X/int(tabCount), pageH, (i+1)*size.X/int(tabCount), pageH+barH)
+		}
 		st := op.Offset(image.Pt(0, pageH)).Push(gtx.Ops)
 		call.Add(gtx.Ops)
 		st.Pop()
@@ -415,6 +427,10 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	}
 	a.layoutPage(pgtx, pageSafe)
 	cl.Pop()
+	// Home's Settings gear: the top bar's 34dp button at the right, 13dp
+	// down (topBar) and centred on the 38dp logo row.
+	top := gtx.Dp(pageSafe.Top) + gtx.Dp(13) + gtx.Dp(2)
+	a.guideRects.gear = image.Rect(size.X-gtx.Dp(gutter)-gtx.Dp(34), top, size.X-gtx.Dp(gutter), top+gtx.Dp(34))
 
 	if a.sheet != nil {
 		if a.sheet.Layout(gtx, a, gtx.Dp(safe.Bottom)) {
@@ -426,6 +442,10 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 			a.dialog = nil
 		}
 	}
+	if a.guide == nil && a.Lib.Profile.ShowWelcome && len(a.stack) == 0 && !a.splashing() {
+		a.startGuide()
+	}
+	a.layoutGuide(gtx)
 	a.toast.Layout(gtx, a, gtx.Dp(safe.Top))
 	a.layoutSplash(gtx)
 

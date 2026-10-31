@@ -30,7 +30,7 @@ import (
 var tourArchive []byte
 
 var tourLight = []string{
-	"onboarding", "home-welcome", "home", "home-memory", "swy", "rf", "ae", "swy-search", "consumed", "consumed-folder",
+	"onboarding", "guide-0", "guide-1", "guide-6", "home", "home-memory", "swy", "rf", "ae", "swy-search", "consumed", "consumed-folder",
 	"library", "lib-category", "lib-folder", "lib-menu", "lib-new-category",
 	"detail", "detail-book", "detail-film", "log-session", "log-rewatch", "reached-end-accent",
 	"form-new", "form-series", "form-edit", "form-calendar",
