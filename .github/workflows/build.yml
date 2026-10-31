@@ -158,6 +158,19 @@ jobs:
         run: go test ./store/...
       - name: Install gogio
         run: go install gioui.org/cmd/gogio@v0.10.0
+      - name: Build the iPhone app (unsigned .ipa, for sideloading)
+        # Sideloadly on Windows signs it with the owner's free Apple ID as
+        # it installs (no Mac needed). The version code is the run number.
+        run: |
+          bash tools/gogio-nosign.sh "$RUNNER_TEMP/gogio-nosign"
+          GOGIO_NOSIGN=1 "$RUNNER_TEMP/gogio-nosign" -target ios -arch arm64 -minsdk 15 \
+            -icon cmd/relic/appicon-ios.png -version "0.4.0.$GITHUB_RUN_NUMBER" \
+            -appid "$APP_ID" -name Relic -o Relic.ipa ./cmd/relic
+          unzip -l Relic.ipa | head -20
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relic-ipa
+          path: Relic.ipa
       - name: Build for the iOS simulator
         run: |
           gogio -target ios -arch amd64 -minsdk 15 -icon cmd/relic/appicon-ios.png \
