@@ -30,6 +30,7 @@ func (a *App) ShowForSnapshot(screen string) error {
 	t0 := a.Now()
 	a.Now = func() time.Time { return t0 }
 	a.posters.sync = true // draw posters at once, not on the next frames
+	a.guide = nil         // a tour step from the previous screen
 	a.shownAt = t0
 	settle := func() {
 		// Jump the clock past every animation.
