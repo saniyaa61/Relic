@@ -78,7 +78,8 @@ const (
 	navBold                       // heavier icon and label; others faded
 )
 
-var navStyle = navColour
+// Owner's choice (2026-10-31): B, a soft pill behind the icon.
+var navStyle = navPill
 
 func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.Dimensions {
 	c := th.Muted
@@ -103,7 +104,10 @@ func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.
 			return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle, Spacing: layout.SpaceSides}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if navStyle == navPill && on {
-						pw, ph := gtx.Dp(52), gtx.Dp(28)
+						// 46×30 around the 20dp icon: 13dp either side, 5dp
+						// above and below (owner: cover the icon, neither
+						// tight nor wide).
+						pw, ph := gtx.Dp(46), gtx.Dp(30)
 						iw := gtx.Dp(20)
 						st := op.Offset(image.Pt((iw-pw)/2, (iw-ph)/2)).Push(gtx.Ops)
 						rrect(gtx, image.Pt(pw, ph), ph/2, mixSRGB(th.Accent, th.Surface, 0.14))
@@ -111,7 +115,13 @@ func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.
 					}
 					return navItems[t].icon.Layout(gtx, 20, stroke, c)
 				}),
-				layout.Rigid(layout.Spacer{Height: 2}.Layout),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					// With the pill, room for its lower edge above the label.
+					if navStyle == navPill {
+						return layout.Spacer{Height: 6}.Layout(gtx)
+					}
+					return layout.Spacer{Height: 2}.Layout(gtx)
+				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return label.Layout(gtx, th, navItems[t].label)
 				}),
