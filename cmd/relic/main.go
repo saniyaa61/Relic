@@ -21,6 +21,7 @@ import (
 	"github.com/saniyaa61/relic/photos"
 	"github.com/saniyaa61/relic/share"
 	"github.com/saniyaa61/relic/store"
+	"github.com/saniyaa61/relic/tz"
 	"github.com/saniyaa61/relic/ui"
 )
 
@@ -77,6 +78,11 @@ func openStore() (*store.DB, error) {
 var startTour func(a *ui.App, db *store.DB, posters string)
 
 func run(w *app.Window) error {
+	// Days, weeks and months follow the phone's time zone; Go doesn't know
+	// it on Android (it uses UTC) and not always on iOS.
+	if name := tz.SetLocal(); name != "" {
+		log.Printf("relic: time zone %s", name)
+	}
 	db, err := openStore()
 	if err != nil {
 		return err

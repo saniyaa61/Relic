@@ -373,6 +373,10 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	}
 	a.runAsync()
 	a.timeIdx = nil
+	// Redraw at the next minute even when nothing happens, so the date,
+	// greeting, streak and "this week" never go stale while the app is
+	// left open (Gio only draws on events).
+	gtx.Execute(op.InvalidateCmd{At: time.Now().Truncate(time.Minute).Add(time.Minute)})
 	a.handleBack(gtx)
 	th := a.Theme
 	paint.Fill(gtx.Ops, th.Bg)

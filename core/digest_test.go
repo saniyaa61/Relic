@@ -206,3 +206,20 @@ func TestYearCard(t *testing.T) {
 		t.Error("YearHasData")
 	}
 }
+
+// A tie for the top category goes to the one the prototype saw first:
+// sessions before new entries, newest entry first. Category order doesn't
+// matter.
+func TestDigestTopCategoryTie(t *testing.T) {
+	l := newLib(t)
+	films := mustCat(t, l, "Films", Film)
+	dramas := mustCat(t, l, "Dramas", Series)
+	day := at(ist, 2026, 9, 28, 12, 0)
+	mustEntry(t, l, films, EntryInput{Title: "Film", Status: Finished, Fields: Fields{Duration: 100}}, day)
+	mustEntry(t, l, dramas, EntryInput{Title: "Drama", StartEpisodes: 1, Fields: Fields{TotalEpisodes: 8, EpisodeDuration: 60}}, day.Add(time.Hour))
+	x := NewTimeIndex(l.Entries)
+	st := l.Digest(x, LastWeek(day.Add(24*time.Hour)))
+	if st.TopCategory != dramas.ID {
+		t.Errorf("top category %q, want Dramas (the newest entry's)", l.Category(st.TopCategory).Name)
+	}
+}

@@ -99,7 +99,7 @@ type DigestStats struct {
 	Minutes     float64  // time events in period
 	Pages       int      // sum of toPage − fromPage over book sessions in period
 	Sessions    int      // sessions + rewatches in period
-	TopCategory string   // category id with the most new entries + sessions; "" if none
+	TopCategory string   // category id with the most new entries + sessions (ties: the first seen, as the prototype); "" if none
 	TopTag      string   // most frequent tag among new entries; "" if none
 	TopRated    []*Entry // rated entries active in period, best first (at most 3)
 }
@@ -108,6 +108,9 @@ type DigestStats struct {
 func (l *Library) Digest(x *TimeIndex, p Period) DigestStats {
 	var st DigestStats
 	catCount := map[string]int{}
+	// The prototype counts sessions (entry by entry, newest entry first)
+	// before new entries, and a tie goes to the category it saw first.
+	var sessionCats, newCats []string
 	tagCount := map[string]int{}
 	var tagOrder []string
 	var active []*Entry
@@ -116,6 +119,7 @@ func (l *Library) Digest(x *TimeIndex, p Period) DigestStats {
 		if p.Contains(e.CreatedAt) {
 			st.New = append(st.New, e)
 			catCount[e.CategoryID]++
+			newCats = append(newCats, e.CategoryID)
 			isActive = true
 			for _, t := range e.Tags {
 				if tagCount[t] == 0 {
@@ -132,6 +136,7 @@ func (l *Library) Digest(x *TimeIndex, p Period) DigestStats {
 			if p.Contains(s.At) {
 				st.Sessions++
 				catCount[e.CategoryID]++
+				sessionCats = append(sessionCats, e.CategoryID)
 				isActive = true
 				if e.Type == Book && s.ToPage > s.FromPage {
 					st.Pages += s.ToPage - s.FromPage
@@ -142,6 +147,7 @@ func (l *Library) Digest(x *TimeIndex, p Period) DigestStats {
 			if p.Contains(r.At) {
 				st.Sessions++
 				catCount[e.CategoryID]++
+				sessionCats = append(sessionCats, e.CategoryID)
 				isActive = true
 			}
 		}
@@ -149,11 +155,9 @@ func (l *Library) Digest(x *TimeIndex, p Period) DigestStats {
 			active = append(active, e)
 		}
 	}
-	best := 0
-	for _, c := range l.Categories {
-		if n := catCount[c.ID]; n > best {
-			best, st.TopCategory = n, c.ID
-		}
+	st.TopCategory = topCount(append(sessionCats, newCats...), catCount)
+	if l.Category(st.TopCategory) == nil {
+		st.TopCategory = ""
 	}
 	st.TopTag = topCount(tagOrder, tagCount)
 	sort.SliceStable(active, func(i, j int) bool { return active[i].Rating > active[j].Rating })

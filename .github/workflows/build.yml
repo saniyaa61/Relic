@@ -135,6 +135,8 @@ jobs:
             # Fails the run unless the database was written and read back.
             grep "relic: store ok, launch 1" screenshots/logcat.txt
             grep "relic: store ok, launch 2" screenshots/logcat.txt
+            # The phone's time zone was found (Go alone would use UTC).
+            grep "relic: time zone " screenshots/logcat.txt
             # Every screen, in Linen light and Midnight dark, with test data.
             bash tools/emulator-tour.sh relic-tour.apk ${{ env.APP_ID }} screenshots/tour
       - uses: actions/upload-artifact@v4
@@ -213,6 +215,7 @@ jobs:
           cat screenshots/run1.txt screenshots/run2.txt
           grep "relic: store ok, launch 1" screenshots/run1.txt
           grep "relic: store ok, launch 2" screenshots/run2.txt
+          grep "relic: time zone " screenshots/run1.txt
           echo "$UDID" > udid.txt
       - name: Tour every screen and screenshot
         run: bash tools/ios-tour.sh "$(cat udid.txt)" RelicTour.app "$APP_ID" screenshots/tour
