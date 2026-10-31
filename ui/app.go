@@ -70,6 +70,9 @@ type App struct {
 	// photo library (posters); ErrNoFile if they back out. Without it,
 	// posters come through ChooseFile.
 	PickPhoto func() ([]byte, error)
+	// KeyboardOpen is set by cmd/relic while the on-screen keyboard is up;
+	// the bottom bar hides then.
+	KeyboardOpen bool
 	// TopTrim is taken off the top system inset for pages: on iPhones the
 	// safe area already leaves room under the status bar, so the top bar's
 	// own 13dp made the header sit low (owner, 2026-10-31). cmd/relic sets
@@ -345,6 +348,11 @@ func (a *App) timeIndex() *core.TimeIndex {
 // sub-pages that keep it (the Library's category and folder pages, as in
 // the prototype).
 func (a *App) navShown() bool {
+	// The bar hides behind the keyboard while typing (owner, 2026-10-31),
+	// instead of riding on top of it.
+	if a.KeyboardOpen {
+		return false
+	}
 	if len(a.stack) == 0 {
 		return true
 	}

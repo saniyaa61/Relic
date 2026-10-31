@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"math"
 	"testing"
 
@@ -24,6 +25,27 @@ func TestFitWidth(t *testing.T) {
 		m, k := fitWidth(tc.goos, unit.Metric{PxPerDp: tc.pxPerDp, PxPerSp: tc.pxPerDp}, tc.widthPx)
 		if math.Abs(float64(k-tc.wantScale)) > 1e-4 || math.Abs(float64(m.PxPerDp-tc.pxPerDp*k)) > 1e-4 || m.PxPerSp != m.PxPerDp {
 			t.Errorf("%s %v×%d: scale %v, metric %+v; want scale %v", tc.goos, tc.pxPerDp, tc.widthPx, k, m, tc.wantScale)
+		}
+	}
+}
+
+func TestKeyboardWatch(t *testing.T) {
+	var k keyboardWatch
+	const dp = 3
+	steps := []struct {
+		w, h, inset int
+		want        bool
+	}{
+		{1170, 2532, 34 * dp, false},  // iPhone, home indicator
+		{1170, 2532 - 336*dp, 0, true}, // iOS shrinks the window for the keyboard
+		{1170, 2532, 34 * dp, false},   // keyboard gone
+		{1170, 2532, 300 * dp, true},   // Android-style: keyboard as bottom inset
+		{2532, 1170, 21 * dp, false},   // rotated: starts again
+		{2532, 1170 - 40*dp, 0, false}, // a small change isn't the keyboard
+	}
+	for i, s := range steps {
+		if got := k.open(image.Pt(s.w, s.h), s.inset, dp); got != s.want {
+			t.Errorf("step %d: open = %v, want %v", i, got, s.want)
 		}
 	}
 }

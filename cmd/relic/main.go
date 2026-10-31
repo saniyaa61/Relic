@@ -3,6 +3,7 @@ package main
 
 import (
 	"errors"
+	"image"
 	"image/color"
 	"io"
 	"log"
@@ -153,6 +154,7 @@ func run(w *app.Window) error {
 		w.Option(app.StatusColor(status), app.NavigationColor(navigation))
 	}
 	var ops op.Ops
+	var kb keyboardWatch
 	for {
 		e := w.Event()
 		expl.ListenEvents(e)
@@ -168,6 +170,7 @@ func run(w *app.Window) error {
 			// bottom-bar backgrounds under them), so the bars' space was
 			// counted twice on phones.
 			ops.Reset()
+			a.KeyboardOpen = kb.open(e.Size, e.Metric.Dp(e.Insets.Bottom), e.Metric.PxPerDp)
 			m, k := fitWidth(runtime.GOOS, e.Metric, e.Size.X)
 			gtx := layout.Context{Ops: &ops, Now: e.Now, Source: e.Source, Metric: m,
 				Constraints: layout.Exact(e.Size)}
@@ -199,4 +202,26 @@ func fitWidth(goos string, m unit.Metric, widthPx int) (unit.Metric, float32) {
 	m.PxPerDp *= k
 	m.PxPerSp *= k
 	return m, k
+}
+
+// keyboardWatch tells when the on-screen keyboard is up. Gio doesn't say,
+// but the keyboard takes its height from the bottom of the window: iOS
+// shrinks the window, and Android either shrinks it or reports the
+// keyboard as bottom inset. Either way, the space left at the bottom
+// shrinks by far more than any system bar is tall.
+type keyboardWatch struct {
+	width, tallest int // the tallest free height seen at this width
+}
+
+// open takes a frame's size and bottom inset (px) and reports whether the
+// keyboard is up.
+func (k *keyboardWatch) open(size image.Point, bottomInset int, pxPerDp float32) bool {
+	if size.X != k.width { // rotated or resized: start again
+		k.width, k.tallest = size.X, 0
+	}
+	free := size.Y - bottomInset
+	if free > k.tallest {
+		k.tallest = free
+	}
+	return float32(k.tallest-free) > 120*pxPerDp
 }
