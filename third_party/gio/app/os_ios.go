@@ -114,6 +114,10 @@ type window struct {
 	config Config
 
 	pointerMap []C.CFTypeRef
+
+	// Relic patch: whether the keyboard's whole-text snippet has been
+	// asked for (ime_ios.go).
+	imeAsked bool
 }
 
 var mainWindow = newWindowRendezvous()
@@ -308,7 +312,7 @@ func (w *window) Configure([]Option) {
 	w.ProcessEvent(ConfigEvent{Config: w.config})
 }
 
-func (w *window) EditorStateChanged(old, new editorState) {}
+// EditorStateChanged is in ime_ios.go (Relic patch).
 
 func (w *window) Perform(system.Action) {}
 
@@ -355,6 +359,7 @@ func (w *window) contextView() C.CFTypeRef {
 }
 
 func (w *window) ShowTextInput(show bool) {
+	w.imeAsked = false
 	if show {
 		C.showTextInput(w.view)
 	} else {

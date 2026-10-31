@@ -13,7 +13,7 @@ Relic ("your stories, preserved") is a personal archive for films, dramas, books
 ## Decisions
 
 - Language: **Go**, for the app and later the backend.
-- UI toolkit: **Gio** (gioui.org v0.10). The Phase 0 spike matched the prototype's chip and poster card with custom drawing and bundled fonts, and runs on Android. Relic builds against its own copy, `third_party/gio` (v0.10.3, via `replace` in go.mod), to carry small fixes listed in `third_party/gio/RELIC-PATCHES.md` (first: touch slop 3dp → 8dp, so taps in scrolling pages aren't lost).
+- UI toolkit: **Gio** (gioui.org v0.10). The Phase 0 spike matched the prototype's chip and poster card with custom drawing and bundled fonts, and runs on Android. Relic builds against its own copy, `third_party/gio` (v0.10.3, via `replace` in go.mod), to carry small fixes listed in `third_party/gio/RELIC-PATCHES.md` (touch slop 3dp → 8dp, so taps in scrolling pages aren't lost; on iOS the view adopts `UITextInput`, so the keyboard offers autocorrect, predictive text and dictation).
 - Local storage: **SQLite via github.com/ncruces/go-sqlite3** (SQLite translated to pure Go, no cgo), in `store/`. Uses Go's own file I/O, so it runs inside Android's syscall filter; builds for Windows, Android and iOS with no C toolchain. Schema changes are numbered migrations tracked in `PRAGMA user_version`. (modernc.org/sqlite was rejected: it crashed on Android x86_64.)
 - Architecture: pure `core/` package for every rule in SPEC §4. UI and storage depend on core, never the other way round.
 - Offline-first: the app works fully without a network. Sync comes in Phase 5.

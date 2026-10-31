@@ -8,8 +8,46 @@
 
 __attribute__ ((visibility ("hidden"))) Class gio_layerClass(void);
 
-@interface GioView: UIView <UIKeyInput>
+// Relic patch: GioView adopts UITextInput (not just UIKeyInput), so the
+// keyboard gets the field's text and selection and can offer autocorrect,
+// predictive text and dictation. Positions are UTF-16 offsets from the
+// start of the field; ime_ios.go converts them for the editor.
+@interface GioTextPosition : UITextPosition
+@property (nonatomic) NSInteger offset;
++ (instancetype)at:(NSInteger)offset;
+@end
+
+@implementation GioTextPosition
++ (instancetype)at:(NSInteger)offset {
+	GioTextPosition *p = [[GioTextPosition alloc] init];
+	p.offset = MAX(offset, 0);
+	return p;
+}
+@end
+
+@interface GioTextRange : UITextRange
+@property (nonatomic, strong) GioTextPosition *from;
+@property (nonatomic, strong) GioTextPosition *to;
++ (instancetype)from:(NSInteger)a to:(NSInteger)b;
+@end
+
+@implementation GioTextRange
++ (instancetype)from:(NSInteger)a to:(NSInteger)b {
+	GioTextRange *r = [[GioTextRange alloc] init];
+	r.from = [GioTextPosition at:MIN(a, b)];
+	r.to = [GioTextPosition at:MAX(a, b)];
+	return r;
+}
+- (UITextPosition *)start { return self.from; }
+- (UITextPosition *)end { return self.to; }
+- (BOOL)isEmpty { return self.from.offset == self.to.offset; }
+@end
+
+@interface GioView: UIView <UITextInput>
 @property uintptr_t handle;
+@property (nonatomic, weak) id<UITextInputDelegate> inputDelegate;
+@property (nonatomic, copy) NSDictionary<NSAttributedStringKey, id> *markedTextStyle;
+@property (nonatomic, strong) UITextInputStringTokenizer *gioTokenizer;
 @end
 
 @implementation GioViewController
@@ -215,8 +253,200 @@ NSArray<UIKeyCommand *> *_keyCommands;
 	handleTouches(1, self, touches, event);
 }
 
+// The field's text, selection and marked (composing) range, from Go.
+- (NSString *)gioText:(NSRange *)sel marked:(NSRange *)marked {
+	int s0, s1, c0, c1;
+	NSString *text = (__bridge_transfer NSString *)gio_imeText(self.handle, &s0, &s1, &c0, &c1);
+	if (sel != NULL) {
+		*sel = NSMakeRange(s0, MAX(s1 - s0, 0));
+	}
+	if (marked != NULL) {
+		*marked = c0 < 0 ? NSMakeRange(NSNotFound, 0) : NSMakeRange(c0, MAX(c1 - c0, 0));
+	}
+	return text == nil ? @"" : text;
+}
+
+- (NSInteger)gioClamp:(NSInteger)offset {
+	NSInteger n = [self gioText:NULL marked:NULL].length;
+	return MAX(0, MIN(offset, n));
+}
+
 - (void)insertText:(NSString *)text {
+	NSRange marked;
+	[self gioText:NULL marked:&marked];
+	if (marked.location != NSNotFound) {
+		// Committing a composition replaces the marked text.
+		gio_imeReplace(self.handle, (int)marked.location, (int)NSMaxRange(marked), (__bridge CFTypeRef)text);
+		NSInteger caret = marked.location + text.length;
+		gio_imeSetComposing(self.handle, -1, -1);
+		gio_imeSetSelection(self.handle, (int)caret, (int)caret);
+		return;
+	}
 	onText(self.handle, (__bridge CFTypeRef)text);
+}
+
+- (NSString *)textInRange:(UITextRange *)range {
+	GioTextRange *r = (GioTextRange *)range;
+	NSString *text = [self gioText:NULL marked:NULL];
+	NSInteger a = MIN(r.from.offset, (NSInteger)text.length), b = MIN(r.to.offset, (NSInteger)text.length);
+	return [text substringWithRange:NSMakeRange(a, MAX(b - a, 0))];
+}
+
+- (void)replaceRange:(UITextRange *)range withText:(NSString *)text {
+	GioTextRange *r = (GioTextRange *)range;
+	gio_imeReplace(self.handle, (int)r.from.offset, (int)r.to.offset, (__bridge CFTypeRef)text);
+}
+
+- (UITextRange *)selectedTextRange {
+	NSRange sel;
+	[self gioText:&sel marked:NULL];
+	return [GioTextRange from:sel.location to:NSMaxRange(sel)];
+}
+
+- (void)setSelectedTextRange:(UITextRange *)range {
+	GioTextRange *r = (GioTextRange *)range;
+	if (r == nil) {
+		return;
+	}
+	gio_imeSetSelection(self.handle, (int)r.from.offset, (int)r.to.offset);
+}
+
+- (UITextRange *)markedTextRange {
+	NSRange marked;
+	[self gioText:NULL marked:&marked];
+	if (marked.location == NSNotFound || marked.length == 0) {
+		return nil;
+	}
+	return [GioTextRange from:marked.location to:NSMaxRange(marked)];
+}
+
+- (void)setMarkedText:(NSString *)markedText selectedRange:(NSRange)selectedRange {
+	NSRange sel, marked;
+	[self gioText:&sel marked:&marked];
+	NSRange target = marked.location != NSNotFound ? marked : sel;
+	if (markedText == nil) {
+		markedText = @"";
+	}
+	gio_imeReplace(self.handle, (int)target.location, (int)NSMaxRange(target), (__bridge CFTypeRef)markedText);
+	if (markedText.length > 0) {
+		gio_imeSetComposing(self.handle, (int)target.location, (int)(target.location + markedText.length));
+	} else {
+		gio_imeSetComposing(self.handle, -1, -1);
+	}
+	NSInteger caret = target.location + MIN(selectedRange.location, markedText.length);
+	gio_imeSetSelection(self.handle, (int)caret, (int)(caret + selectedRange.length));
+}
+
+- (void)unmarkText {
+	gio_imeSetComposing(self.handle, -1, -1);
+}
+
+- (UITextPosition *)beginningOfDocument {
+	return [GioTextPosition at:0];
+}
+
+- (UITextPosition *)endOfDocument {
+	return [GioTextPosition at:[self gioText:NULL marked:NULL].length];
+}
+
+- (UITextRange *)textRangeFromPosition:(UITextPosition *)fromPosition toPosition:(UITextPosition *)toPosition {
+	return [GioTextRange from:((GioTextPosition *)fromPosition).offset to:((GioTextPosition *)toPosition).offset];
+}
+
+- (UITextPosition *)positionFromPosition:(UITextPosition *)position offset:(NSInteger)offset {
+	NSInteger p = ((GioTextPosition *)position).offset + offset;
+	NSInteger n = [self gioText:NULL marked:NULL].length;
+	if (p < 0 || p > n) {
+		return nil;
+	}
+	return [GioTextPosition at:p];
+}
+
+- (UITextPosition *)positionFromPosition:(UITextPosition *)position inDirection:(UITextLayoutDirection)direction offset:(NSInteger)offset {
+	switch (direction) {
+	case UITextLayoutDirectionLeft:
+	case UITextLayoutDirectionUp:
+		return [self positionFromPosition:position offset:-offset];
+	default:
+		return [self positionFromPosition:position offset:offset];
+	}
+}
+
+- (NSComparisonResult)comparePosition:(UITextPosition *)position toPosition:(UITextPosition *)other {
+	NSInteger a = ((GioTextPosition *)position).offset, b = ((GioTextPosition *)other).offset;
+	return a < b ? NSOrderedAscending : (a > b ? NSOrderedDescending : NSOrderedSame);
+}
+
+- (NSInteger)offsetFromPosition:(UITextPosition *)from toPosition:(UITextPosition *)toPosition {
+	return ((GioTextPosition *)toPosition).offset - ((GioTextPosition *)from).offset;
+}
+
+- (id<UITextInputTokenizer>)tokenizer {
+	if (self.gioTokenizer == nil) {
+		self.gioTokenizer = [[UITextInputStringTokenizer alloc] initWithTextInput:self];
+	}
+	return self.gioTokenizer;
+}
+
+- (UITextPosition *)positionWithinRange:(UITextRange *)range farthestInDirection:(UITextLayoutDirection)direction {
+	GioTextRange *r = (GioTextRange *)range;
+	switch (direction) {
+	case UITextLayoutDirectionLeft:
+	case UITextLayoutDirectionUp:
+		return r.from;
+	default:
+		return r.to;
+	}
+}
+
+- (UITextRange *)characterRangeByExtendingPosition:(UITextPosition *)position inDirection:(UITextLayoutDirection)direction {
+	NSInteger p = ((GioTextPosition *)position).offset;
+	switch (direction) {
+	case UITextLayoutDirectionLeft:
+	case UITextLayoutDirectionUp:
+		return [GioTextRange from:[self gioClamp:p - 1] to:p];
+	default:
+		return [GioTextRange from:p to:[self gioClamp:p + 1]];
+	}
+}
+
+- (NSWritingDirection)baseWritingDirectionForPosition:(UITextPosition *)position inDirection:(UITextStorageDirection)direction {
+	return NSWritingDirectionNatural;
+}
+
+- (void)setBaseWritingDirection:(NSWritingDirection)writingDirection forRange:(UITextRange *)range {
+}
+
+// The caret, from the editor (window pixels to view points).
+- (CGRect)caretRectForPosition:(UITextPosition *)position {
+	float x, y, h;
+	gio_imeCaret(self.handle, &x, &y, &h);
+	CGFloat s = self.contentScaleFactor;
+	return CGRectMake(x / s, y / s, 2, MAX(h / s, 1));
+}
+
+- (CGRect)firstRectForRange:(UITextRange *)range {
+	return [self caretRectForPosition:range.start];
+}
+
+- (NSArray<UITextSelectionRect *> *)selectionRectsForRange:(UITextRange *)range {
+	return @[];
+}
+
+- (UITextPosition *)closestPositionToPoint:(CGPoint)point {
+	NSRange sel;
+	[self gioText:&sel marked:NULL];
+	return [GioTextPosition at:NSMaxRange(sel)];
+}
+
+- (UITextPosition *)closestPositionToPoint:(CGPoint)point withinRange:(UITextRange *)range {
+	return range.end;
+}
+
+- (UITextRange *)characterRangeAtPoint:(CGPoint)point {
+	NSRange sel;
+	[self gioText:&sel marked:NULL];
+	return [GioTextRange from:sel.location to:NSMaxRange(sel)];
 }
 
 - (BOOL)canBecomeFirstResponder {
@@ -225,6 +455,20 @@ NSArray<UIKeyCommand *> *_keyCommands;
 
 - (BOOL)hasText {
 	return YES;
+}
+
+// Keyboard traits: sentences start with a capital, and autocorrect and
+// spelling are on (the defaults for a text view).
+- (UITextAutocapitalizationType)autocapitalizationType {
+	return UITextAutocapitalizationTypeSentences;
+}
+
+- (UITextAutocorrectionType)autocorrectionType {
+	return UITextAutocorrectionTypeYes;
+}
+
+- (UITextSpellCheckingType)spellCheckingType {
+	return UITextSpellCheckingTypeYes;
 }
 
 - (void)deleteBackward {
@@ -337,4 +581,25 @@ int gio_applicationMain(int argc, char *argv[]) {
 	@autoreleasepool {
 		return UIApplicationMain(argc, argv, nil, NSStringFromClass([_gioAppDelegate class]));
 	}
+}
+
+// Relic patch: tells the keyboard about changes it didn't make (another
+// field, text set by the app, a tap moving the caret), so autocorrect
+// works on the right words.
+void gio_textInputChanged(CFTypeRef viewRef, int text, int selection) {
+	GioView *view = (__bridge GioView *)viewRef;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		id<UITextInputDelegate> d = view.inputDelegate;
+		if (d == nil) {
+			return;
+		}
+		if (text) {
+			[d textWillChange:view];
+			[d textDidChange:view];
+		}
+		if (selection) {
+			[d selectionWillChange:view];
+			[d selectionDidChange:view];
+		}
+	});
 }
