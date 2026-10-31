@@ -8,12 +8,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/unit"
 	"gioui.org/x/explorer"
 
 	"github.com/saniyaa61/relic/photos"
@@ -157,11 +159,35 @@ func run(w *app.Window) error {
 			// bottom-bar backgrounds under them), so the bars' space was
 			// counted twice on phones.
 			ops.Reset()
-			gtx := layout.Context{Ops: &ops, Now: e.Now, Source: e.Source, Metric: e.Metric,
+			m, k := fitWidth(runtime.GOOS, e.Metric, e.Size.X)
+			gtx := layout.Context{Ops: &ops, Now: e.Now, Source: e.Source, Metric: m,
 				Constraints: layout.Exact(e.Size)}
-			safe := layout.Inset{Top: e.Insets.Top, Bottom: e.Insets.Bottom, Left: e.Insets.Left, Right: e.Insets.Right}
+			// The insets are in the system's dp; in the scaled dp they're
+			// 1/k as many, so they cover the same pixels.
+			safe := layout.Inset{Top: e.Insets.Top / unit.Dp(k), Bottom: e.Insets.Bottom / unit.Dp(k),
+				Left: e.Insets.Left / unit.Dp(k), Right: e.Insets.Right / unit.Dp(k)}
 			a.Layout(gtx, safe)
 			e.Frame(gtx.Ops)
 		}
 	}
+}
+
+// designWidth is the phone width, in dp, the layout is drawn for (a
+// standard ~390pt iPhone; the prototype's own column is up to 400px).
+const designWidth = 390
+
+// fitWidth scales a phone's dp and sp so the layout fills its width as it
+// would a designWidth phone: wider phones zoom in, narrower ones zoom out
+// (owner's choice, 2026-10-31). The scale stays within 0.85–1.2 (tablets
+// and folds don't blow up), and desktops keep their own size. It returns
+// the metric and the scale.
+func fitWidth(goos string, m unit.Metric, widthPx int) (unit.Metric, float32) {
+	if goos != "android" && goos != "ios" || m.PxPerDp <= 0 || widthPx <= 0 {
+		return m, 1
+	}
+	k := float32(widthPx) / m.PxPerDp / designWidth
+	k = max(0.85, min(1.2, k))
+	m.PxPerDp *= k
+	m.PxPerSp *= k
+	return m, k
 }
