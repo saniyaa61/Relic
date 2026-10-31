@@ -70,6 +70,11 @@ type App struct {
 	// photo library (posters); ErrNoFile if they back out. Without it,
 	// posters come through ChooseFile.
 	PickPhoto func() ([]byte, error)
+	// TopTrim is taken off the top system inset for pages: on iPhones the
+	// safe area already leaves room under the status bar, so the top bar's
+	// own 13dp made the header sit low (owner, 2026-10-31). cmd/relic sets
+	// it on iOS.
+	TopTrim unit.Dp
 	// ShareImage, if set, opens the system share sheet for a PNG called
 	// name (Android and iOS). It returns once the sheet is on its way.
 	ShareImage func(name, title string, png []byte) error
@@ -392,6 +397,7 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	pgtx.Constraints = layout.Exact(image.Pt(size.X, pageH))
 	cl := clip.Rect{Max: pgtx.Constraints.Max}.Push(gtx.Ops)
 	pageSafe := safe
+	pageSafe.Top = max(0, safe.Top-a.TopTrim)
 	if showNav {
 		pageSafe.Bottom = 0
 	}

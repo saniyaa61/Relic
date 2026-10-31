@@ -134,6 +134,9 @@ func run(w *app.Window) error {
 	if share.Available() {
 		a.ShareImage = sh.Image
 	}
+	if runtime.GOOS == "ios" {
+		a.TopTrim = 13
+	}
 	a.Invalidate = w.Invalidate
 	if startTour != nil {
 		startTour(a, db, posters)
