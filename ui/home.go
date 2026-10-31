@@ -10,6 +10,7 @@ import (
 	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/unit"
 	"gioui.org/widget"
 
 	"github.com/saniyaa61/relic/core"
@@ -34,7 +35,6 @@ type homePage struct {
 	settings IconButton
 	list     widget.List
 	chips    [4]widget.Clickable
-	chipRow  widget.List
 	add      widget.Clickable
 	setup    widget.Clickable
 	gotIt    widget.Clickable // the welcome card's "Got it"
@@ -249,11 +249,83 @@ func (h *homePage) ribbon(gtx layout.Context, a *App, ongoing, finished int) lay
 		{Value: itoa(finished), Label: "Finished", Sub: "titles"},
 		{Value: itoa(ongoing), Label: "Ongoing", Sub: "in progress"},
 	}
-	return layout.Inset{Top: 8, Bottom: 20}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return cardRow(gtx, &h.chipRow, 9, len(chips), func(gtx layout.Context, i int) layout.Dimensions {
-			return pressable(gtx, &h.chips[i], func(gtx layout.Context) layout.Dimensions { return chips[i].Layout(gtx, th) })
-		}, 0)
+	return layout.Inset{Top: 8, Bottom: 20, Left: gutter, Right: gutter}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return fitChips(gtx, th, chips, h.chips[:])
 	})
+}
+
+// fitChips lays the stat chips out in one row that exactly fills the
+// width (owner, 2026-10-31: no sideways scrolling, unlike the prototype's
+// ribbon). Each chip keeps its natural width plus an equal share of the
+// spare room; on a narrow screen the side padding shrinks first (to 6dp),
+// then the chips share the width in proportion.
+func fitChips(gtx layout.Context, th *Theme, chips []StatChip, clicks []widget.Clickable) layout.Dimensions {
+	gap := gtx.Dp(9)
+	avail := gtx.Constraints.Max.X - gap*(len(chips)-1)
+	natural := func(c StatChip) int {
+		rec := op.Record(gtx.Ops)
+		mgtx := gtx
+		mgtx.Constraints = layout.Constraints{Max: image.Pt(1<<20, gtx.Constraints.Max.Y)}
+		d := c.Layout(mgtx, th)
+		rec.Stop()
+		return d.Size.X
+	}
+	widths := make([]int, len(chips))
+	sum := 0
+	for i, c := range chips {
+		widths[i] = natural(c)
+		sum += widths[i]
+	}
+	if sum > avail {
+		// Shrink the side padding (14dp each side) to fit, down to 6dp.
+		over := sum - avail
+		cut := min(over, gtx.Dp(8)*2*len(chips))
+		per := unit.Dp(float32(cut) / float32(2*len(chips)) / gtx.Metric.PxPerDp)
+		sum = 0
+		for i := range chips {
+			chips[i].PadX = 14 - per
+			widths[i] = natural(chips[i])
+			sum += widths[i]
+		}
+	}
+	if sum <= avail {
+		extra := avail - sum
+		for i := range widths {
+			widths[i] += extra / len(widths)
+			if i < extra%len(widths) {
+				widths[i]++
+			}
+		}
+	} else {
+		// Still too wide: shrink the text until the row fits.
+		k := float32(1)
+		for k > 0.7 && sum > avail {
+			k -= 0.03
+			sum = 0
+			for i := range chips {
+				chips[i].Scale = k
+				widths[i] = natural(chips[i])
+				sum += widths[i]
+			}
+		}
+		extra := max(avail-sum, 0)
+		for i := range widths {
+			widths[i] += extra / len(widths)
+		}
+	}
+	height := 0
+	x := 0
+	for i := range chips {
+		st := op.Offset(image.Pt(x, 0)).Push(gtx.Ops)
+		cgtx := gtx
+		cgtx.Constraints = layout.Exact(image.Pt(widths[i], 0))
+		cgtx.Constraints.Max.Y = gtx.Constraints.Max.Y
+		d := pressable(cgtx, &clicks[i], func(gtx layout.Context) layout.Dimensions { return chips[i].Layout(gtx, th) })
+		height = max(height, d.Size.Y)
+		st.Pop()
+		x += widths[i] + gap
+	}
+	return layout.Dimensions{Size: image.Pt(gtx.Constraints.Max.X, height)}
 }
 
 // memoryCard is "One year ago today" (SPEC §4.15).
