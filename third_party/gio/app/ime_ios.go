@@ -16,6 +16,7 @@ package app
 #include <stdint.h>
 
 __attribute__ ((visibility ("hidden"))) void gio_textInputChanged(CFTypeRef viewRef, int text, int selection);
+__attribute__ ((visibility ("hidden"))) void gio_requestSnippetLater(CFTypeRef viewRef);
 */
 import "C"
 
@@ -29,12 +30,21 @@ const imeWholeText = 1 << 30
 // imeState is the editor state, asking once per field (and after the app
 // changes the text) for the whole text; the keyboard queries many times a
 // keystroke, and each ask is an event.
+//
+// The ask is posted to the main queue rather than made here: UIKit calls
+// these queries from inside its own work (even from inside Gio showing the
+// keyboard), and asking is an event Gio must not handle re-entrantly.
 func (w *window) imeState() editorState {
 	if !w.imeAsked {
 		w.imeAsked = true
-		w.w.SetEditorSnippet(key.Range{Start: 0, End: imeWholeText})
+		C.gio_requestSnippetLater(w.view)
 	}
 	return w.w.EditorState()
+}
+
+//export gio_imeRequestSnippet
+func gio_imeRequestSnippet(h C.uintptr_t) {
+	viewFor(h).w.SetEditorSnippet(key.Range{Start: 0, End: imeWholeText})
 }
 
 //export gio_imeText

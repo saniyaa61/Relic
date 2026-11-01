@@ -16,3 +16,12 @@ release here and re-apply these:
    The Go side reads and edits the editor state like the Android IME code
    does, asking for the whole text once per field; `EditorStateChanged`
    tells the keyboard's `inputDelegate` about changes it didn't make.
+3. iOS keyboard, round 2 (owner, 2026-11-01): after choosing a suggestion
+   the caret now goes after the new word (`replaceRange:withText:` sets it;
+   Gio left it at the old offset, inside a longer word). The app froze when
+   a sheet with a focused field closed: Gio shows and hides the keyboard in
+   the middle of its own event handling, UIKit calls the UITextInput methods
+   straight back, and they called into Gio re-entrantly. `showTextInput` /
+   `hideTextInput` now set `gio_textInputBusy`, the edit methods wait for
+   the main queue while it's set (`gioLater`), and the whole-text request
+   always goes through the main queue.

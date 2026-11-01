@@ -43,6 +43,18 @@ __attribute__ ((visibility ("hidden"))) Class gio_layerClass(void);
 - (BOOL)isEmpty { return self.from.offset == self.to.offset; }
 @end
 
+int gio_textInputBusy = 0;
+
+// gioLater runs block now, or on the main queue when Gio is in the middle
+// of showing or hiding the keyboard (see gio_textInputBusy in os_ios.go).
+static void gioLater(void (^block)(void)) {
+	if (gio_textInputBusy > 0) {
+		dispatch_async(dispatch_get_main_queue(), block);
+	} else {
+		block();
+	}
+}
+
 @interface GioView: UIView <UITextInput>
 @property uintptr_t handle;
 @property (nonatomic, weak) id<UITextInputDelegate> inputDelegate;
@@ -272,17 +284,19 @@ NSArray<UIKeyCommand *> *_keyCommands;
 }
 
 - (void)insertText:(NSString *)text {
-	NSRange marked;
-	[self gioText:NULL marked:&marked];
-	if (marked.location != NSNotFound) {
-		// Committing a composition replaces the marked text.
-		gio_imeReplace(self.handle, (int)marked.location, (int)NSMaxRange(marked), (__bridge CFTypeRef)text);
-		NSInteger caret = marked.location + text.length;
-		gio_imeSetComposing(self.handle, -1, -1);
-		gio_imeSetSelection(self.handle, (int)caret, (int)caret);
-		return;
-	}
-	onText(self.handle, (__bridge CFTypeRef)text);
+	gioLater(^{
+		NSRange marked;
+		[self gioText:NULL marked:&marked];
+		if (marked.location != NSNotFound) {
+			// Committing a composition replaces the marked text.
+			gio_imeReplace(self.handle, (int)marked.location, (int)NSMaxRange(marked), (__bridge CFTypeRef)text);
+			NSInteger caret = marked.location + text.length;
+			gio_imeSetComposing(self.handle, -1, -1);
+			gio_imeSetSelection(self.handle, (int)caret, (int)caret);
+			return;
+		}
+		onText(self.handle, (__bridge CFTypeRef)text);
+	});
 }
 
 - (NSString *)textInRange:(UITextRange *)range {
@@ -294,7 +308,25 @@ NSArray<UIKeyCommand *> *_keyCommands;
 
 - (void)replaceRange:(UITextRange *)range withText:(NSString *)text {
 	GioTextRange *r = (GioTextRange *)range;
-	gio_imeReplace(self.handle, (int)r.from.offset, (int)r.to.offset, (__bridge CFTypeRef)text);
+	NSInteger from = r.from.offset, to = r.to.offset;
+	gioLater(^{
+		NSRange sel;
+		[self gioText:&sel marked:NULL];
+		gio_imeReplace(self.handle, (int)from, (int)to, (__bridge CFTypeRef)text);
+		// Put the caret where the user expects it: after the new text when
+		// it was at or inside the replaced range (choosing a suggestion
+		// for the word just typed), moved along when it was after it.
+		// Gio would leave it at the old offset, inside a longer word.
+		if (sel.length == 0) {
+			NSInteger caret = sel.location;
+			if (caret >= to) {
+				caret += (NSInteger)text.length - (to - from);
+			} else if (caret > from) {
+				caret = from + text.length;
+			}
+			gio_imeSetSelection(self.handle, (int)caret, (int)caret);
+		}
+	});
 }
 
 - (UITextRange *)selectedTextRange {
@@ -308,7 +340,10 @@ NSArray<UIKeyCommand *> *_keyCommands;
 	if (r == nil) {
 		return;
 	}
-	gio_imeSetSelection(self.handle, (int)r.from.offset, (int)r.to.offset);
+	NSInteger a = r.from.offset, b = r.to.offset;
+	gioLater(^{
+		gio_imeSetSelection(self.handle, (int)a, (int)b);
+	});
 }
 
 - (UITextRange *)markedTextRange {
@@ -321,6 +356,12 @@ NSArray<UIKeyCommand *> *_keyCommands;
 }
 
 - (void)setMarkedText:(NSString *)markedText selectedRange:(NSRange)selectedRange {
+	gioLater(^{
+		[self gioSetMarkedText:markedText selectedRange:selectedRange];
+	});
+}
+
+- (void)gioSetMarkedText:(NSString *)markedText selectedRange:(NSRange)selectedRange {
 	NSRange sel, marked;
 	[self gioText:&sel marked:&marked];
 	NSRange target = marked.location != NSNotFound ? marked : sel;
@@ -338,7 +379,9 @@ NSArray<UIKeyCommand *> *_keyCommands;
 }
 
 - (void)unmarkText {
-	gio_imeSetComposing(self.handle, -1, -1);
+	gioLater(^{
+		gio_imeSetComposing(self.handle, -1, -1);
+	});
 }
 
 - (UITextPosition *)beginningOfDocument {
@@ -472,7 +515,9 @@ NSArray<UIKeyCommand *> *_keyCommands;
 }
 
 - (void)deleteBackward {
-	onDeleteBackward(self.handle);
+	gioLater(^{
+		onDeleteBackward(self.handle);
+	});
 }
 
 - (void)onUpArrow {
@@ -601,5 +646,14 @@ void gio_textInputChanged(CFTypeRef viewRef, int text, int selection) {
 			[d selectionWillChange:view];
 			[d selectionDidChange:view];
 		}
+	});
+}
+
+// Relic patch: asks Go for the field's whole text on the next turn of the
+// main queue (never from inside a UIKit or Gio callback).
+void gio_requestSnippetLater(CFTypeRef viewRef) {
+	GioView *view = (__bridge GioView *)viewRef;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		gio_imeRequestSnippet(view.handle);
 	});
 }

@@ -42,14 +42,24 @@ static CFTypeRef readClipboard(void) {
 #endif
 }
 
+// Relic patch: while Gio shows or hides the keyboard (in the middle of
+// its own event handling), UIKit calls the view's UITextInput methods
+// straight back; those must not call into Gio then, or it deadlocks
+// (os_ios.m defers them while gio_textInputBusy is set).
+extern int gio_textInputBusy;
+
 static void showTextInput(CFTypeRef viewRef) {
 	UIView *view = (__bridge UIView *)viewRef;
+	gio_textInputBusy++;
 	[view becomeFirstResponder];
+	gio_textInputBusy--;
 }
 
 static void hideTextInput(CFTypeRef viewRef) {
 	UIView *view = (__bridge UIView *)viewRef;
+	gio_textInputBusy++;
 	[view resignFirstResponder];
+	gio_textInputBusy--;
 }
 
 static struct drawParams viewDrawParams(CFTypeRef viewRef) {
