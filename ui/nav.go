@@ -93,6 +93,8 @@ const (
 	activeSolid                        // a solid accent pill with the button text colour
 )
 
+// Owner's choice (2026-11-01): A, the accent on the pill, as in their
+// custom theme.
 var navActive = activeAccent
 
 func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.Dimensions {
