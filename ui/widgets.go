@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"sync"
+	"time"
 
 	"gioui.org/font"
 	"gioui.org/io/key"
@@ -19,11 +21,29 @@ import (
 // prototype's hover opacity (".add-btn:hover{opacity:.88}").
 func pressable(gtx layout.Context, c *widget.Clickable, w layout.Widget) layout.Dimensions {
 	return c.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		if c.Pressed() {
+		if c.Pressed() || recentlyReleased(gtx, c) {
 			defer paint.PushOpacity(gtx.Ops, 0.88).Pop()
 		}
 		return w(gtx)
 	})
+}
+
+// pressFlash is how long a press still shows after the finger lifts. A
+// quick tap on a phone often starts and ends within one frame, so without
+// it the button never looked pressed and the tap seemed ignored.
+const pressFlash = 120 * time.Millisecond
+
+func recentlyReleased(gtx layout.Context, c *widget.Clickable) bool {
+	for _, h := range c.History() {
+		if h.End.IsZero() || h.Cancelled || gtx.Now.IsZero() {
+			continue
+		}
+		if until := h.End.Add(pressFlash); gtx.Now.Before(until) {
+			gtx.Execute(op.InvalidateCmd{At: until})
+			return true
+		}
+	}
+	return false
 }
 
 // rrect fills a rounded rectangle of size sz at the origin.
@@ -32,38 +52,74 @@ func rrect(gtx layout.Context, sz image.Point, radius int, c color.NRGBA) {
 }
 
 // boxShadow approximates CSS box-shadow: 0 offsetY blur rgba(0,0,0,alpha)
-// behind a rounded rectangle of size sz, over a page of colour bg. Gio has no blur, so we stack thin
-// rounded rings whose opacities follow the Gaussian fall-off a CSS blur
-// has: full strength well inside the edge, half at the edge, fading to
-// nothing a blur's width outside it.
+// behind a rounded rectangle of size sz, over a page of colour bg. Gio has
+// no blur, so the shadow is worked out once on the CPU (the Gaussian
+// fall-off a CSS blur has: full strength well inside the edge, half at the
+// edge, fading to nothing a blur's width outside) and cached as an image,
+// which the GPU then draws in one go. (Drawing it as 24 stacked rings each
+// frame made pages with many shadows, like the Library, slow on phones.)
 func boxShadow(gtx layout.Context, sz image.Point, radius int, offsetY, blur unit.Dp, alpha float32, bg color.NRGBA) {
-	const layers = 24
-	b := float64(gtx.Dp(blur))
-	if b <= 0 {
+	b := gtx.Dp(blur)
+	if b <= 0 || sz.X <= 0 || sz.Y <= 0 {
 		return
 	}
+	img, pad := shadowImage(shadowKey{sz, clampRadius(radius, sz), b, alpha, bg})
+	defer op.Offset(image.Pt(-pad, -pad+gtx.Dp(offsetY))).Push(gtx.Ops).Pop()
+	defer clip.Rect{Max: img.Size()}.Push(gtx.Ops).Pop()
+	img.Add(gtx.Ops)
+	paint.PaintOp{}.Add(gtx.Ops)
+}
+
+type shadowKey struct {
+	size   image.Point
+	radius int
+	blur   int
+	alpha  float32
+	bg     color.NRGBA
+}
+
+var (
+	shadowMu    sync.Mutex
+	shadowCache = map[shadowKey]paint.ImageOp{}
+)
+
+// shadowImage is the shadow for k, with pad px of fall-off on every side.
+func shadowImage(k shadowKey) (paint.ImageOp, int) {
+	b := float64(k.blur)
+	pad := int(math.Ceil(1.5 * b))
+	shadowMu.Lock()
+	defer shadowMu.Unlock()
+	if op, ok := shadowCache[k]; ok {
+		return op, pad
+	}
+	if len(shadowCache) > 300 {
+		clear(shadowCache)
+	}
 	sigma := b / 2
-	cover := func(d float64) float64 { // shadow strength at distance d outside the edge
-		return 0.5 * math.Erfc(d/(sigma*math.Sqrt2))
+	// The colour for each strength, mixed for bg as shade does.
+	var levels [256]color.NRGBA
+	for i := range levels {
+		levels[i] = shade(k.alpha*float32(i)/255, k.bg)
 	}
-	oy := gtx.Dp(offsetY)
-	// Draw from the outermost ring in. Each ring adds the strength gained
-	// between its distance and the next one out, so a point is covered by
-	// rings adding up to the strength at its own distance.
-	for k := layers; k >= 1; k-- {
-		d := -b + 2*b*float64(k)/layers
-		dOut := -b + 2*b*float64(k+1)/layers
-		a := alpha * float32(cover(d-b/layers)-cover(dOut-b/layers))
-		if a <= 0 {
-			continue
+	w, h := k.size.X+2*pad, k.size.Y+2*pad
+	img := image.NewNRGBA(image.Rect(0, 0, w, h))
+	hx, hy := float64(k.size.X)/2, float64(k.size.Y)/2
+	r := float64(k.radius)
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			// Distance outside the rounded rectangle (negative inside).
+			qx := math.Abs(float64(x)+0.5-float64(pad)-hx) - (hx - r)
+			qy := math.Abs(float64(y)+0.5-float64(pad)-hy) - (hy - r)
+			d := math.Hypot(math.Max(qx, 0), math.Max(qy, 0)) + math.Min(math.Max(qx, qy), 0) - r
+			cover := 0.5 * math.Erfc(d/(sigma*math.Sqrt2))
+			c := levels[int(math.Round(cover*255))]
+			i := img.PixOffset(x, y)
+			img.Pix[i], img.Pix[i+1], img.Pix[i+2], img.Pix[i+3] = c.R, c.G, c.B, c.A
 		}
-		g := int(math.Round(d))
-		r := image.Rectangle{Max: sz}.Inset(-g).Add(image.Pt(0, oy))
-		if r.Dx() <= 0 || r.Dy() <= 0 {
-			continue
-		}
-		paint.FillShape(gtx.Ops, shade(a, bg), clip.UniformRRect(r, clampRadius(radius+g, r.Size())).Op(gtx.Ops))
 	}
+	op := paint.NewImageOp(img)
+	shadowCache[k] = op
+	return op, pad
 }
 
 // IconButton is the prototype's .ibtn: a 34dp round button with an 18dp

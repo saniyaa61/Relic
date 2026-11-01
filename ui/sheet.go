@@ -62,7 +62,7 @@ func (s *Sheet) Layout(gtx layout.Context, a *App, bottom int) (done bool) {
 		}
 	}
 	for {
-		if _, ok := gtx.Event(pointer.Filter{Target: &s.box, Kinds: pointer.Press | pointer.Release | pointer.Scroll | pointer.Drag}); !ok {
+		if _, ok := gtx.Event(pointer.Filter{Target: &s.box, Kinds: pointer.Press | pointer.Release | pointer.Cancel | pointer.Scroll | pointer.Drag}); !ok {
 			break
 		}
 	}

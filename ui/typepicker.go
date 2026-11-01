@@ -64,7 +64,7 @@ func (p *dropdown) Layout(gtx layout.Context, a *App, labels []string, icons []*
 		}
 	}
 	for {
-		ev, ok := gtx.Event(pointer.Filter{Target: &p.scrim, Kinds: pointer.Press})
+		ev, ok := gtx.Event(pointer.Filter{Target: &p.scrim, Kinds: pointer.Press | pointer.Release | pointer.Cancel})
 		if !ok {
 			break
 		}
@@ -73,7 +73,7 @@ func (p *dropdown) Layout(gtx layout.Context, a *App, labels []string, icons []*
 		}
 	}
 	for {
-		if _, ok := gtx.Event(pointer.Filter{Target: &p.box, Kinds: pointer.Press | pointer.Release}); !ok {
+		if _, ok := gtx.Event(pointer.Filter{Target: &p.box, Kinds: pointer.Press | pointer.Release | pointer.Cancel}); !ok {
 			break
 		}
 	}

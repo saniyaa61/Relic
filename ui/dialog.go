@@ -201,7 +201,7 @@ func (d *Dialog) Layout(gtx layout.Context, a *App) (done bool) {
 	area := clip.Rect{Max: cd.Size}.Push(gtx.Ops)
 	event.Op(gtx.Ops, &d.cardTag)
 	for {
-		if _, ok := gtx.Event(pointer.Filter{Target: &d.cardTag, Kinds: pointer.Press | pointer.Release}); !ok {
+		if _, ok := gtx.Event(pointer.Filter{Target: &d.cardTag, Kinds: pointer.Press | pointer.Release | pointer.Cancel}); !ok {
 			break
 		}
 	}

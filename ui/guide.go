@@ -152,7 +152,7 @@ func (a *App) layoutGuide(gtx layout.Context) {
 	area := clip.Rect{Max: size}.Push(gtx.Ops)
 	event.Op(gtx.Ops, &g.blockTag)
 	for {
-		if _, ok := gtx.Event(pointer.Filter{Target: &g.blockTag, Kinds: pointer.Press | pointer.Release | pointer.Drag | pointer.Scroll,
+		if _, ok := gtx.Event(pointer.Filter{Target: &g.blockTag, Kinds: pointer.Press | pointer.Release | pointer.Cancel | pointer.Drag | pointer.Scroll,
 			ScrollY: pointer.ScrollRange{Min: -1e6, Max: 1e6}}); !ok {
 			break
 		}

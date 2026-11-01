@@ -187,7 +187,7 @@ func (m *cardMenu) Layout(gtx layout.Context, a *App, cardW int) int {
 		}
 	}
 	for {
-		ev, ok := gtx.Event(pointer.Filter{Target: &m.scrim, Kinds: pointer.Press})
+		ev, ok := gtx.Event(pointer.Filter{Target: &m.scrim, Kinds: pointer.Press | pointer.Release | pointer.Cancel})
 		if !ok {
 			break
 		}
@@ -196,7 +196,7 @@ func (m *cardMenu) Layout(gtx layout.Context, a *App, cardW int) int {
 		}
 	}
 	for {
-		if _, ok := gtx.Event(pointer.Filter{Target: &m.box, Kinds: pointer.Press | pointer.Release}); !ok {
+		if _, ok := gtx.Event(pointer.Filter{Target: &m.box, Kinds: pointer.Press | pointer.Release | pointer.Cancel}); !ok {
 			break
 		}
 	}

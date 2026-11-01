@@ -98,6 +98,7 @@ type App struct {
 	// guide is the guided tour while it's running.
 	guide      *guide
 	guideRects guideRects
+	perf       perfMeter
 	nav        navBar
 	dialog     *Dialog
 	sheet      *Sheet
@@ -383,6 +384,7 @@ func (a *App) SetTheme(theme, mode, base, accent string) {
 
 // Layout draws the whole window. safe is the system-bar inset.
 func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
+	frameStart := a.perfFrameStart(gtx)
 	if a.shownAt.IsZero() {
 		a.shownAt = a.Now()
 	}
@@ -448,6 +450,7 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 	a.layoutGuide(gtx)
 	a.toast.Layout(gtx, a, gtx.Dp(safe.Top))
 	a.layoutSplash(gtx)
+	a.perfFrameEnd(gtx, frameStart)
 
 	statusColor, navColor := th.Bg, th.Bg
 	if showNav {
@@ -464,10 +467,13 @@ func (a *App) Layout(gtx layout.Context, safe layout.Inset) layout.Dimensions {
 }
 
 // layoutPage draws the current screen, fading it up into place when it
-// appears (the prototype's .page animation: 0.26s, 6px rise).
+// appears (after the prototype's .page animation: a 6px rise, shortened).
 func (a *App) layoutPage(gtx layout.Context, safe layout.Inset) {
-	t := easeCSS(progress(gtx, a.Now(), a.shownAt, 260*time.Millisecond))
-	defer paint.PushOpacity(gtx.Ops, t).Pop()
+	// Shorter than the prototype's 0.26s from transparent: the new page
+	// shows at once at 40% and settles in 0.16s, so a tap reads as
+	// answered straight away on a phone (owner: taps felt slow).
+	t := easeCSS(progress(gtx, a.Now(), a.shownAt, 160*time.Millisecond))
+	defer paint.PushOpacity(gtx.Ops, 0.4+0.6*t).Pop()
 	defer op.Offset(image.Pt(0, roundi(float32(gtx.Dp(6))*(1-t)))).Push(gtx.Ops).Pop()
 	safe.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return a.top().Layout(gtx, a)

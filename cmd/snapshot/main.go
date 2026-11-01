@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/png"
 	"log"
@@ -38,6 +39,7 @@ func main() {
 	bottom := flag.Float64("bottom", 0, "system navigation bar height in dp")
 	nowFlag := flag.String("now", "", "pretend it is this time (RFC 3339, e.g. 2026-09-29T09:00:00Z), for streaks and dates")
 	archive := flag.String("archive", "", "prototype archive to show (e.g. importer/testdata/scrubbed-archive.json)")
+	frames := flag.Int("frames", 0, "also time this many repeated frames (layout and GPU drawing)")
 	flag.Parse()
 
 	mode := "light"
@@ -85,6 +87,26 @@ func main() {
 	a.Layout(gtx, layout.Inset{Top: unit.Dp(*top), Bottom: unit.Dp(*bottom)})
 	if err := win.Frame(&ops); err != nil {
 		log.Fatal(err)
+	}
+	if *frames > 0 {
+		// Time repeated frames: layout alone, and layout plus GPU drawing
+		// (each frame read back, so the GPU work is finished).
+		small := image.NewRGBA(image.Rectangle{Max: size})
+		var lay, all time.Duration
+		for i := 0; i < *frames; i++ {
+			t0 := time.Now()
+			ops.Reset()
+			a.Layout(gtx, layout.Inset{Top: unit.Dp(*top), Bottom: unit.Dp(*bottom)})
+			t1 := time.Now()
+			if err := win.Frame(&ops); err != nil {
+				log.Fatal(err)
+			}
+			win.Screenshot(small)
+			lay += t1.Sub(t0)
+			all += time.Since(t0)
+		}
+		fmt.Printf("%s: layout %.2f ms, layout+draw %.2f ms per frame\n", *screen,
+			float64(lay.Microseconds())/1000/float64(*frames), float64(all.Microseconds())/1000/float64(*frames))
 	}
 	img := image.NewRGBA(image.Rectangle{Max: size})
 	if err := win.Screenshot(img); err != nil {

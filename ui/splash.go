@@ -70,7 +70,7 @@ func (a *App) layoutSplash(gtx layout.Context) {
 	area := clip.Rect{Max: size}.Push(gtx.Ops)
 	event.Op(gtx.Ops, &a.splashAt)
 	for {
-		if _, ok := gtx.Event(pointer.Filter{Target: &a.splashAt, Kinds: pointer.Press | pointer.Release | pointer.Drag}); !ok {
+		if _, ok := gtx.Event(pointer.Filter{Target: &a.splashAt, Kinds: pointer.Press | pointer.Release | pointer.Cancel | pointer.Drag}); !ok {
 			break
 		}
 	}
