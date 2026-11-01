@@ -22,7 +22,7 @@ var SnapshotScreens = []string{"home", "library", "new", "favorites", "digest", 
 	"settings-import", "settings-clear", "yearcard", "yearcard-share", "yearcard-sheet", "consumed", "consumed-search", "consumed-folder", "consumed-empty",
 	"fav-series", "fav-top3", "fav-podcasts", "fav-rank", "fav-nocats",
 	"detail", "detail-hero-prototype", "detail-noposter", "detail-book", "detail-film",
-	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent", "splash", "guide-0", "guide-1", "guide-2", "guide-3", "guide-4", "guide-5", "guide-6", "guide-7", "nav-colour", "nav-pill", "nav-dot", "nav-bold"}
+	"log-session", "log-book", "log-rewatch", "log-rewatch-partial", "log-edit", "reached-end", "reached-end-accent", "splash", "guide-0", "guide-1", "guide-2", "guide-3", "guide-4", "guide-5", "guide-6", "guide-7", "nav-colour", "nav-pill", "nav-dot", "nav-bold", "onboarding-typing", "nav-ink", "nav-faded", "nav-accent2", "nav-solid"}
 
 // ShowForSnapshot puts the app into one of SnapshotScreens with every
 // animation finished, for rendering to a PNG.
@@ -128,6 +128,11 @@ func (a *App) ShowForSnapshot(screen string) error {
 		a.guide.step = n
 		a.guide.shownAt = t0.Add(-time.Second)
 		a.Go(guideSteps[n].tab)
+	case "nav-ink", "nav-faded", "nav-accent2", "nav-solid":
+		// The active tab's colour options, with the pill, on Library.
+		navStyle = navPill
+		navActive = map[string]navActiveKind{"nav-ink": activeInk, "nav-faded": activeFaded, "nav-accent2": activeAccent2, "nav-solid": activeSolid}[screen]
+		a.Go(TabLibrary)
 	case "nav-colour", "nav-pill", "nav-dot", "nav-bold":
 		// The bottom bar's active-tab options, on Library.
 		navStyle = map[string]navStyleKind{"nav-colour": navColour, "nav-pill": navPill, "nav-dot": navDot, "nav-bold": navBold}[screen]
@@ -136,6 +141,11 @@ func (a *App) ShowForSnapshot(screen string) error {
 		// Home under the launch splash, at the top of its pulse (1.1s in,
 		// once the clock is settled 1s on).
 		a.splashAt = t0.Add(-100 * time.Millisecond)
+	case "onboarding-typing":
+		// The welcome page with the keyboard up (run with -h about 450).
+		a.Lib.Categories, a.Lib.Entries, a.Lib.Profile.Name = nil, nil, ""
+		a.StartOnboarding()
+		a.KeyboardOpen = true
 	case "onboarding":
 		a.Lib.Categories, a.Lib.Entries, a.Lib.Profile.Name = nil, nil, ""
 		a.StartOnboarding()

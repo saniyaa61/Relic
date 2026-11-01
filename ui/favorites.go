@@ -326,10 +326,9 @@ func rankButton(gtx layout.Context, th *Theme, c *widget.Clickable, label string
 
 // noCategories is the Favorites page before any category exists.
 func noCategories(gtx layout.Context, th *Theme) layout.Dimensions {
-	// The prototype centres this over the whole screen below the top bar,
-	// behind its fixed bottom bar; ours ends at the bar, so add the bar's
-	// height (66dp) on top to land in the same place.
-	return layout.Inset{Top: 40 + 66, Bottom: 40, Left: 24, Right: 24}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	// Centred in the space between the top bar and the bottom bar (owner,
+	// 2026-11-01; the prototype sat it lower, centred behind its bar).
+	return layout.Inset{Left: 24, Right: 24}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min = gtx.Constraints.Max
 		return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle, Spacing: layout.SpaceSides}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {

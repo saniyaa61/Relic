@@ -81,11 +81,44 @@ const (
 // Owner's choice (2026-10-31): B, a soft pill behind the icon.
 var navStyle = navPill
 
+// navActive is the active tab's colour inside the pill (options for the
+// owner, 2026-11-01: "a contrast colour for the current tab's icon").
+type navActiveKind int
+
+const (
+	activeAccent  navActiveKind = iota // the accent, as now
+	activeInk                          // the text colour (darkest in light, lightest in dark)
+	activeFaded                        // the accent, with the other tabs faded
+	activeAccent2                      // the theme's second accent
+	activeSolid                        // a solid accent pill with the button text colour
+)
+
+var navActive = activeAccent
+
 func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.Dimensions {
 	c := th.Muted
 	on := active || n.items[t].Pressed()
 	if on {
 		c = th.Accent
+	}
+	pillColour := mixSRGB(th.Accent, th.Surface, 0.14)
+	switch navActive {
+	case activeInk:
+		if on {
+			c = th.Text
+		}
+	case activeFaded:
+		if !on {
+			c = withAlpha(th.Muted, 0.55)
+		}
+	case activeAccent2:
+		if on {
+			c = th.Accent2
+		}
+	}
+	iconColour := c
+	if navActive == activeSolid && on {
+		iconColour, pillColour = th.BtnText, th.Accent
 	}
 	stroke := float32(1.5)
 	label := Text{Font: font.Font{Typeface: Sans}, Size: 10, Tracking: 0.04, Upper: true, Color: c}
@@ -110,10 +143,10 @@ func (n *navBar) item(gtx layout.Context, th *Theme, t Tab, active bool) layout.
 						pw, ph := gtx.Dp(46), gtx.Dp(30)
 						iw := gtx.Dp(20)
 						st := op.Offset(image.Pt((iw-pw)/2, (iw-ph)/2)).Push(gtx.Ops)
-						rrect(gtx, image.Pt(pw, ph), ph/2, mixSRGB(th.Accent, th.Surface, 0.14))
+						rrect(gtx, image.Pt(pw, ph), ph/2, pillColour)
 						st.Pop()
 					}
-					return navItems[t].icon.Layout(gtx, 20, stroke, c)
+					return navItems[t].icon.Layout(gtx, 20, stroke, iconColour)
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					// With the pill, room for its lower edge above the label.

@@ -69,11 +69,18 @@ func (p *onboardingPage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 			return layout.Center.Layout(gtx, w)
 		})
 	}
+	// While the keyboard is up there isn't room for everything above it:
+	// the logo and the introduction step aside, so the name field, Begin
+	// and Skip stay in view (owner, 2026-11-01).
+	typing := a.KeyboardOpen
 	// .onboard-wrap: a centred column, 32px 28px padding.
 	return layout.Inset{Top: 32, Bottom: 32, Left: 28, Right: 28}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min = gtx.Constraints.Max
 		return layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceSides}.Layout(gtx,
 			centred(func(gtx layout.Context) layout.Dimensions {
+				if typing {
+					return layout.Dimensions{}
+				}
 				// 100px wide: the logo is 200 × 341.
 				return layout.Inset{Bottom: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return Logo(gtx, 170.5) })
 			}),
@@ -88,6 +95,9 @@ func (p *onboardingPage) Layout(gtx layout.Context, a *App) layout.Dimensions {
 				})
 			}),
 			centred(func(gtx layout.Context) layout.Dimensions {
+				if typing {
+					return layout.Spacer{Height: 18}.Layout(gtx)
+				}
 				gtx.Constraints.Max.X = min(gtx.Constraints.Max.X, gtx.Dp(280))
 				return layout.Inset{Bottom: 30}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return Paragraph{Font: font.Font{Typeface: Serif, Style: font.Italic}, Size: 14, LineHeight: 1.7, Alignment: textMiddle, Color: th.Muted}.Layout(gtx, th,
