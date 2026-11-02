@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"gioui.org/f32"
 	"gioui.org/font"
 	"gioui.org/io/key"
 	"gioui.org/layout"
@@ -32,6 +33,12 @@ func pressable(gtx layout.Context, c *widget.Clickable, w layout.Widget) layout.
 // quick tap on a phone often starts and ends within one frame, so without
 // it the button never looked pressed and the tap seemed ignored.
 const pressFlash = 120 * time.Millisecond
+
+// showsPressed reports whether c should look pressed: held down, or
+// released within pressFlash.
+func showsPressed(gtx layout.Context, c *widget.Clickable) bool {
+	return c.Pressed() || recentlyReleased(gtx, c)
+}
 
 func recentlyReleased(gtx layout.Context, c *widget.Clickable) bool {
 	for _, h := range c.History() {
@@ -63,9 +70,14 @@ func boxShadow(gtx layout.Context, sz image.Point, radius int, offsetY, blur uni
 	if b <= 0 || sz.X <= 0 || sz.Y <= 0 {
 		return
 	}
-	img, pad := shadowImage(shadowKey{sz, clampRadius(radius, sz), b, alpha, bg})
+	img, pad, full := shadowImage(shadowKey{sz, clampRadius(radius, sz), b, alpha, bg})
 	defer op.Offset(image.Pt(-pad, -pad+gtx.Dp(offsetY))).Push(gtx.Ops).Pop()
-	defer clip.Rect{Max: img.Size()}.Push(gtx.Ops).Pop()
+	defer clip.Rect{Max: full}.Push(gtx.Ops).Pop()
+	if small := img.Size(); small != full {
+		img.Filter = paint.FilterLinear
+		k := f32.Pt(float32(full.X)/float32(small.X), float32(full.Y)/float32(small.Y))
+		defer op.Affine(f32.AffineId().Scale(f32.Point{}, k)).Push(gtx.Ops).Pop()
+	}
 	img.Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 }
@@ -83,14 +95,21 @@ var (
 	shadowCache = map[shadowKey]paint.ImageOp{}
 )
 
-// shadowImage is the shadow for k, with pad px of fall-off on every side.
-func shadowImage(k shadowKey) (paint.ImageOp, int) {
+// shadowImage is the shadow for k, with pad px of fall-off on every side,
+// and the size it covers. A shadow is soft all over, so a wide one is
+// worked out at a fraction of its size (sampling it at least every blur/8
+// px) and stretched back smoothly by the GPU: the entry page's poster
+// shadow took ~50 ms at full size on a desktop, several times that on a
+// phone, as the page opened.
+func shadowImage(k shadowKey) (paint.ImageOp, int, image.Point) {
 	b := float64(k.blur)
 	pad := int(math.Ceil(1.5 * b))
+	w, h := k.size.X+2*pad, k.size.Y+2*pad
+	full := image.Pt(w, h)
 	shadowMu.Lock()
 	defer shadowMu.Unlock()
 	if op, ok := shadowCache[k]; ok {
-		return op, pad
+		return op, pad, full
 	}
 	if len(shadowCache) > 300 {
 		clear(shadowCache)
@@ -101,15 +120,18 @@ func shadowImage(k shadowKey) (paint.ImageOp, int) {
 	for i := range levels {
 		levels[i] = shade(k.alpha*float32(i)/255, k.bg)
 	}
-	w, h := k.size.X+2*pad, k.size.Y+2*pad
-	img := image.NewNRGBA(image.Rect(0, 0, w, h))
+	step := max(1, k.blur/8)
+	sw, sh := (w+step-1)/step, (h+step-1)/step
+	sx, sy := float64(w)/float64(sw), float64(h)/float64(sh)
+	img := image.NewNRGBA(image.Rect(0, 0, sw, sh))
 	hx, hy := float64(k.size.X)/2, float64(k.size.Y)/2
 	r := float64(k.radius)
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			// Distance outside the rounded rectangle (negative inside).
-			qx := math.Abs(float64(x)+0.5-float64(pad)-hx) - (hx - r)
-			qy := math.Abs(float64(y)+0.5-float64(pad)-hy) - (hy - r)
+	for y := 0; y < sh; y++ {
+		for x := 0; x < sw; x++ {
+			// Distance outside the rounded rectangle (negative inside),
+			// at this pixel's centre in full-size pixels.
+			qx := math.Abs((float64(x)+0.5)*sx-float64(pad)-hx) - (hx - r)
+			qy := math.Abs((float64(y)+0.5)*sy-float64(pad)-hy) - (hy - r)
 			d := math.Hypot(math.Max(qx, 0), math.Max(qy, 0)) + math.Min(math.Max(qx, qy), 0) - r
 			cover := 0.5 * math.Erfc(d/(sigma*math.Sqrt2))
 			c := levels[int(math.Round(cover*255))]
@@ -119,7 +141,7 @@ func shadowImage(k shadowKey) (paint.ImageOp, int) {
 	}
 	op := paint.NewImageOp(img)
 	shadowCache[k] = op
-	return op, pad
+	return op, pad, full
 }
 
 // IconButton is the prototype's .ibtn: a 34dp round button with an 18dp

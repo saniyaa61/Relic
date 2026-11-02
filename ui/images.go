@@ -90,11 +90,17 @@ func (a *App) posterSize(name string) (image.Point, bool) {
 	return d, d != (image.Point{})
 }
 
-// decodedLocked returns the decoded poster, decoding it if need be; c.mu
-// must be held (decoding happens on the worker, or at once when sync).
-func (a *App) decodedLocked(name string) image.Image {
+// decoded returns the decoded poster, decoding it if need be. c.mu must
+// not be held: reading and decoding happen without it, so frames never
+// wait on them (two callers may both decode once; the first kept wins).
+func (a *App) decoded(name string) image.Image {
 	c := &a.posters
-	if img, seen := c.src[name]; seen {
+	c.mu.Lock()
+	c.initLocked()
+	img, seen := c.src[name]
+	gen := c.gen
+	c.mu.Unlock()
+	if seen {
 		return img
 	}
 	var out image.Image
@@ -111,16 +117,31 @@ func (a *App) decodedLocked(name string) image.Image {
 	if err != nil {
 		log.Printf("relic: poster %s: %v", name, err)
 	}
-	c.src[name] = out
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.initLocked()
+	if prev, ok := c.src[name]; ok {
+		return prev
+	}
+	if c.gen == gen {
+		c.src[name] = out
+	}
 	return out
 }
 
-// prepare makes the value for key with build (holding c.mu), now when sync,
-// else on the worker, and reports whether it's ready.
-func (a *App) prepare(key any, build func()) posterState {
+// prepare makes the value for key: build works it out (without c.mu, so
+// frames don't wait on it) and save stores it (with c.mu held). It runs
+// now when sync, else on the worker, and reports whether it's ready.
+// c.mu must be held by the caller; with sync it is released while build
+// runs.
+func (a *App) prepare(key any, build func() any, save func(any)) posterState {
 	c := &a.posters
 	if c.sync {
-		build()
+		c.mu.Unlock()
+		v := build()
+		c.mu.Lock()
+		c.initLocked()
+		save(v)
 		return posterReady
 	}
 	if c.pending[key] {
@@ -138,8 +159,15 @@ func (a *App) prepare(key any, build func()) posterState {
 	gen := c.gen
 	job := func() {
 		c.mu.Lock()
+		stale := c.gen != gen
+		c.mu.Unlock()
+		if stale {
+			return
+		}
+		v := build()
+		c.mu.Lock()
 		if c.gen == gen {
-			build()
+			save(v)
 			delete(c.pending, key)
 		}
 		c.mu.Unlock()
@@ -172,13 +200,12 @@ func (a *App) poster(name string, size image.Point) (paint.ImageOp, posterState)
 	if op, ok := c.resized[k]; ok {
 		return op, posterReady
 	}
-	st := a.prepare(k, func() {
-		if src := a.decodedLocked(name); src != nil {
-			c.resized[k] = paint.NewImageOp(coverScale(src, size))
-		} else {
-			c.resized[k] = paint.ImageOp{}
+	st := a.prepare(k, func() any {
+		if src := a.decoded(name); src != nil {
+			return paint.NewImageOp(coverScale(src, size))
 		}
-	})
+		return paint.ImageOp{}
+	}, func(v any) { c.resized[k] = v.(paint.ImageOp) })
 	if op, ok := c.resized[k]; ok && st == posterReady {
 		if op == (paint.ImageOp{}) {
 			return op, posterNone
@@ -241,11 +268,7 @@ func (a *App) posterImage(name string) (image.Image, bool) {
 	if _, ok := a.posterSize(name); !ok {
 		return nil, false
 	}
-	c := &a.posters
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.initLocked()
-	img := a.decodedLocked(name)
+	img := a.decoded(name)
 	return img, img != nil
 }
 
@@ -294,11 +317,10 @@ func (a *App) backdrop(name string, size image.Point, bg color.NRGBA) (paint.Ima
 	if op, ok := c.backdrops[k]; ok {
 		return op, op != (paint.ImageOp{})
 	}
-	a.prepare(k, func() {
-		src := a.decodedLocked(name)
+	a.prepare(k, func() any {
+		src := a.decoded(name)
 		if src == nil {
-			c.backdrops[k] = paint.ImageOp{}
-			return
+			return paint.ImageOp{}
 		}
 		img := coverScale(src, size)
 		mix := func(p, q uint8) uint8 { return uint8(0.55*float32(p) + 0.45*float32(q) + 0.5) }
@@ -308,8 +330,8 @@ func (a *App) backdrop(name string, size image.Point, bg color.NRGBA) (paint.Ima
 			img.Pix[i+2] = mix(img.Pix[i+2], bg.B)
 			img.Pix[i+3] = 255
 		}
-		c.backdrops[k] = paint.NewImageOp(img)
-	})
+		return paint.NewImageOp(img)
+	}, func(v any) { c.backdrops[k] = v.(paint.ImageOp) })
 	op, ok := c.backdrops[k]
 	return op, ok && op != (paint.ImageOp{})
 }

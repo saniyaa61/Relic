@@ -233,7 +233,7 @@ func (c *finishedCard) Layout(gtx layout.Context, a *App, e *core.Entry, showTim
 			}),
 		)
 		call := rec.Stop()
-		if c.click.Pressed() {
+		if showsPressed(gtx, &c.click) {
 			s := float32(0.96)
 			ctr := f32.Pt(float32(d.Size.X)/2, float32(d.Size.Y)/2)
 			defer op.Affine(f32.AffineId().Scale(ctr, f32.Pt(s, s))).Push(gtx.Ops).Pop()
@@ -312,7 +312,7 @@ var iconPodcastSmall = IconSVG(`<circle cx="12" cy="11" r="4"/><path d="M4 11a8 
 // (the prototype's .oc:hover).
 func liftOnPress(gtx layout.Context, th *Theme, c *widget.Clickable, radius unit.Dp, w layout.Widget) layout.Dimensions {
 	return c.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		if !c.Pressed() {
+		if !showsPressed(gtx, c) {
 			return w(gtx)
 		}
 		rec := op.Record(gtx.Ops)

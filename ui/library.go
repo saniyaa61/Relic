@@ -151,7 +151,7 @@ func (p *libraryRoot) categoryBox(gtx layout.Context, a *App, c *core.Category) 
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	d := bc.click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		border := th.Border
-		if bc.click.Pressed() {
+		if showsPressed(gtx, &bc.click) {
 			border = th.Accent2
 		}
 		return card(gtx, th.Card, border, 14, layout.UniformInset(14), 0, func(gtx layout.Context) layout.Dimensions {
@@ -395,7 +395,7 @@ func (p *categoryPage) folderBox(gtx layout.Context, a *App, c *core.Category, n
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	d := bc.click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		border := th.Border
-		if bc.click.Pressed() {
+		if showsPressed(gtx, &bc.click) {
 			border = th.Accent2
 		}
 		return card(gtx, th.Card, border, 14, layout.UniformInset(14), 0, func(gtx layout.Context) layout.Dimensions {

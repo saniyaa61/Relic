@@ -84,7 +84,7 @@ func dashedRRect(gtx layout.Context, sz image.Point, radius int, width, dash, ga
 func addTile(gtx layout.Context, th *Theme, c *widget.Clickable, label string, small bool) layout.Dimensions {
 	return c.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		border, bg := th.Border, color.NRGBA{}
-		if c.Pressed() {
+		if showsPressed(gtx, c) {
 			border, bg = th.Accent, th.Tag
 		}
 		size := 14
@@ -276,7 +276,7 @@ func (it *menuItem) layout(gtx layout.Context, th *Theme) layout.Dimensions {
 			)
 		})
 		call := rec.Stop()
-		if it.click.Pressed() {
+		if showsPressed(gtx, &it.click) {
 			rrect(gtx, d.Size, gtx.Dp(9), th.Tag)
 		}
 		call.Add(gtx.Ops)

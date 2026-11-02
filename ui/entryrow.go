@@ -25,7 +25,7 @@ func (r *entryRow) Layout(gtx layout.Context, a *App, e *core.Entry) layout.Dime
 	gtx.Constraints.Min.X = gtx.Constraints.Max.X
 	return r.click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		// Hover nudged the row 2px right; on touch it's press feedback.
-		if r.click.Pressed() {
+		if showsPressed(gtx, &r.click) {
 			defer op.Offset(image.Pt(gtx.Dp(2), 0)).Push(gtx.Ops).Pop()
 		}
 		return card(gtx, th.Card, th.Border, 13, layout.Inset{Top: 11, Bottom: 11, Left: 13, Right: 13}, 0, func(gtx layout.Context) layout.Dimensions {
