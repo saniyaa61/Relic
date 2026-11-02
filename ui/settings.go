@@ -527,12 +527,12 @@ func confirmClearAll(a *App) {
 		}))
 }
 
-// clearAll deletes every category, entry, favourite and the name; the
-// theme and light/dark stay.
+// clearAll puts the app back as it was when first installed (owner,
+// 2026-11-02): every category, entry, favourite, the name and the theme
+// go (back to Linen light), and the welcome page opens, then the guided
+// tour, after the launch splash.
 func (a *App) clearAll() bool {
-	p := a.Lib.Profile
-	lib := &core.Library{Profile: core.Profile{Theme: p.Theme, Mode: p.Mode, CustomBase: p.CustomBase,
-		CustomAccent: p.CustomAccent, FirstUsedAt: a.Now()}}
+	lib := &core.Library{Profile: core.Profile{Theme: "linen", Mode: "light", FirstUsedAt: a.Now()}}
 	if a.DB != nil {
 		if err := a.DB.ReplaceAll(lib); err != nil {
 			log.Printf("relic: clear: %v", err)
@@ -544,6 +544,12 @@ func (a *App) clearAll() bool {
 		}
 	}
 	a.Lib = lib
+	a.guide = nil
 	a.restart()
+	a.dialog = nil
+	a.StartOnboarding()
+	if a.Invalidate != nil { // a real window (tests have none)
+		a.ShowSplash()
+	}
 	return true
 }

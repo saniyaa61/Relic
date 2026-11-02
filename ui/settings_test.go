@@ -120,7 +120,8 @@ func TestSettingsExportImport(t *testing.T) {
 	}
 }
 
-// Clear all data asks twice, then empties everything but the theme.
+// Clear all data asks twice, then puts the app back as first installed:
+// no data, no name, Linen light, the welcome page, then the guided tour.
 func TestSettingsClearAll(t *testing.T) {
 	a, p, reload := settingsApp(t)
 	a.SetTheme("slate", "dark", "", "")
@@ -142,8 +143,18 @@ func TestSettingsClearAll(t *testing.T) {
 	if len(lib.Entries) != 0 || len(lib.Categories) != 0 || lib.Profile.Name != "" {
 		t.Errorf("left %d entries, %d categories, name %q", len(lib.Entries), len(lib.Categories), lib.Profile.Name)
 	}
-	if lib.Profile.Theme != "slate" || lib.Profile.Mode != "dark" {
-		t.Errorf("theme %q / %q should stay", lib.Profile.Theme, lib.Profile.Mode)
+	if lib.Profile.Theme != "linen" || lib.Profile.Mode != "light" || a.Theme.Palette != PaletteFor(lib.Profile) {
+		t.Errorf("theme %q / %q should be back to Linen light", lib.Profile.Theme, lib.Profile.Mode)
 	}
 	frame(a)
+	ob, ok := a.top().(*onboardingPage)
+	if !ok {
+		t.Fatalf("after clearing: %T, want the welcome page", a.top())
+	}
+	ob.skip.Click()
+	frame(a)
+	frame(a)
+	if a.guide == nil || a.guide.step != 0 {
+		t.Error("the guided tour should follow the welcome page")
+	}
 }
