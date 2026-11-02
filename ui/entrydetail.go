@@ -179,13 +179,28 @@ func (p *entryDetail) hero(gtx layout.Context, a *App, e *core.Entry, size image
 	// The buttons: 14dp in from the top corners, translucent dark discs.
 	white := color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 	dark := shade(0.28, th.Tag)
+	// Like IconButton, a disc answers taps a little beyond its edge (44dp
+	// square around the 32dp disc) and shows pressed for a moment.
 	disc := func(gtx layout.Context, c *widget.Clickable, bg color.NRGBA, w layout.Widget) layout.Dimensions {
-		return c.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			sz := gtx.Dp(32)
+		sz, hit := gtx.Dp(32), gtx.Dp(44)
+		pad := (hit - sz) / 2
+		st := op.Offset(image.Pt(-pad, -pad)).Push(gtx.Ops)
+		c.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			inner := op.Offset(image.Pt(pad, pad)).Push(gtx.Ops)
+			alpha := float32(1)
+			if c.Pressed() || recentlyReleased(gtx, c) {
+				alpha = 0.7
+			}
+			fade := paint.PushOpacity(gtx.Ops, alpha)
 			paint.FillShape(gtx.Ops, bg, clip.Ellipse{Max: image.Pt(sz, sz)}.Op(gtx.Ops))
 			gtx.Constraints = layout.Exact(image.Pt(sz, sz))
-			return layout.Center.Layout(gtx, w)
+			layout.Center.Layout(gtx, w)
+			fade.Pop()
+			inner.Pop()
+			return layout.Dimensions{Size: image.Pt(hit, hit)}
 		})
+		st.Pop()
+		return layout.Dimensions{Size: image.Pt(sz, sz)}
 	}
 	bgtx := gtx
 	bgtx.Constraints = layout.Constraints{Max: size}
@@ -211,7 +226,7 @@ func (p *entryDetail) hero(gtx layout.Context, a *App, e *core.Entry, size image
 					}),
 					layout.Rigid(layout.Spacer{Width: 7}.Layout),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return p.edit.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return pressable(gtx, &p.edit, func(gtx layout.Context) layout.Dimensions {
 							rec := op.Record(gtx.Ops)
 							d := layout.Inset{Top: 6, Bottom: 6, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 								return layout.Flex{Alignment: layout.Middle}.Layout(gtx,

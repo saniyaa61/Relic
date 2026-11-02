@@ -45,16 +45,37 @@ func pageHead(gtx layout.Context, th *Theme, eyebrow, title, sub string) layout.
 // .scroll), with the top bar and search bar fixed above it.
 func scrollPage(gtx layout.Context, list *widget.List, header []layout.Widget, rows []layout.Widget) layout.Dimensions {
 	list.Axis = layout.Vertical
-	children := make([]layout.FlexChild, 0, len(header)+1)
-	for _, h := range header {
-		children = append(children, layout.Rigid(h))
+	size := gtx.Constraints.Max
+	// The bar's buttons answer taps a little beyond what they draw (see
+	// IconButton), reaching over the top of the scroller; so the header is
+	// drawn after the scroller, where those taps reach it first.
+	type part struct {
+		call op.CallOp
+		y    int
 	}
-	children = append(children, layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-		return list.List.Layout(gtx, len(rows), func(gtx layout.Context, i int) layout.Dimensions {
-			return rows[i](gtx)
-		})
-	}))
-	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
+	var parts []part
+	y := 0
+	for _, h := range header {
+		hgtx := gtx
+		hgtx.Constraints = layout.Constraints{Min: image.Pt(0, 0), Max: image.Pt(size.X, max(size.Y-y, 0))}
+		rec := op.Record(gtx.Ops)
+		d := h(hgtx)
+		parts = append(parts, part{rec.Stop(), y})
+		y += d.Size.Y
+	}
+	lgtx := gtx
+	lgtx.Constraints = layout.Exact(image.Pt(size.X, max(size.Y-y, 0)))
+	st := op.Offset(image.Pt(0, y)).Push(gtx.Ops)
+	list.List.Layout(lgtx, len(rows), func(gtx layout.Context, i int) layout.Dimensions {
+		return rows[i](gtx)
+	})
+	st.Pop()
+	for _, p := range parts {
+		st := op.Offset(image.Pt(0, p.y)).Push(gtx.Ops)
+		p.call.Add(gtx.Ops)
+		st.Pop()
+	}
+	return layout.Dimensions{Size: size}
 }
 
 // wideButton is the prototype's quiet full-width card button ("Set up

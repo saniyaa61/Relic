@@ -66,3 +66,48 @@ func TestRealTapsOpenPagesEveryTime(t *testing.T) {
 		}
 	}
 }
+
+// The header's round buttons (the gear, back arrows) answer taps a little
+// off their 34dp circle, as a fingertip lands (owner, 2026-11-02).
+func TestHeaderButtonsTakeNearbyTaps(t *testing.T) {
+	a, _ := libApp(t)
+	now := a.Now()
+	a.Now = func() time.Time { return now }
+	var r input.Router
+	var ops op.Ops
+	draw := func() {
+		ops.Reset()
+		gtx := layout.Context{Ops: &ops, Source: r.Source(), Metric: unit.Metric{PxPerDp: 2, PxPerSp: 2},
+			Constraints: layout.Exact(image.Pt(800, 1600))}
+		a.Layout(gtx, layout.Inset{})
+		r.Frame(gtx.Ops)
+	}
+	tap := func(p f32.Point) {
+		now = now.Add(time.Second) // let the page's entrance settle
+		draw()
+		r.Queue(pointer.Event{Kind: pointer.Press, Source: pointer.Touch, Position: p},
+			pointer.Event{Kind: pointer.Release, Source: pointer.Touch, Position: p})
+		draw()
+		draw()
+	}
+	draw()
+	gear := a.guideRects.gear
+	c := gear.Min.Add(gear.Size().Div(2))
+	// 20dp (40px here) left of the centre: outside the 17dp-radius circle.
+	tap(f32.Pt(float32(c.X-40), float32(c.Y)))
+	if _, ok := a.top().(*settingsPage); !ok {
+		t.Fatalf("a tap just off the gear showed %T, want Settings", a.top())
+	}
+	// Settings' back arrow is where the gear was: 20dp below its centre.
+	tap(f32.Pt(float32(c.X), float32(c.Y+40)))
+	if _, ok := a.top().(*homePage); !ok {
+		t.Fatalf("a tap just off the back arrow showed %T, want Home", a.top())
+	}
+	// The entry page's back disc: 32dp, 14dp in from the top left, so its
+	// centre is at 30dp (60px); tap 19dp to its right, past its edge.
+	a.Push(newEntryDetail(a.Lib.Entries[0].ID))
+	tap(f32.Pt(60+38, 60))
+	if _, ok := a.top().(*homePage); !ok {
+		t.Errorf("a tap just off the entry page's back disc showed %T, want Home", a.top())
+	}
+}

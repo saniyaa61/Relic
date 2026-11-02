@@ -128,18 +128,28 @@ type IconButton struct {
 	Click widget.Clickable
 }
 
+// Layout draws the button. It looks 34dp but answers taps over 48dp around it (the size
+// phones recommend for a fingertip; owner, 2026-11-02: the header's gear
+// and back arrows lagged, as taps a little off the small circle missed),
+// and shows pressed for a moment after a quick tap, like pressable.
 func (b *IconButton) Layout(gtx layout.Context, th *Theme, ic *Icon) layout.Dimensions {
-	return b.Click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		sz := gtx.Dp(34)
-		if b.Click.Pressed() {
+	sz, hit := gtx.Dp(34), gtx.Dp(48)
+	pad := (hit - sz) / 2
+	st := op.Offset(image.Pt(-pad, -pad)).Push(gtx.Ops)
+	b.Click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		inner := op.Offset(image.Pt(pad, pad)).Push(gtx.Ops)
+		if b.Click.Pressed() || recentlyReleased(gtx, &b.Click) {
 			paint.FillShape(gtx.Ops, th.Border, clip.Ellipse{Max: image.Pt(sz, sz)}.Op(gtx.Ops))
 		}
 		off := (sz - gtx.Dp(18)) / 2
-		st := op.Offset(image.Pt(off, off)).Push(gtx.Ops)
+		icon := op.Offset(image.Pt(off, off)).Push(gtx.Ops)
 		ic.Layout(gtx, 18, 1.6, th.Accent)
-		st.Pop()
-		return layout.Dimensions{Size: image.Pt(sz, sz)}
+		icon.Pop()
+		inner.Pop()
+		return layout.Dimensions{Size: image.Pt(hit, hit)}
 	})
+	st.Pop()
+	return layout.Dimensions{Size: image.Pt(sz, sz)}
 }
 
 // Button is a filled text button. Prototype styles: .rmodal-btn (accent,
